@@ -1,0 +1,128 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm giáo viên</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px #00000015;
+        }
+
+        h1 {
+            color: #1f3c88;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        textarea {
+            height: 90px;
+            resize: vertical;
+        }
+
+        button, .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button {
+            background: #16a34a;
+        }
+
+        .btn {
+            background: #64748b;
+        }
+
+        .message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1>THÊM GIÁO VIÊN</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Họ và tên *</label>
+        <input type="text" name="full_name"
+               value="{{ request.POST.full_name }}"
+               required>
+
+        <label>Email *</label>
+        <input type="email" name="email"
+               value="{{ request.POST.email }}"
+               required>
+
+        <label>Số điện thoại *</label>
+        <input type="text" name="phone"
+               value="{{ request.POST.phone }}"
+               required>
+
+        <label>Chuyên môn</label>
+        <input type="text" name="specialization"
+               value="{{ request.POST.specialization }}"
+               placeholder="Ví dụ: IELTS, TOEIC, giao tiếp">
+
+        <label>Địa chỉ</label>
+        <textarea name="address"
+                  placeholder="Nhập địa chỉ">{{ request.POST.address }}</textarea>
+
+        <button type="submit">Lưu giáo viên</button>
+
+        <a href="{% url 'teacher_list' %}" class="btn">
+            Quay lại
+        </a>
+    </form>
+</div>
+</body>
+</html>
+```

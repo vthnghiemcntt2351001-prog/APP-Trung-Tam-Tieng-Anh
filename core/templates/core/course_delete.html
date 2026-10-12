@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xóa khóa học | EnglishCenter</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: linear-gradient(135deg, #173b70, #315caa);
+            color: white;
+            padding: 24px 7%;
+        }
+
+        header h1 {
+            font-size: 27px;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #dbeafe;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 22px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 25px #0f172a0d;
+        }
+
+        .warning-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fee2e2;
+            border-radius: 50%;
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 25px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            color: #64748b;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .course-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .course-info p {
+            margin: 10px 0;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .course-info strong {
+            color: #334155;
+        }
+
+        .warning {
+            color: #991b1b;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 9px;
+            padding: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            border: none;
+            border-radius: 9px;
+            padding: 13px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #b91c1c;
+        }
+
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-cancel:hover {
+            background: #cbd5e1;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            padding: 25px;
+        }
+
+        @media (max-width: 550px) {
+            .card {
+                padding: 22px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>EnglishCenter</h1>
+        <p>Hệ thống quản lý trung tâm tiếng Anh</p>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="{% url 'home' %}">Trang chủ</a>
+            &nbsp; / &nbsp;
+            <a href="{% url 'course_list' %}">Khóa học</a>
+            &nbsp; / &nbsp;
+            Xóa khóa học
+        </div>
+
+        <section class="card">
+            <div class="warning-icon">⚠️</div>
+
+            <h2>Xác nhận xóa khóa học</h2>
+
+            <p class="description">
+                Bạn có chắc chắn muốn xóa khóa học này không?
+                Vui lòng kiểm tra thông tin trước khi xác nhận.
+            </p>
+
+            <div class="course-info">
+                <p>
+                    <strong>Tên khóa học:</strong>
+                    {{ course.name }}
+                </p>
+
+                <p>
+                    <strong>Mô tả:</strong>
+                    {{ course.description|default:"Chưa có mô tả" }}
+                </p>
+
+                <p>
+                    <strong>Học phí:</strong>
+                    {{ course.tuition|default:"Chưa cập nhật" }} VNĐ
+                </p>
+
+                <p>
+                    <strong>Thời lượng:</strong>
+                    {{ course.duration|default:"Chưa cập nhật" }} tháng
+                </p>
+            </div>
+
+            <div class="warning">
+                <strong>Lưu ý:</strong>
+                Việc xóa khóa học có thể ảnh hưởng đến các lớp học
+                đang sử dụng khóa học này. Hãy kiểm tra dữ liệu liên quan
+                trước khi xác nhận.
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="actions">
+                    <button
+                        type="submit"
+                        class="btn btn-delete"
+                        onclick="return confirm('Bạn chắc chắn muốn xóa khóa học này?');"
+                    >
+                        Xác nhận xóa
+                    </button>
+
+                    <a
+                        href="{% url 'course_list' %}"
+                        class="btn btn-cancel"
+                    >
+                        Hủy, quay lại
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        © EnglishCenter - Hệ thống quản lý trung tâm tiếng Anh
+    </footer>
+</body>
+</html>
+

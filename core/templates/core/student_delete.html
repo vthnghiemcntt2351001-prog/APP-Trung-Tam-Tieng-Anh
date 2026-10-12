@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xóa học viên</title>
+</head>
+<body>
+    <h2>Xác nhận xóa học viên</h2>
+
+    <p>
+        Bạn có chắc muốn xóa học viên
+        <strong>{{ student.name }}</strong> không?
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Xác nhận xóa</button>
+        <a href="/students/">Hủy</a>
+    </form>
+</body>
+</html>
+

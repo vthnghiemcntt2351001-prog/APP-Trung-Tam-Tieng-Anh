@@ -1,0 +1,491 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khóa học | EnglishCenter</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: linear-gradient(135deg, #173b70, #315caa);
+            color: white;
+            padding: 24px 7%;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        header p {
+            color: #dbeafe;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 22px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .breadcrumb {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumb a {
+            color: #2563eb;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .page-heading h2 {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            border: none;
+            border-radius: 9px;
+            padding: 12px 17px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-edit {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .btn-edit:hover {
+            background: #bfdbfe;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        .btn-home {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px #0f172a08;
+            margin-bottom: 25px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-form input:focus {
+            border-color: #2563eb;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px #0f172a0a;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px #0f172a12;
+        }
+
+        .course-banner {
+            height: 125px;
+            background: linear-gradient(135deg, #dbeafe, #c7d2fe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .course-content {
+            padding: 22px;
+        }
+
+        .course-id {
+            display: inline-block;
+            padding: 5px 9px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .course-content h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .course-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.7;
+            min-height: 48px;
+            margin-bottom: 18px;
+            overflow-wrap: anywhere;
+        }
+
+        .course-info {
+            padding: 14px;
+            background: #f8fafc;
+            border-radius: 9px;
+            margin-bottom: 18px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: #64748b;
+        }
+
+        .info-value {
+            font-weight: bold;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .price {
+            color: #059669;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .card-actions .btn {
+            flex: 1;
+        }
+
+        .card-actions form {
+            flex: 1;
+        }
+
+        .card-actions form button {
+            width: 100%;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 55px 20px;
+            text-align: center;
+            border-radius: 15px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .empty-icon {
+            font-size: 52px;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 13px 16px;
+            border-radius: 9px;
+            margin-bottom: 10px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 30px 20px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 950px) {
+            .course-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-heading {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form .btn {
+                width: 100%;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>EnglishCenter</h1>
+    <p>Hệ thống quản lý trung tâm tiếng Anh</p>
+</header>
+
+<main>
+    <div class="breadcrumb">
+        <a href="{% url 'home' %}">Trang chủ</a>
+        &nbsp; / &nbsp; Quản lý khóa học
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {% if message.tags == 'error' %}error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="page-heading">
+        <div>
+            <h2>Quản lý khóa học</h2>
+            <p>Danh sách các chương trình đào tạo tại trung tâm.</p>
+        </div>
+
+        <div>
+            <a href="{% url 'home' %}" class="btn btn-home">
+                ← Trang chủ
+            </a>
+
+            {% if is_admin %}
+                <a href="{% url 'course_add' %}" class="btn btn-primary">
+                    + Thêm khóa học
+                </a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="toolbar">
+        <form method="GET" class="search-form">
+            <input
+                type="text"
+                name="q"
+                placeholder="Tìm theo tên hoặc mô tả khóa học..."
+                value="{{ keyword|default:'' }}"
+            >
+
+            <button type="submit" class="btn btn-primary">
+                Tìm kiếm
+            </button>
+
+            {% if keyword %}
+                <a href="{% url 'course_list' %}" class="btn btn-home">
+                    Xóa tìm kiếm
+                </a>
+            {% endif %}
+        </form>
+    </section>
+
+    {% if courses %}
+        <section class="course-grid">
+            {% for course in courses %}
+                <article class="course-card">
+                    <div class="course-banner">📚</div>
+
+                    <div class="course-content">
+                        <span class="course-id">
+                            KHÓA HỌC #{{ course.id }}
+                        </span>
+
+                        <h3>{{ course.name }}</h3>
+
+                        <p class="course-description">
+                            {{ course.description|default:"Chưa có mô tả cho khóa học này." }}
+                        </p>
+
+                        <div class="course-info">
+                            <div class="info-row">
+                                <span class="info-label">Học phí</span>
+                                <span class="info-value price">
+                                    {{ course.tuition|default:"Chưa cập nhật" }} VNĐ
+                                </span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">Thời lượng</span>
+                                <span class="info-value">
+                                    {{ course.duration|default:"Chưa cập nhật" }}
+                                    tháng
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if is_admin %}
+                            <div class="card-actions">
+                                <a
+                                    href="{% url 'course_edit' course.id %}"
+                                    class="btn btn-edit"
+                                >
+                                    ✏️ Sửa
+                                </a>
+
+                                <a
+                                    href="{% url 'course_delete' course.id %}"
+                                    class="btn btn-delete"
+                                >
+                                    🗑️ Xóa
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="empty-state">
+            <div class="empty-icon">📚</div>
+
+            <h3>
+                {% if keyword %}
+                    Không tìm thấy khóa học
+                {% else %}
+                    Chưa có khóa học nào
+                {% endif %}
+            </h3>
+
+            <p>
+                {% if keyword %}
+                    Thử nhập từ khóa khác để tìm kiếm.
+                {% else %}
+                    Hiện tại hệ thống chưa có khóa học nào.
+                {% endif %}
+            </p>
+
+            {% if keyword %}
+                <a href="{% url 'course_list' %}" class="btn btn-home">
+                    Xem tất cả khóa học
+                </a>
+            {% elif is_admin %}
+                <a href="{% url 'course_add' %}" class="btn btn-primary">
+                    + Thêm khóa học đầu tiên
+                </a>
+            {% endif %}
+        </section>
+    {% endif %}
+</main>
+
+<footer>
+    © EnglishCenter - Hệ thống quản lý trung tâm tiếng Anh
+</footer>
+
+</body>
+</html>
+

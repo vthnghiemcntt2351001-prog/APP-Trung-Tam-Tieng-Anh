@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa điểm</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 30px; }
+        .container { max-width: 650px; margin: auto; background: white; padding: 25px; border-radius: 10px; }
+        h1 { color: #243b64; }
+        label { display: block; margin-top: 14px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button, a { display: inline-block; margin-top: 20px; padding: 10px 15px; border: none; border-radius: 5px; text-decoration: none; cursor: pointer; }
+        button { background: #ffc107; color: black; }
+        a { background: #6c757d; color: white; }
+        .message { padding: 10px; background: #ffe5e5; margin: 8px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sửa điểm kiểm tra</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label>Học viên</label>
+        <select name="student" required>
+            {% for student in students %}
+                <option value="{{ student.id }}"
+                    {% if form_data.student %}
+                        {% if form_data.student == student.id|stringformat:"s" %}selected{% endif %}
+                    {% else %}
+                        {% if grade.student_id == student.id %}selected{% endif %}
+                    {% endif %}>
+                    {{ student.full_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Lớp học</label>
+        <select name="english_class" required>
+            {% for class in classes %}
+                <option value="{{ class.id }}"
+                    {% if form_data.english_class %}
+                        {% if form_data.english_class == class.id|stringformat:"s" %}selected{% endif %}
+                    {% else %}
+                        {% if grade.english_class_id == class.id %}selected{% endif %}
+                    {% endif %}>
+                    {{ class.name }} - {{ class.course.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Điểm nói (0–10)</label>
+        <input type="number" name="oral_score" min="0" max="10" step="0.01"
+               value="{% if form_data.oral_score != None %}{{ form_data.oral_score }}{% else %}{{ grade.oral_score }}{% endif %}" required>
+
+        <label>Điểm nghe (0–10)</label>
+        <input type="number" name="listening_score" min="0" max="10" step="0.01"
+               value="{% if form_data.listening_score != None %}{{ form_data.listening_score }}{% else %}{{ grade.listening_score }}{% endif %}" required>
+
+        <label>Điểm đọc (0–10)</label>
+        <input type="number" name="reading_score" min="0" max="10" step="0.01"
+               value="{% if form_data.reading_score != None %}{{ form_data.reading_score }}{% else %}{{ grade.reading_score }}{% endif %}" required>
+
+        <label>Điểm viết (0–10)</label>
+        <input type="number" name="writing_score" min="0" max="10" step="0.01"
+               value="{% if form_data.writing_score != None %}{{ form_data.writing_score }}{% else %}{{ grade.writing_score }}{% endif %}" required>
+
+        <label>Ngày kiểm tra</label>
+        <input type="date" name="exam_date"
+               value="{% if form_data.exam_date != None %}{{ form_data.exam_date }}{% else %}{{ grade.exam_date|date:'Y-m-d' }}{% endif %}" required>
+
+        <label>Nhận xét</label>
+        <textarea name="note" rows="4">{% if form_data.note != None %}{{ form_data.note }}{% else %}{{ grade.note }}{% endif %}</textarea>
+
+        <button type="submit">Cập nhật điểm</button>
+        <a href="{% url 'grade_list' %}">Quay lại</a>
+    </form>
+</div>
+</body>
+</html>
