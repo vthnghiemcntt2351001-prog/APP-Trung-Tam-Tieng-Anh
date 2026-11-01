@@ -1,0 +1,207 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Quản lý học viên | English Center{% endblock %}
+{% block breadcrumb %}Học viên{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/students/list.css' %}?v=20261027_v4">
+{% endblock %}
+
+{% block page_content %}
+<div class="students-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-intro">
+            <div class="header-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="7" r="4"/>
+                    <path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/>
+                </svg>
+                <span>Hồ sơ & Đào tạo</span>
+            </div>
+            <h1 class="page-title">Quản lý học viên</h1>
+            <p class="page-desc">Theo dõi danh sách, tra cứu hồ sơ và thông tin liên hệ của toàn bộ học viên</p>
+        </div>
+
+        <div class="header-actions">
+            {% if can_manage_academics %}
+            <a class="btn-secondary-action" href="{% url 'student_export_excel' %}{% if keyword %}?q={{ keyword }}{% endif %}" title="Xuất danh sách học viên ra file Excel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                    <line x1="12" y1="11" x2="12" y2="17" />
+                    <polyline points="9 14 12 17 15 14" />
+                </svg>
+                <span>Xuất Excel</span>
+            </a>
+            <a class="btn-primary-action" href="{% url 'student_add' %}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Thêm học viên</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Toolbar: Search & Stats -->
+    <div class="toolbar-card">
+        <form method="get" class="search-form">
+            <div class="search-input-wrap">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ keyword|default:'' }}"
+                    placeholder="Tìm theo họ tên, email hoặc số điện thoại..."
+                    autocomplete="off"
+                >
+                {% if keyword %}
+                <a href="{% url 'student_list' %}" class="search-clear-btn" title="Xóa tìm kiếm">✕</a>
+                {% endif %}
+            </div>
+            <button class="btn-search" type="submit">
+                <span>Tìm kiếm</span>
+            </button>
+        </form>
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: inline-flex; background: #f1f5f9; padding: 3px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <a href="{% url 'student_list' %}?status=active{% if keyword %}&q={{ keyword }}{% endif %}" class="chart-tab-btn {% if status_filter == 'active' %}active{% endif %}" style="text-decoration: none;">
+                    Đang học ({{ total_active }})
+                </a>
+                <a href="{% url 'student_list' %}?status=archived{% if keyword %}&q={{ keyword }}{% endif %}" class="chart-tab-btn {% if status_filter == 'archived' %}active{% endif %}" style="text-decoration: none;">
+                    Đã lưu trữ ({{ total_archived }})
+                </a>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-dot"></span>
+                <span>Hiển thị: <strong>{{ students|length }}</strong> học viên</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th style="width: 90px;">Mã HV</th>
+                        <th>Học viên</th>
+                        <th>Email liên hệ</th>
+                        <th>Số điện thoại</th>
+                        <th style="width: 150px; text-align: right;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <span class="student-id-badge">#{{ student.id }}</span>
+                        </td>
+                        <td>
+                            <div class="student-identity">
+                                <div class="student-avatar" aria-hidden="true">
+                                    {{ student.full_name|first|upper }}
+                                </div>
+                                <div class="student-info">
+                                    <strong class="student-name">{{ student.full_name }}</strong>
+                                    {% if not student.is_active %}
+                                    <small style="color: #ea580c; font-weight: 600;">Đã lưu trữ</small>
+                                    {% else %}
+                                    <small class="student-meta">Học viên trung tâm</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="cell-with-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                    <polyline points="3 7 12 13 21 7"/>
+                                </svg>
+                                <span>{{ student.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="cell-with-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/>
+                                </svg>
+                                <span>{{ student.phone }}</span>
+                            </div>
+                        </td>
+                        <td style="text-align: right;">
+                            <div class="row-actions">
+                                {% if can_manage_academics %}
+                                <a class="action-btn edit" href="{% url 'student_edit' student.id %}" title="Chỉnh sửa thông tin">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                                        <path d="M13.5 6.5l4 4" />
+                                    </svg>
+                                    <span>Sửa</span>
+                                </a>
+                                {% endif %}
+
+                                {% if user.is_superuser or is_admin %}
+                                {% if student.is_active %}
+                                <form method="post" action="{% url 'student_delete' student.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn lưu trữ học viên {{ student.full_name }}? Lịch sử điểm và học phí vẫn được bảo lưu.');" style="margin: 0; display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="archive">
+                                    <button class="action-btn delete" type="submit" title="Lưu trữ học viên (Soft Delete)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 8v13H3V8"></path>
+                                            <path d="M1 3h22v5H1z"></path>
+                                            <path d="M10 12h4"></path>
+                                        </svg>
+                                        <span>Lưu trữ</span>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'student_delete' student.id %}" onsubmit="return confirm('Khôi phục học viên {{ student.full_name }} hoạt động trở lại?');" style="margin: 0; display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="restore">
+                                    <button class="action-btn" type="submit" title="Khôi phục học viên" style="color: #059669; border-color: #a7f3d0; background: #ecfdf5;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="1 4 1 10 7 10"></polyline>
+                                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                        </svg>
+                                        <span>Khôi phục</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-cell">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                </div>
+                                <h3>Không tìm thấy học viên nào</h3>
+                                <p>{% if keyword %}Không có kết quả phù hợp với từ khóa "<strong>{{ keyword }}</strong>". Hãy thử tìm bằng từ khóa khác.{% else %}Hiện tại trung tâm chưa có học viên nào được tạo.{% endif %}</p>
+                                {% if can_manage_academics %}
+                                <a href="{% url 'student_add' %}" class="btn-primary-action" style="margin-top: 14px;">+ Thêm học viên mới</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "core/partials/pagination.html" %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Xóa điểm{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/grades/delete.css' %}?v=20261018e">{% endblock %}
+{% block page_content %}
+<div class="container">
+    <h1>Xác nhận xóa điểm</h1>
+
+    <p>Bạn có chắc chắn muốn xóa kết quả điểm của học viên này không?</p>
+
+    <p><strong>Học viên:</strong> {{ grade.student.full_name }}</p>
+    <p><strong>Lớp học:</strong> {{ grade.english_class.name }}</p>
+    <p><strong>Điểm trung bình:</strong> {{ grade.average_score }}</p>
+    <p><strong>Ngày kiểm tra:</strong> {{ grade.exam_date|date:"d/m/Y" }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Xác nhận xóa</button>
+        <a href="{% url 'grade_list' %}">Hủy</a>
+    </form>
+</div>
+{% endblock %}

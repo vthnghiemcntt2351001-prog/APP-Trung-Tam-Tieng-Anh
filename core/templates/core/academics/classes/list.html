@@ -1,0 +1,328 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Quản lý lớp học | English Center{% endblock %}
+{% block breadcrumb %}Lớp học{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/academics/classes/list.css' %}?v=20261101_v1">
+{% endblock %}
+
+{% block page_content %}
+<div class="class-page-wrapper">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="class-header-area">
+        <div class="class-header-left">
+            <nav class="class-breadcrumb" aria-label="Breadcrumb">
+                <a href="{% url 'home' %}">Trang chủ</a>
+                <span class="sep">/</span>
+                <span>Học vụ</span>
+                <span class="sep">/</span>
+                <span>Quản lý lớp học</span>
+            </nav>
+            <div class="class-badge-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="12" rx="2"/>
+                    <path d="M7 20h10"/>
+                    <path d="M12 16v4"/>
+                </svg>
+                <span>Hệ thống Đào tạo & Xếp lớp</span>
+            </div>
+            <h1 class="class-title">Quản lý lớp học</h1>
+            <p class="class-subtitle">Theo dõi danh sách các lớp đang mở, tiến độ đào tạo, sĩ số và giảng viên phụ trách.</p>
+        </div>
+
+        <div class="class-header-actions">
+            {% if can_manage_academics %}
+                <a href="{% url 'class_transfer_list' %}" class="btn-class-secondary" title="Duyệt yêu cầu chuyển lớp học viên">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="17 1 21 5 17 9"/>
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                        <polyline points="7 23 3 19 7 15"/>
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                    </svg>
+                    <span>Duyệt chuyển lớp</span>
+                </a>
+
+                <a href="{% url 'class_add' %}" class="btn-class-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>Mở lớp học mới</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- STATS OVERVIEW CARDS -->
+    <div class="class-stats-grid">
+        <div class="class-stat-card">
+            <div class="stat-icon-box stat-icon-blue">
+                🏫
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number">{{ page_obj.paginator.count|default:classes|length }}</div>
+                <div class="stat-title">Tổng số lớp trong hệ thống</div>
+            </div>
+        </div>
+
+        <div class="class-stat-card">
+            <div class="stat-icon-box stat-icon-teal">
+                📚
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number">{{ courses|length }}</div>
+                <div class="stat-title">Khóa đào tạo đang kích hoạt</div>
+            </div>
+        </div>
+
+        <div class="class-stat-card">
+            <div class="stat-icon-box stat-icon-purple">
+                👨‍🏫
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number">100%</div>
+                <div class="stat-title">Giảng viên đã phân công</div>
+            </div>
+        </div>
+
+        <div class="class-stat-card">
+            <div class="stat-icon-box stat-icon-amber">
+                🎯
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number">Tiêu chuẩn</div>
+                <div class="stat-title">Quy mô đào tạo chuẩn quốc tế</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOLBAR: SEARCH & COURSE FILTER -->
+    <div class="class-toolbar-card">
+        <form method="get" class="class-search-form">
+            <div class="search-field-wrapper">
+                <span class="search-field-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input
+                    type="text"
+                    name="q"
+                    class="search-field-input"
+                    value="{{ keyword|default:'' }}"
+                    placeholder="Tìm theo tên lớp, khóa học hoặc giảng viên..."
+                    autocomplete="off"
+                >
+                {% if keyword %}
+                    <a href="{% url 'class_list' %}" class="search-reset-btn" title="Xóa tìm kiếm">✕</a>
+                {% endif %}
+            </div>
+
+            {% if courses %}
+                <select name="course_id" class="filter-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả khóa học --</option>
+                    {% for c in courses %}
+                        <option value="{{ c.id }}" {% if selected_course_id == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+
+            <button type="submit" class="btn-search-trigger">
+                Tìm kiếm
+            </button>
+        </form>
+
+        <div class="stat-counter-pill">
+            <span class="stat-counter-dot"></span>
+            <span>Hiển thị: <strong>{{ classes|length }}</strong> lớp</span>
+        </div>
+    </div>
+
+    <!-- DATA TABLE CARD -->
+    <div class="class-table-card">
+        <div class="table-responsive-box">
+            <table class="class-data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">STT</th>
+                        <th>Thông tin lớp học</th>
+                        <th>Khóa học</th>
+                        <th>Giảng viên phụ trách</th>
+                        <th>Thời gian đào tạo</th>
+                        <th>Sĩ số học viên</th>
+                        <th style="text-align: right; width: 220px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in classes %}
+                        <tr>
+                            <td style="color: var(--muted, #64748b); font-weight: 600;">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <div class="class-meta-group">
+                                    <div class="class-avatar-badge" aria-hidden="true">
+                                        🏫
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'class_detail' item.id %}" class="class-name-link">
+                                            {{ item.name }}
+                                        </a>
+                                        <div class="class-id-sub">
+                                            Mã lớp: #{{ item.id }} &bull; Tối đa {{ item.max_students }} học viên
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge-course-pill">
+                                    📖 {{ item.course.name }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="teacher-meta-box">
+                                    <div class="teacher-avatar-circle">
+                                        {{ item.teacher.full_name|default:item.teacher_name|slice:":1"|upper|default:"G" }}
+                                    </div>
+                                    <span class="teacher-name-txt">
+                                        {% if item.teacher %}
+                                            {{ item.teacher.full_name }}
+                                        {% else %}
+                                            {{ item.teacher_name|default:"Chưa phân công" }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span style="font-weight: 600; color: var(--ink, #0f172a);">
+                                        {{ item.start_date|date:"d/m/Y" }}
+                                    </span>
+                                    <span style="font-size: 12px; color: var(--muted, #64748b);">
+                                        {% if item.end_date %}
+                                            Đến {{ item.end_date|date:"d/m/Y" }}
+                                        {% else %}
+                                            Đang diễn ra
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="capacity-meta-box">
+                                    <div class="capacity-text-row">
+                                        <span>{{ item.active_student_count|default:0 }} / {{ item.max_students }}</span>
+                                        <span style="color: var(--muted, #64748b); font-size: 11px;">
+                                            {% widthratio item.active_student_count|default:0 item.max_students 100 %}%
+                                        </span>
+                                    </div>
+                                    <div class="capacity-progress-track">
+                                        <div
+                                            class="capacity-progress-fill {% if item.active_student_count >= item.max_students %}full{% elif item.active_student_count > 15 %}warning{% endif %}"
+                                            style="width: {% widthratio item.active_student_count|default:0 item.max_students 100 %}%;"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="table-actions-cell">
+                                    <a href="{% url 'class_detail' item.id %}" class="btn-table-action detail" title="Xem chi tiết lớp">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                        <span>Chi tiết</span>
+                                    </a>
+
+                                    <a href="{% url 'session_list' item.id %}" class="btn-table-action attendance" title="Quản lý điểm danh buổi học">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                        <span>Điểm danh</span>
+                                    </a>
+
+                                    {% if can_manage_academics %}
+                                        <a href="{% url 'class_edit' item.id %}" class="btn-table-action edit" title="Chỉnh sửa thông tin">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                            </svg>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="class-empty-state">
+                                    <div class="class-empty-icon">
+                                        🏫
+                                    </div>
+                                    <h3 class="class-empty-title">Không tìm thấy lớp học nào</h3>
+                                    <p class="class-empty-desc">
+                                        {% if keyword or selected_course_id %}
+                                            Không có lớp học nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại. Vui lòng thử từ khóa khác.
+                                        {% else %}
+                                            Hệ thống hiện chưa có lớp học nào được tạo. Hãy mở lớp học đầu tiên ngay.
+                                        {% endif %}
+                                    </p>
+                                    {% if can_manage_academics and not keyword and not selected_course_id %}
+                                        <a href="{% url 'class_add' %}" class="btn-class-primary" style="margin-top: 8px;">
+                                            + Mở lớp học đầu tiên
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION CONTROLS -->
+        {% if page_obj.has_other_pages %}
+            <div class="class-pagination-area">
+                <div>
+                    Trang <strong>{{ page_obj.number }}</strong> / <strong>{{ page_obj.paginator.num_pages }}</strong>
+                </div>
+
+                <div class="pagination-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if keyword %}&q={{ keyword }}{% endif %}{% if selected_course_id %}&course_id={{ selected_course_id }}{% endif %}" class="page-btn" title="Trang đầu">«</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if keyword %}&q={{ keyword }}{% endif %}{% if selected_course_id %}&course_id={{ selected_course_id }}{% endif %}" class="page-btn" title="Trang trước">‹</a>
+                    {% else %}
+                        <span class="page-btn disabled">«</span>
+                        <span class="page-btn disabled">‹</span>
+                    {% endif %}
+
+                    <span class="page-btn active">{{ page_obj.number }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if keyword %}&q={{ keyword }}{% endif %}{% if selected_course_id %}&course_id={{ selected_course_id }}{% endif %}" class="page-btn" title="Trang sau">›</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if keyword %}&q={{ keyword }}{% endif %}{% if selected_course_id %}&course_id={{ selected_course_id }}{% endif %}" class="page-btn" title="Trang cuối">»</a>
+                    {% else %}
+                        <span class="page-btn disabled">›</span>
+                        <span class="page-btn disabled">»</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

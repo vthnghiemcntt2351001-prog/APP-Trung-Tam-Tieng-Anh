@@ -1,0 +1,206 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Xác nhận trạng thái học viên - English Center{% endblock %}
+{% block breadcrumb %}
+    <a href="{% url 'student_list' %}" style="color: inherit; text-decoration: none;">Học viên</a> / {% if student.is_active %}Lưu trữ{% else %}Khôi phục{% endif %}
+{% endblock %}
+
+{% block page_styles %}
+<style>
+    .delete-container {
+        max-width: 540px;
+        margin: 40px auto;
+    }
+
+    .confirm-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 36px 32px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+        text-align: center;
+    }
+
+    .confirm-icon-wrap {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .confirm-icon-wrap.archive {
+        background: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #ffedd5;
+    }
+
+    .confirm-icon-wrap.restore {
+        background: #ecfdf5;
+        color: #059669;
+        border: 1px solid #d1fae5;
+    }
+
+    .confirm-title {
+        margin: 0 0 10px 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .confirm-desc {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0 0 24px 0;
+    }
+
+    .confirm-highlight {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .safety-callout {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 12px;
+        color: #475569;
+        text-align: left;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .safety-callout svg {
+        flex-shrink: 0;
+        color: #2563eb;
+        margin-top: 1px;
+    }
+
+    .confirm-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .btn-cancel {
+        padding: 9px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .btn-submit-archive {
+        padding: 9px 22px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ffffff;
+        background: #ea580c;
+        border: 1px solid #c2410c;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit-archive:hover {
+        background: #c2410c;
+        transform: translateY(-1px);
+    }
+
+    .btn-submit-restore {
+        padding: 9px 22px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ffffff;
+        background: #10b981;
+        border: 1px solid #059669;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit-restore:hover {
+        background: #059669;
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="delete-container">
+    <div class="confirm-card">
+        {% if student.is_active %}
+        <div class="confirm-icon-wrap archive">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 8v13H3V8"></path>
+                <path d="M1 3h22v5H1z"></path>
+                <path d="M10 12h4"></path>
+            </svg>
+        </div>
+
+        <h1 class="confirm-title">Lưu trữ hồ sơ học viên</h1>
+        <p class="confirm-desc">
+            Bạn có chắc chắn muốn ngừng hoạt động và chuyển học viên <span class="confirm-highlight">{{ student.full_name }}</span> (HV-{{ student.id|stringformat:"04d" }}) vào danh mục lưu trữ?
+        </p>
+
+        <div class="safety-callout">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <div>
+                <strong>Cơ chế bảo vệ dữ liệu (Soft Delete):</strong>
+                Thao tác này chỉ ẩn học viên khỏi danh sách lớp học thường nhật. Toàn bộ chứng chỉ, lịch sử điểm số và hóa đơn học phí vẫn được bảo lưu 100% trong hệ thống kế toán.
+            </div>
+        </div>
+
+        <form method="POST" class="confirm-actions">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="archive">
+            <a href="{% url 'student_list' %}" class="btn-cancel">Hủy bỏ</a>
+            <button type="submit" class="btn-submit-archive">Xác nhận lưu trữ</button>
+        </form>
+
+        {% else %}
+        <div class="confirm-icon-wrap restore">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+        </div>
+
+        <h1 class="confirm-title">Khôi phục hồ sơ học viên</h1>
+        <p class="confirm-desc">
+            Kích hoạt lại học viên <span class="confirm-highlight">{{ student.full_name }}</span> (HV-{{ student.id|stringformat:"04d" }}) để học viên có thể tiếp tục ghi danh vào các lớp học mới?
+        </p>
+
+        <form method="POST" class="confirm-actions">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="restore">
+            <a href="{% url 'student_list' %}?status=archived" class="btn-cancel">Hủy bỏ</a>
+            <button type="submit" class="btn-submit-restore">Khôi phục học viên</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

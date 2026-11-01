@@ -1,0 +1,175 @@
+{% load query_tags %}
+
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+<nav class="saas-pagination-nav" aria-label="Phân trang danh sách">
+    <div class="pagination-info">
+        Hiển thị <strong>{{ page_obj.start_index }}</strong> - <strong>{{ page_obj.end_index }}</strong> trong tổng số <strong>{{ page_obj.paginator.count }}</strong> mục
+    </div>
+
+    <ul class="pagination-list">
+        {# Nút Quay về trang đầu #}
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link page-nav-btn" href="?{% query_transform page=1 %}" title="Trang đầu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="11 17 6 12 11 7"></polyline>
+                        <polyline points="18 17 13 12 18 7"></polyline>
+                    </svg>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link page-nav-btn" href="?{% query_transform page=page_obj.previous_page_number %}" title="Trang trước">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span>Trước</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link page-nav-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span>Trước</span>
+                </span>
+            </li>
+        {% endif %}
+
+        {# Các trang số rút gọn #}
+        {% for page_num in page_obj|get_elided_pages %}
+            {% if page_num == page_obj.paginator.ELLIPSIS %}
+                <li class="page-item disabled">
+                    <span class="page-link dots">…</span>
+                </li>
+            {% elif page_num == page_obj.number %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% query_transform page=page_num %}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Nút Sang trang sau #}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link page-nav-btn" href="?{% query_transform page=page_obj.next_page_number %}" title="Trang kế">
+                    <span>Sau</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link page-nav-btn" href="?{% query_transform page=page_obj.paginator.num_pages %}" title="Trang cuối">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="13 17 18 12 13 7"></polyline>
+                        <polyline points="6 17 11 12 6 7"></polyline>
+                    </svg>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link page-nav-btn">
+                    <span>Sau</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<style>
+.saas-pagination-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    flex-wrap: wrap;
+}
+.pagination-info {
+    font-size: 13.5px;
+    color: #64748b;
+}
+.pagination-info strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+.pagination-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.page-item {
+    display: inline-block;
+}
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    user-select: none;
+    gap: 4px;
+}
+a.page-link:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+.page-item.active .page-link {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+}
+.page-item.disabled .page-link {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: #f8fafc;
+    border-color: #f1f5f9;
+}
+.page-link.dots {
+    border: none;
+    background: transparent;
+    cursor: default;
+    color: #94a3b8;
+}
+@media (max-width: 640px) {
+    .saas-pagination-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    .pagination-list {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+</style>
+{% endif %}

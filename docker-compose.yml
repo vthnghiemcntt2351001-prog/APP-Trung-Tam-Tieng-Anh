@@ -1,0 +1,60 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: english_center_db
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: english_center_db
+      MYSQL_USER: english_user
+      MYSQL_PASSWORD: english_secure_password_2026
+      MYSQL_ROOT_PASSWORD: root_secure_password_2026
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "english_user", "-penglish_secure_password_2026"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    container_name: english_center_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_ENGINE=mysql
+      - DB_NAME=english_center_db
+      - DB_USER=english_user
+      - DB_PASSWORD=english_secure_password_2026
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DJANGO_SECRET_KEY=django-insecure-prod-key-docker-center-2026-very-secure-key-1234567890
+      - DJANGO_DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,web
+      - DJANGO_EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - DJANGO_SECURE_SSL_REDIRECT=False
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+
+volumes:
+  mysql_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local

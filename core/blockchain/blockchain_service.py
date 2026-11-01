@@ -454,6 +454,21 @@ def verify_database_certificate(certificate):
         "transaction_hash": certificate.transaction_hash,
         "block_number": certificate.block_number,
     }
+# =====================================================
+# 11. KIEM TRA KET NOI BLOCKCHAIN CO SAN SANG KHONG
+# =====================================================
+
+def is_blockchain_available():
+    """
+    Kiem tra nhanh xem node Ganache / RPC co dang phan hoi khong.
+    Tra ve True neu ket noi tot, False neu dang tat hoac loi.
+    Khong bao gio lam crash chuong trinh.
+    """
+    try:
+        web3, _ = get_blockchain_contract()
+        return web3.is_connected()
+    except Exception:
+        return False
 
 
 

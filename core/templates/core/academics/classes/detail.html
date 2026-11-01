@@ -1,0 +1,438 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ english_class.name }} | Quản lý lớp học | English Center{% endblock %}
+{% block breadcrumb %}{{ english_class.name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/academics/classes/detail.css' %}?v=20261101_v2">
+{% endblock %}
+
+{% block page_content %}
+<div class="class-detail-wrapper">
+
+    <!-- BREADCRUMB -->
+    <nav class="detail-breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Trang chủ</a>
+        <span class="sep">/</span>
+        <a href="{% url 'class_list' %}">Học vụ</a>
+        <span class="sep">/</span>
+        <a href="{% url 'class_list' %}">Lớp học</a>
+        <span class="sep">/</span>
+        <span>{{ english_class.name }}</span>
+    </nav>
+
+    <!-- HERO HEADER BANNER -->
+    <div class="detail-hero-banner">
+        <div class="hero-left-content">
+            <div class="hero-badge-pill">
+                <span>🎓</span>
+                <span>Khóa: {{ english_class.course.name }}</span>
+            </div>
+            <h1 class="hero-class-title">{{ english_class.name }}</h1>
+            <p class="hero-class-subtitle">
+                Mã lớp: #{{ english_class.id }} &bull; Phụ trách bởi: 
+                <strong>{{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa phân công" }}</strong>
+            </p>
+        </div>
+
+        <div class="hero-actions-group">
+            <a href="{% url 'session_list' english_class.id %}" class="btn-hero-primary" title="Quản lý buổi học và điểm danh học viên">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span>Điểm danh & Buổi học</span>
+            </a>
+
+            <a href="{% url 'class_assessments' class_id=english_class.id %}" class="btn-hero-ghost" title="Quản lý đợt đánh giá & bảng điểm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                <span>Đánh giá & Điểm số</span>
+            </a>
+
+            {% if can_manage_academics %}
+                <a href="{% url 'class_edit' english_class.id %}" class="btn-hero-ghost" title="Chỉnh sửa thông tin lớp học">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    <span>Sửa</span>
+                </a>
+            {% endif %}
+
+            <a href="{% url 'class_list' %}" class="btn-hero-ghost" title="Quay lại danh sách lớp">
+                <span>← Danh sách</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- MESSAGES ALERT -->
+    {% if messages %}
+        <div class="messages-container" style="display: flex; flex-direction: column; gap: 8px;">
+            {% for message in messages %}
+                <div class="notice-box {% if message.tags == 'error' %}warning{% else %}info{% endif %}">
+                    <span>{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
+                    <div>{{ message }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- CLASS OVERVIEW INFO CARD -->
+    <div class="class-info-card">
+        <div class="card-title-row">
+            <h2 class="card-title-text">
+                <span class="card-title-icon">📋</span>
+                <span>Thông số & Quy mô lớp học</span>
+            </h2>
+            <span class="badge-status-pill badge-secondary">
+                Lớp hoạt động
+            </span>
+        </div>
+
+        <div class="info-items-grid">
+            <div class="info-box-item">
+                <span class="info-box-label">Khóa đào tạo</span>
+                <div class="info-box-val">{{ english_class.course.name }}</div>
+            </div>
+
+            <div class="info-box-item">
+                <span class="info-box-label">Giảng viên phụ trách</span>
+                <div class="info-box-val">
+                    {% if english_class.teacher %}
+                        {{ english_class.teacher.full_name }}
+                    {% else %}
+                        {{ english_class.teacher_name|default:"Chưa phân công" }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-box-item">
+                <span class="info-box-label">Thời gian bắt đầu</span>
+                <div class="info-box-val">
+                    {{ english_class.start_date|date:"d/m/Y" }}
+                </div>
+            </div>
+
+            <div class="info-box-item">
+                <span class="info-box-label">Thời gian kết thúc</span>
+                <div class="info-box-val">
+                    {% if english_class.end_date %}
+                        {{ english_class.end_date|date:"d/m/Y" }}
+                    {% else %}
+                        Đang diễn ra
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-box-item">
+                <span class="info-box-label">Sĩ số & Tỷ lệ lấp đầy</span>
+                <div class="info-box-val">
+                    {{ students.count }} / {{ english_class.max_students }} học viên
+                </div>
+                <div class="capacity-progress-wrap">
+                    <div class="capacity-progress-bar">
+                        <div
+                            class="capacity-progress-bar-fill {% if students.count >= english_class.max_students %}full{% endif %}"
+                            style="width: {% widthratio students.count english_class.max_students 100 %}%;"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENROLL STUDENT SECTION -->
+    <div class="class-info-card">
+        <div class="card-title-row">
+            <h2 class="card-title-text">
+                <span class="card-title-icon">➕</span>
+                <span>Đăng ký học viên vào lớp</span>
+            </h2>
+        </div>
+
+        <p style="margin: 0; font-size: 13.5px; color: var(--muted, #64748b); line-height: 1.5;">
+            Chọn học viên từ danh sách chờ hoặc danh sách toàn hệ thống để xếp vào lớp <strong>{{ english_class.name }}</strong>.
+        </p>
+
+        {% if students.count < english_class.max_students %}
+            {% if available_students %}
+                <form method="POST" class="enroll-action-bar">
+                    {% csrf_token %}
+                    <select name="student_id" id="student_id" required class="enroll-select-field">
+                        <option value="">-- Chọn học viên cần đăng ký vào lớp --</option>
+                        {% for student in available_students %}
+                            <option value="{{ student.id }}">
+                                {{ student.full_name }} &bull; {{ student.email }} ({{ student.phone|default:"Chưa có SĐT" }})
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn-enroll-submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>Xác nhận đăng ký vào lớp</span>
+                    </button>
+                </form>
+            {% else %}
+                <div class="notice-box info">
+                    <span>ℹ️</span>
+                    <div>
+                        <strong>Không còn học viên khả dụng để xếp lớp.</strong>
+                        <div>Tất cả học viên trong hệ thống hiện đã được xếp vào lớp này hoặc bạn chưa tạo thêm hồ sơ học viên mới.</div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="notice-box warning">
+                <span>⚠️</span>
+                <div>
+                    <strong>Lớp học đã đạt sĩ số tối đa ({{ students.count }}/{{ english_class.max_students }}).</strong>
+                    <div>Để tiếp tục ghi danh thêm học viên, vui lòng tăng chỉ tiêu sĩ số tối đa tại trang chỉnh sửa lớp học.</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ENROLLED STUDENTS TABLE -->
+    <div class="students-table-card">
+        <div class="students-table-head">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 750; color: var(--ink-heading, #0f172a);">
+                    Danh sách học viên & Quản lý ghi danh
+                </h3>
+                <span class="badge-status-pill badge-secondary">
+                    {{ students.count }} đang theo học
+                </span>
+            </div>
+            <span style="font-size: 12.5px; color: var(--muted, #64748b);">
+                Để chuyển lớp, nhấn nút <strong>Chuyển lớp</strong> tại dòng của học viên tương ứng.
+            </span>
+        </div>
+
+        <div class="table-responsive-box">
+            <table class="class-data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">STT</th>
+                        <th>Học viên</th>
+                        <th>Hòm thư Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Trạng thái học vụ</th>
+                        <th style="text-align: right; width: 170px;">Điều chuyển lớp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                        {% with student=enrollment.student %}
+                        <tr>
+                            <td style="color: var(--muted, #64748b); font-weight: 600;">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <div class="student-meta-cell">
+                                    <div class="student-avatar-round">
+                                        {{ student.full_name|slice:":1"|upper|default:"H" }}
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'student_edit' student.id %}" class="student-name-strong" title="Xem hồ sơ học viên">
+                                            {{ student.full_name }}
+                                        </a>
+                                        <span class="student-phone-sub">Mã HV: #{{ student.id }}</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span style="color: var(--ink-subtle, #475569); font-size: 13px;">
+                                    {{ student.email }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span style="font-weight: 500; color: var(--ink, #0f172a);">
+                                    {{ student.phone|default:"—" }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if enrollment.student_id in pending_transfer_student_ids %}
+                                    <span class="badge-status-pill badge-warning" title="Đang chờ Admin duyệt chuyển lớp">
+                                        ⏳ Chờ duyệt chuyển
+                                    </span>
+                                {% elif enrollment.status == "transferred" %}
+                                    <span class="badge-status-pill badge-secondary">
+                                        Đã chuyển lớp
+                                    </span>
+                                {% else %}
+                                    <form method="POST" action="{% url 'enrollment_status_update' class_id=english_class.id student_id=student.id %}" class="inline-status-form">
+                                        {% csrf_token %}
+                                        <select name="status" aria-label="Trạng thái ghi danh" class="inline-status-select">
+                                            {% for value, label in enrollment_statuses %}
+                                                <option value="{{ value }}" {% if enrollment.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn-inline-save" title="Lưu thay đổi trạng thái">Lưu</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+
+                            <td style="text-align: right;">
+                                {% if enrollment.student_id in pending_transfer_student_ids %}
+                                    <span style="font-size: 12px; color: #b45309; font-weight: 600;">
+                                        🔒 Đang chờ duyệt
+                                    </span>
+                                {% elif enrollment.status == "studying" and target_classes %}
+                                    <button
+                                        type="button"
+                                        class="btn-transfer-trigger"
+                                        onclick="openTransferModal('{{ student.id }}', '{{ student.full_name|escapejs }}', '{% url 'enrollment_transfer' class_id=english_class.id student_id=student.id %}')"
+                                    >
+                                        <span>🔄</span>
+                                        <span>Chuyển lớp</span>
+                                    </button>
+                                {% elif enrollment.status == "studying" and not target_classes %}
+                                    <span style="color: var(--muted, #64748b); font-size: 12px;">Chưa có lớp khác</span>
+                                {% else %}
+                                    <span style="color: var(--muted, #64748b); font-size: 12px;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endwith %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="class-empty-state">
+                                    <div class="class-empty-icon">
+                                        👨‍🎓
+                                    </div>
+                                    <h3 class="class-empty-title">Lớp học chưa có học viên</h3>
+                                    <p class="class-empty-desc">
+                                        Vui lòng chọn học viên ở mục "Đăng ký học viên vào lớp" phía trên để xếp lớp.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL CHUYỂN LỚP (DARK & LIGHT COMPATIBLE) -->
+<div id="transferModal" class="modal-backdrop" style="display: none;" onclick="handleModalBackdrop(event)">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="transferModalTitle">
+        <div class="modal-header">
+            <div class="modal-header-info">
+                <div class="modal-header-icon">🔄</div>
+                <div>
+                    <h3 id="transferModalTitle" class="modal-title">Yêu cầu Chuyển lớp</h3>
+                    <p class="modal-subtitle">Điều chuyển học viên sang lớp học khác trong hệ thống</p>
+                </div>
+            </div>
+            <button type="button" class="btn-modal-close" onclick="closeTransferModal()" aria-label="Đóng">&times;</button>
+        </div>
+
+        <form id="transferForm" method="POST" action="">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="transfer-student-summary">
+                    <div class="summary-avatar">👨‍🎓</div>
+                    <div class="summary-text">
+                        <span class="summary-label">Học viên chuyển lớp:</span>
+                        <strong class="summary-name" id="modalStudentName">...</strong>
+                        <div class="summary-class-info">
+                            Lớp hiện tại: <strong>{{ english_class.name }}</strong> &bull; Khóa: {{ english_class.course.name }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label for="modalTargetClass" class="modal-label">Lớp chuyển đến <span style="color: #ef4444;">*</span></label>
+                    <select id="modalTargetClass" name="target_class_id" required class="modal-select">
+                        <option value="">-- Chọn lớp muốn chuyển đến --</option>
+                        {% for target_class in target_classes %}
+                            <option value="{{ target_class.id }}" {% if target_class.active_student_count >= target_class.max_students %}disabled{% endif %}>
+                                {{ target_class.name }} &mdash; {{ target_class.course.name }} ({{ target_class.active_student_count }}/{{ target_class.max_students }}{% if target_class.active_student_count >= target_class.max_students %} &bull; Đã đủ sĩ số{% endif %})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="modal-field-hint">
+                        💡 <em>Lưu ý:</em> Nếu lớp mới cùng khóa học, hệ thống sẽ chuyển ngay lập tức. Nếu khác khóa học, yêu cầu sẽ được chuyển tới quản trị viên để phê duyệt.
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label for="modalReason" class="modal-label">Lý do chuyển lớp <span style="color: #ef4444;">*</span></label>
+                    <textarea
+                        id="modalReason"
+                        name="reason"
+                        rows="3"
+                        required
+                        class="modal-textarea"
+                        placeholder="Nhập lý do chuyển lớp (ví dụ: Trùng lịch học ở trường, học viên đổi ca, nâng/hạ cấp độ phù hợp...)"
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeTransferModal()">Hủy bỏ</button>
+                <button type="submit" class="btn-modal-submit">
+                    <span>Xác nhận chuyển lớp</span> &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openTransferModal(studentId, studentName, actionUrl) {
+        var modal = document.getElementById('transferModal');
+        var form = document.getElementById('transferForm');
+        var nameElem = document.getElementById('modalStudentName');
+        var targetClassSelect = document.getElementById('modalTargetClass');
+        var reasonText = document.getElementById('modalReason');
+
+        if (modal && form) {
+            form.action = actionUrl;
+            if (nameElem) nameElem.textContent = studentName;
+            if (targetClassSelect) targetClassSelect.selectedIndex = 0;
+            if (reasonText) reasonText.value = '';
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            setTimeout(function() {
+                if (targetClassSelect) targetClassSelect.focus();
+            }, 60);
+        }
+    }
+
+    function closeTransferModal() {
+        var modal = document.getElementById('transferModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    function handleModalBackdrop(event) {
+        if (event.target === document.getElementById('transferModal')) {
+            closeTransferModal();
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeTransferModal();
+        }
+    });
+</script>
+{% endblock %}

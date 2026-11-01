@@ -1,0 +1,119 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Thêm buổi học - {{ english_class.name }} | EnglishCenter{% endblock %}
+
+{% block page_content %}
+<div class="page-container" style="max-width: 760px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        <a href="{% url 'home' %}" style="color: var(--primary);">Trang chủ</a> / 
+        <a href="{% url 'class_list' %}" style="color: var(--primary);">Lớp học</a> / 
+        <a href="{% url 'session_list' english_class.id %}" style="color: var(--primary);">Lớp {{ english_class.name }}</a> / 
+        <span>Thêm buổi học</span>
+    </div>
+
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.5rem 0;">
+            Thêm buổi học mới
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0 0 1.5rem 0;">
+            Lớp học: <strong>{{ english_class.name }}</strong> (Khóa: {{ english_class.course.name }})
+        </p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.9rem; background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; color: {% if message.tags == 'error' %}#b91c1c{% else %}#15803d{% endif %}; border: 1px solid currentColor;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                        Buổi số mấy <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input type="number" name="session_number" value="{{ next_session_number }}" min="1" required
+                        style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                        Ngày học <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input type="date" name="session_date" value="{{ default_date }}" required
+                        style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                        Giờ bắt đầu
+                    </label>
+                    <input type="time" name="start_time" value="18:00"
+                        style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                        Giờ kết thúc
+                    </label>
+                    <input type="time" name="end_time" value="19:30"
+                        style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                        Phòng học
+                    </label>
+                    <input type="text" name="room" placeholder="Ví dụ: P.204"
+                        style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                    Giáo viên đứng lớp
+                </label>
+                <select name="teacher"
+                    style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+                    <option value="">-- Mặc định giáo viên phụ trách lớp ({{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa gán" }}) --</option>
+                    {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if t.id == english_class.teacher_id %}selected{% endif %}>
+                            {{ t.full_name }} ({{ t.specialization|default:"Giáo viên" }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                    Chủ đề / Bài học
+                </label>
+                <input type="text" name="topic" placeholder="Ví dụ: Unit 3 - Everyday Conversations & Pronunciation"
+                    style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 1.75rem;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
+                    Ghi chú / Yêu cầu chuẩn bị
+                </label>
+                <textarea name="notes" rows="3" placeholder="Nhập ghi chú cho giáo viên hoặc học viên..."
+                    style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <a href="{% url 'session_list' english_class.id %}" class="btn"
+                    style="background: var(--surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.65rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn btn-primary"
+                    style="background: var(--primary); color: #fff; border: none; padding: 0.65rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">
+                    💾 Lưu buổi học
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

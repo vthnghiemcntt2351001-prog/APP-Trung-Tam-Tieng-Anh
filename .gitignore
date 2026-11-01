@@ -1,11 +1,29 @@
+# Python & Virtual Environments
 venv/
 .venv/
 __pycache__/
 *.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Databases & Local state
 db.sqlite3
+*.db
+*.sqlite3
+*.sql
+datadump*.json
+
+# Environment variables & secrets
 .env
 .env.*
 !.env.example
-.pytest_cache/
+
+# Static & Media in production
+staticfiles/
+media/
+*.log
+
+# IDE & Editor configs
 .idea/
 .vscode/
+*.swp

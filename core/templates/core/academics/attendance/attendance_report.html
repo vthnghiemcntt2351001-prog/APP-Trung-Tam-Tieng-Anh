@@ -1,0 +1,146 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Báo cáo chuyên cần - {{ english_class.name }} | EnglishCenter{% endblock %}
+
+{% block page_content %}
+<div class="page-container" style="max-width: 1300px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        <a href="{% url 'home' %}" style="color: var(--primary);">Trang chủ</a> / 
+        <a href="{% url 'class_list' %}" style="color: var(--primary);">Lớp học</a> / 
+        <a href="{% url 'session_list' english_class.id %}" style="color: var(--primary);">Lớp {{ english_class.name }}</a> / 
+        <span>Báo cáo chuyên cần</span>
+    </div>
+
+    <!-- Header Card -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;">
+        <div>
+            <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-main); margin: 0;">
+                Báo cáo Chuyên cần Lớp {{ english_class.name }}
+            </h1>
+            <p style="color: var(--text-muted); margin: 0.25rem 0 0 0; font-size: 0.95rem;">
+                Khóa học: <strong>{{ english_class.course.name }}</strong> &bull; Tổng số buổi: <strong>{{ total_sessions }}</strong>
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'session_list' english_class.id %}" class="btn" style="background: var(--surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.6rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                ← Danh sách buổi học
+            </a>
+            <button type="button" onclick="window.print()" class="btn" style="background: var(--surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                🖨️ In báo cáo
+            </button>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #16a34a;"></span>
+            <strong>P</strong>: Có mặt
+        </span>
+        <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #0284c7;"></span>
+            <strong>L</strong>: Đi muộn (tính 0.8 buổi)
+        </span>
+        <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #d97706;"></span>
+            <strong>E</strong>: Vắng có phép
+        </span>
+        <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #dc2626;"></span>
+            <strong>A</strong>: Vắng không phép
+        </span>
+        <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--border-color);"></span>
+            <strong>-</strong>: Chưa diễn ra / Chưa điểm danh
+        </span>
+    </div>
+
+    <!-- Report Table -->
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));">
+        <div class="table-responsive" style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--bg-secondary, rgba(0,0,0,0.02)); border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                        <th style="padding: 0.85rem 1rem; width: 50px; text-align: center;">STT</th>
+                        <th style="padding: 0.85rem 1.25rem; min-width: 180px;">Học viên</th>
+                        {% for s in sessions %}
+                        <th style="padding: 0.85rem 0.5rem; text-align: center; min-width: 44px;" title="Buổi {{ s.session_number }} ({{ s.session_date|date:'d/m' }})">
+                            B.{{ s.session_number }}
+                        </th>
+                        {% endfor %}
+                        <th style="padding: 0.85rem 0.75rem; text-align: center; width: 70px;">Có mặt</th>
+                        <th style="padding: 0.85rem 0.75rem; text-align: center; width: 70px;">Muộn</th>
+                        <th style="padding: 0.85rem 0.75rem; text-align: center; width: 70px;">Có phép</th>
+                        <th style="padding: 0.85rem 0.75rem; text-align: center; width: 70px;">K.phép</th>
+                        <th style="padding: 0.85rem 1.25rem; width: 160px; text-align: right;">Chuyên cần</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report_rows %}
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;">
+                        <td style="padding: 0.85rem 1rem; text-align: center; color: var(--text-muted);">
+                            {{ forloop.counter }}
+                        </td>
+                        <td style="padding: 0.85rem 1.25rem;">
+                            <div style="font-weight: 600; color: var(--text-main);">{{ row.student.full_name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ row.student.student_code }}</div>
+                        </td>
+
+                        {% for item in row.session_statuses %}
+                        <td style="padding: 0.85rem 0.4rem; text-align: center;">
+                            {% if item.status == 'present' %}
+                                <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; border-radius: 6px; background: rgba(22,163,74,0.15); color: #16a34a; font-weight: 700; font-size: 0.8rem;">P</span>
+                            {% elif item.status == 'late' %}
+                                <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; border-radius: 6px; background: rgba(2,132,199,0.15); color: #0284c7; font-weight: 700; font-size: 0.8rem;">L</span>
+                            {% elif item.status == 'absent_excused' %}
+                                <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; border-radius: 6px; background: rgba(217,119,6,0.15); color: #d97706; font-weight: 700; font-size: 0.8rem;">E</span>
+                            {% elif item.status == 'absent_unexcused' %}
+                                <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; border-radius: 6px; background: rgba(220,38,38,0.15); color: #dc2626; font-weight: 700; font-size: 0.8rem;">A</span>
+                            {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.9rem;">-</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+
+                        <td style="padding: 0.85rem 0.75rem; text-align: center; font-weight: 600; color: #16a34a;">
+                            {{ row.present_count }}
+                        </td>
+                        <td style="padding: 0.85rem 0.75rem; text-align: center; font-weight: 600; color: #0284c7;">
+                            {{ row.late_count }}
+                        </td>
+                        <td style="padding: 0.85rem 0.75rem; text-align: center; font-weight: 600; color: #d97706;">
+                            {{ row.excused_count }}
+                        </td>
+                        <td style="padding: 0.85rem 0.75rem; text-align: center; font-weight: 600; color: #dc2626;">
+                            {{ row.unexcused_count }}
+                        </td>
+                        <td style="padding: 0.85rem 1.25rem; text-align: right;">
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;">
+                                <div style="font-weight: 700; font-size: 0.95rem; color: {% if row.is_warning %}#dc2626{% else %}var(--text-main){% endif %};">
+                                    {{ row.attendance_rate }}%
+                                </div>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: var(--border-color); border-radius: 9999px; margin-top: 0.35rem; overflow: hidden;">
+                                <div style="width: {{ row.attendance_rate }}%; height: 100%; background: {% if row.is_warning %}#dc2626{% else %}#16a34a{% endif %}; border-radius: 9999px;"></div>
+                            </div>
+                            {% if row.is_warning %}
+                                <div style="font-size: 0.75rem; color: #dc2626; font-weight: 600; margin-top: 0.25rem;">
+                                    ⚠️ Vắng quá 20%
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ total_sessions|add:7 }}" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                            Chưa có dữ liệu học viên trong lớp này.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

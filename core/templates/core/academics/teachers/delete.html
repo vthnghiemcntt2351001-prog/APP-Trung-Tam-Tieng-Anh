@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Xóa giáo viên{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/academics/teachers/delete.css' %}?v=20261018e">{% endblock %}
+{% block page_content %}
+<div class="container">
+    <h1>XÁC NHẬN XÓA GIÁO VIÊN</h1>
+
+    <p>Bạn có chắc chắn muốn xóa giáo viên này không?</p>
+
+    <div class="info">
+        <strong>Họ và tên:</strong> {{ teacher.full_name }}<br>
+        <strong>Email:</strong> {{ teacher.email }}<br>
+        <strong>Số điện thoại:</strong> {{ teacher.phone }}<br>
+        <strong>Chuyên môn:</strong>
+        {{ teacher.specialization|default:"Chưa cập nhật" }}
+    </div>
+
+    <p>Thao tác này sẽ xóa thông tin giáo viên khỏi hệ thống.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit">Xác nhận xóa</button>
+
+        <a href="{% url 'teacher_list' %}" class="btn">
+            Hủy bỏ
+        </a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+{% block title %}Đánh giá lớp {{ english_class.name }}{% endblock %}
+{% load static %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/assessments.css' %}?v=20261018a">{% endblock %}
+{% block page_content %}
+<main class="assessment-page">
+    <a href="{% url 'class_detail' class_id=english_class.id %}">← Chi tiết lớp</a>
+    <h1>Đánh giá lớp {{ english_class.name }}</h1>
+    {% if messages %}{% for message in messages %}<div class="assessment-notice">{{ message }}</div>{% endfor %}{% endif %}
+
+    <section class="assessment-card">
+        <h2>Quy chế đang áp dụng</h2>
+        {% if english_class.assessment_policy %}
+            <p><strong>{{ english_class.assessment_policy.name }} v{{ english_class.assessment_policy.version }}</strong> — {{ english_class.assessment_policy.get_scale_display }}, tối đa {{ english_class.assessment_policy.max_score }}.</p>
+            <p>Điểm đạt: {{ english_class.assessment_policy.pass_score|default:"Chưa đặt" }}. Thành phần:
+                {% for component in components %}{{ component.name }} ({{ component.weight }}%){% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+        {% else %}<p>Chưa gán quy chế đánh giá.</p>{% endif %}
+        {% if is_admin %}
+            <form method="post">
+                {% csrf_token %}
+                <label for="policy_id">Gán quy chế đã kích hoạt thuộc khóa {{ english_class.course.name }}</label>
+                <select id="policy_id" name="policy_id" required>
+                    <option value="">-- Chọn quy chế --</option>
+                    {% for policy in active_policies %}
+                        <option value="{{ policy.id }}" {% if english_class.assessment_policy_id == policy.id %}selected{% endif %}>{{ policy.name }} v{{ policy.version }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Gán quy chế</button>
+            </form>
+        {% endif %}
+    </section>
+
+    {% if english_class.assessment_policy %}
+    <section class="assessment-card">
+        <h2>Tạo đợt đánh giá</h2>
+        {% if components %}
+        <form method="post" action="{% url 'assessment_event_create' class_id=english_class.id %}">
+            {% csrf_token %}
+            <label for="event-name">Tên bài đánh giá</label>
+            <input id="event-name" type="text" name="name" maxlength="180" required>
+            <label for="component_id">Thành phần</label>
+            <select id="component_id" name="component_id" required>
+                {% for component in components %}<option value="{{ component.id }}">{{ component.name }} — {{ component.weight }}%</option>{% endfor %}
+            </select>
+            <label for="assessment_date">Ngày đánh giá</label>
+            <input id="assessment_date" type="date" name="assessment_date" required>
+            <label for="event-max">Điểm tối đa riêng (để trống dùng điểm thành phần)</label>
+            <input id="event-max" type="number" name="max_score" min="0.01" step="0.01">
+            <br><button type="submit">Tạo đợt đánh giá</button>
+        </form>
+        {% else %}<p>Quy chế chưa có thành phần đánh giá.</p>{% endif %}
+    </section>
+    {% endif %}
+
+    <section class="assessment-card">
+        <h2>Các đợt đánh giá</h2>
+        <table><thead><tr><th>Tên</th><th>Thành phần</th><th>Ngày</th><th></th></tr></thead><tbody>
+            {% for event in events %}
+                <tr><td>{{ event.name }}</td><td>{{ event.component.name }}</td><td>{{ event.assessment_date|date:"d/m/Y" }}</td><td><a href="{% url 'assessment_event_gradebook' event_id=event.id %}">Nhập và xem điểm</a></td></tr>
+            {% empty %}<tr><td colspan="4">Chưa có đợt đánh giá.</td></tr>{% endfor %}
+        </tbody></table>
+    </section>
+</main>
+{% endblock %}

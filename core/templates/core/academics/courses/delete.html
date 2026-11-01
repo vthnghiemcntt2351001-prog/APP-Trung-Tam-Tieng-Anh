@@ -1,0 +1,85 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Xóa khóa học | EnglishCenter{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/academics/courses/delete.css' %}?v=20261018e">{% endblock %}
+{% block page_content %}
+    <header>
+        <h1>EnglishCenter</h1>
+        <p>Hệ thống quản lý trung tâm tiếng Anh</p>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="{% url 'home' %}">Trang chủ</a>
+            &nbsp; / &nbsp;
+            <a href="{% url 'course_list' %}">Khóa học</a>
+            &nbsp; / &nbsp;
+            Xóa khóa học
+        </div>
+
+        <section class="card">
+            <div class="warning-icon">⚠️</div>
+
+            <h2>Xác nhận xóa khóa học</h2>
+
+            <p class="description">
+                Bạn có chắc chắn muốn xóa khóa học này không?
+                Vui lòng kiểm tra thông tin trước khi xác nhận.
+            </p>
+
+            <div class="course-info">
+                <p>
+                    <strong>Tên khóa học:</strong>
+                    {{ course.name }}
+                </p>
+
+                <p>
+                    <strong>Mô tả:</strong>
+                    {{ course.description|default:"Chưa có mô tả" }}
+                </p>
+
+                <p>
+                    <strong>Học phí:</strong>
+                    {{ course.tuition|default:"Chưa cập nhật" }} VNĐ
+                </p>
+
+                <p>
+                    <strong>Thời lượng:</strong>
+                    {{ course.duration|default:"Chưa cập nhật" }} tháng
+                </p>
+            </div>
+
+            <div class="warning">
+                <strong>Lưu ý:</strong>
+                Việc xóa khóa học có thể ảnh hưởng đến các lớp học
+                đang sử dụng khóa học này. Hãy kiểm tra dữ liệu liên quan
+                trước khi xác nhận.
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="actions">
+                    <button
+                        type="submit"
+                        class="btn btn-delete"
+                        onclick="return confirm('Bạn chắc chắn muốn xóa khóa học này?');"
+                    >
+                        Xác nhận xóa
+                    </button>
+
+                    <a
+                        href="{% url 'course_list' %}"
+                        class="btn btn-cancel"
+                    >
+                        Hủy, quay lại
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        © EnglishCenter - Hệ thống quản lý trung tâm tiếng Anh
+    </footer>
+{% endblock %}

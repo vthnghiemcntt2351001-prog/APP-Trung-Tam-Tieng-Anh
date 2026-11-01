@@ -1,0 +1,223 @@
+.assessment-page {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    padding: 28px clamp(16px, 3vw, 32px) 40px;
+    color: #273444;
+}
+
+.assessment-page > a:first-child,
+.transfer-back,
+.verify-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: #4169a1;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.assessment-page > a:first-child:hover,
+.transfer-back:hover,
+.verify-back:hover { color: #203864; text-decoration: underline; }
+
+.assessment-page h1,
+.transfer-page h1,
+.delete-page h1 {
+    margin: 4px 0 20px;
+    color: #203864;
+    font-size: clamp(25px, 3vw, 34px);
+    line-height: 1.2;
+    letter-spacing: -.025em;
+}
+
+.assessment-page h2,
+.transfer-page h2 { margin: 0 0 14px; color: #203864; font-size: 19px; }
+.assessment-page p { line-height: 1.65; }
+
+.assessment-card,
+.assessment-page > form,
+.assessment-page > table,
+.transfer-card,
+.transfer-history-wrap,
+.delete-card {
+    margin: 16px 0 20px;
+    padding: clamp(16px, 2.5vw, 24px);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(32 56 100 / 5%);
+}
+
+.assessment-page table,
+.transfer-history {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: #273444;
+    font-size: 14px;
+}
+
+.assessment-page th,
+.assessment-page td,
+.transfer-history th,
+.transfer-history td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: top;
+}
+
+.assessment-page th,
+.transfer-history th {
+    background: #f7f5ef;
+    color: #203864;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+}
+
+.assessment-page th:first-child,
+.transfer-history th:first-child { border-radius: 9px 0 0; }
+.assessment-page th:last-child,
+.transfer-history th:last-child { border-radius: 0 9px 0 0; }
+.assessment-page tbody tr:hover,
+.transfer-history tbody tr:hover { background: #f8fafc; }
+.assessment-page tbody tr:last-child td,
+.transfer-history tbody tr:last-child td { border-bottom: 0; }
+
+.assessment-page form:not(.attempt-form) { margin: 12px 0; }
+.assessment-page label,
+.attempt-form label {
+    display: block;
+    margin: 12px 0 6px;
+    color: #273444;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.assessment-page input:not([type=checkbox]),
+.assessment-page select,
+.assessment-page textarea,
+.attempt-form input,
+.attempt-form select,
+.attempt-form textarea {
+    box-sizing: border-box;
+    min-height: 42px;
+    max-width: 100%;
+    padding: 9px 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #273444;
+    font: inherit;
+}
+
+.assessment-page input:focus,
+.assessment-page select:focus,
+.assessment-page textarea:focus,
+.attempt-form input:focus,
+.attempt-form select:focus,
+.attempt-form textarea:focus {
+    border-color: #4169a1;
+    outline: 3px solid rgb(65 105 161 / 15%);
+}
+
+.assessment-page input[type=text] { width: min(520px, 100%); }
+.assessment-page input[type=number] { width: 150px; }
+.assessment-page input[type=date] { width: 190px; }
+.assessment-page input[type=checkbox] { accent-color: #4f8a87; }
+
+.assessment-page button,
+.transfer-actions button,
+.delete-actions button,
+.delete-actions a {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 15px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #203864;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s ease, transform .15s ease;
+}
+
+.assessment-page button:hover,
+.delete-actions button:hover { background: #172b50; transform: translateY(-1px); }
+.assessment-page a:not(:first-child) { color: #4169a1; font-weight: 650; text-decoration: none; }
+.assessment-page a:not(:first-child):hover { color: #203864; text-decoration: underline; }
+.assessment-notice,
+.transfer-messages {
+    padding: 12px 15px;
+    margin: 12px 0;
+    border: 1px solid #d7e2f0;
+    border-radius: 9px;
+    background: #f2f6fb;
+    color: #203864;
+}
+
+.assessment-muted,
+.assessment-help { color: #718096; }
+.attempt-form { min-width: 290px; margin: 8px 0; padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f7f5ef; }
+.attempt-form input,
+.attempt-form select,
+.attempt-form textarea { width: 100%; }
+.assessment-page > table { display: block; overflow-x: auto; }
+.assessment-page > table table { margin: 12px 0; }
+
+.transfer-page { width: min(1180px, 100%); margin: 0 auto; padding: 28px clamp(16px, 3vw, 32px) 40px; color: #273444; }
+.transfer-card p { margin: 8px 0; line-height: 1.55; }
+.transfer-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.transfer-approve { background: #4f8a87 !important; }
+.transfer-approve:hover { background: #3e716e !important; }
+.transfer-reject { background: #fff !important; border-color: #cbd5e1 !important; color: #273444 !important; }
+.transfer-reject:hover { background: #f7f5ef !important; }
+.transfer-empty { padding: 18px; border: 1px dashed #cbd5e1; border-radius: 10px; color: #718096; text-align: center; }
+.transfer-history-wrap { overflow-x: auto; }
+.transfer-history { min-width: 680px; }
+
+.verify-wrap { width: min(760px, 100%); margin: 0 auto; padding: clamp(20px, 5vw, 52px) 16px; color: #273444; }
+.verify-card { padding: clamp(20px, 4vw, 34px); border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; box-shadow: 0 14px 36px rgb(32 56 100 / 8%); }
+.verify-card h1 { margin: 0 0 12px; color: #203864; font-size: clamp(26px, 4vw, 34px); }
+.verify-card > p { color: #718096; line-height: 1.7; }
+.verify-form { display: flex; gap: 10px; margin: 22px 0; }
+.verify-form input { flex: 1; min-width: 0; min-height: 46px; padding: 10px 13px; border: 1px solid #cbd5e1; border-radius: 9px; font: inherit; }
+.verify-form input:focus { border-color: #4169a1; outline: 3px solid rgb(65 105 161 / 15%); }
+.verify-form button { min-height: 46px; padding: 10px 18px; border: 0; border-radius: 9px; background: #203864; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+.verify-form button:hover { background: #172b50; }
+.verify-result { margin-top: 20px; padding: 18px; border-radius: 10px; overflow-wrap: anywhere; }
+.verify-result.valid { border: 1px solid #8ab8b4; background: #eff7f6; }
+.verify-result.invalid { border: 1px solid #e2a7a1; background: #fff4f2; }
+.verify-result p { margin: 8px 0; line-height: 1.55; }
+.verify-card .messages { padding: 10px 14px; margin-bottom: 16px; border: 1px solid #ead9aa; border-radius: 8px; background: #fbf6e8; }
+.verify-card > a { color: #4169a1; font-weight: 650; text-decoration: none; }
+.verify-card > a:hover { text-decoration: underline; }
+
+.delete-page { width: min(620px, 100%); margin: 0 auto; padding: 36px 16px; color: #273444; }
+.delete-card { padding: clamp(22px, 4vw, 34px); }
+.delete-card p { color: #718096; line-height: 1.7; }
+.delete-card strong { color: #203864; }
+.delete-warning { display: grid; width: 48px; height: 48px; place-items: center; margin-bottom: 16px; border-radius: 12px; background: #f7f5ef; color: #203864; font-weight: 800; }
+.delete-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.delete-actions button { background: #8b3f3a; }
+.delete-actions button:hover { background: #71312d; }
+.delete-actions a { border-color: #cbd5e1; background: #fff; color: #273444; }
+.delete-actions a:hover { background: #f7f5ef; }
+
+@media (max-width: 720px) {
+    .assessment-page { padding-top: 20px; }
+    .assessment-card { overflow-x: auto; }
+    .assessment-card table { min-width: 620px; }
+    .assessment-page > form { overflow-x: auto; }
+    .assessment-page > form table { min-width: 760px; }
+    .verify-form { flex-direction: column; }
+    .verify-form button { width: 100%; }
+}

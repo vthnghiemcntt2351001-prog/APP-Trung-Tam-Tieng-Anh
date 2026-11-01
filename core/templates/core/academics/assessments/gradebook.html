@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}
+{% block title %}Nhập điểm — {{ event.name }}{% endblock %}
+{% load static %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/assessments.css' %}?v=20261018a">{% endblock %}
+{% block page_content %}
+<main class="assessment-page">
+    <a href="{% url 'class_assessments' class_id=event.english_class_id %}">← Các đợt đánh giá của lớp</a>
+    <h1>{{ event.name }}</h1>
+    <p>Lớp {{ event.english_class.name }} · {{ event.component.name }} · {{ event.assessment_date|date:"d/m/Y" }} · Thang điểm tối đa {{ maximum_score }}</p>
+    {% if messages %}{% for message in messages %}<div class="assessment-notice">{{ message }}</div>{% endfor %}{% endif %}
+    <table>
+        <thead><tr><th>Học viên</th><th>Kết quả từng lần đánh giá</th><th>Tổng kết theo quy chế</th></tr></thead>
+        <tbody>
+        {% for row in grade_rows %}
+            <tr>
+                <td>{{ row.enrollment.student.full_name }}</td>
+                <td>
+                    {% for result in row.attempts %}
+                        <form class="attempt-form" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="enrollment_id" value="{{ row.enrollment.id }}">
+                            <label>Lần đánh giá {{ result.attempt_number }}</label>
+                            <input type="hidden" name="attempt_number" value="{{ result.attempt_number }}">
+                            <label for="status-{{ result.id }}">Trạng thái</label>
+                            <select id="status-{{ result.id }}" name="status" required>
+                                {% for value,label in result_statuses %}<option value="{{ value }}" {% if result.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                            <label for="score-{{ result.id }}">Điểm (0–{{ maximum_score }})</label>
+                            <input id="score-{{ result.id }}" type="number" name="score" min="0" max="{{ maximum_score }}" step="0.01" value="{{ result.score|default_if_none:'' }}">
+                            <label for="feedback-{{ result.id }}">Nhận xét</label>
+                            <textarea id="feedback-{{ result.id }}" name="feedback" rows="2">{{ result.feedback }}</textarea>
+                            <label for="reason-{{ result.id }}">Lý do sửa điểm/trạng thái (bắt buộc nếu có thay đổi)</label>
+                            <input id="reason-{{ result.id }}" type="text" name="reason">
+                            <button type="submit">Lưu lần này</button>
+                        </form>
+                    {% endfor %}
+                    <form class="attempt-form" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="enrollment_id" value="{{ row.enrollment.id }}">
+                        <input type="hidden" name="attempt_number" value="{{ row.next_attempt }}">
+                        <strong>Thêm lần đánh giá {{ row.next_attempt }}</strong>
+                        <label for="new-status-{{ row.enrollment.id }}">Trạng thái</label>
+                        <select id="new-status-{{ row.enrollment.id }}" name="status" required>
+                            {% for value,label in result_statuses %}<option value="{{ value }}" {% if value == "graded" %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                        <label for="new-score-{{ row.enrollment.id }}">Điểm (0–{{ maximum_score }})</label>
+                        <input id="new-score-{{ row.enrollment.id }}" type="number" name="score" min="0" max="{{ maximum_score }}" step="0.01">
+                        <label for="new-feedback-{{ row.enrollment.id }}">Nhận xét</label>
+                        <textarea id="new-feedback-{{ row.enrollment.id }}" name="feedback" rows="2"></textarea>
+                        <button type="submit">Lưu lần đánh giá</button>
+                    </form>
+                </td>
+                <td>
+                    {% if row.final_result %}
+                        <strong>{{ row.final_result.get_status_display }}</strong><br>
+                        {% if row.final_result.final_score != None %}{{ row.final_result.final_score|floatformat:row.final_result.policy.rounding_precision }} / {{ row.final_result.policy.max_score }}{% endif %}
+                        {% if row.final_result.calculation_details.missing_required_components %}
+                            <p class="assessment-muted">Còn thiếu: {{ row.final_result.calculation_details.missing_required_components|join:", " }}</p>
+                        {% endif %}
+                        {% if row.final_result.calculation_details.failed_components %}
+                            <p class="assessment-muted">Chưa đạt thành phần: {{ row.final_result.calculation_details.failed_components|join:", " }}</p>
+                        {% endif %}
+                    {% else %}<span class="assessment-muted">Chưa có kết quả tổng kết</span>{% endif %}
+                </td>
+            </tr>
+        {% empty %}<tr><td colspan="3">Lớp chưa có học viên đang học hoặc đã hoàn thành.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</main>
+{% endblock %}

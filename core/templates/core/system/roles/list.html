@@ -1,0 +1,134 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Phân quyền & Vai trò hệ thống | EnglishCenter{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/system/system.css' %}?v=20261101a">
+{% endblock %}
+
+{% block page_content %}
+<div class="system-page-wrapper">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="system-header-area">
+        <div class="system-header-left">
+            <nav class="system-breadcrumb" aria-label="Breadcrumb">
+                <a href="{% url 'home' %}">Trang chủ</a>
+                <span class="sep">/</span>
+                <span>Hệ thống</span>
+                <span class="sep">/</span>
+                <span>Phân quyền & Vai trò</span>
+            </nav>
+            <h1 class="system-title">
+                <span class="system-title-icon">🛡️</span>
+                Phân quyền & Vai trò hệ thống (RBAC)
+            </h1>
+            <p class="system-subtitle">
+                Mô hình kiểm soát truy cập dựa trên vai trò (Role-Based Access Control) giúp đảm bảo an toàn dữ liệu và phân tách nhiệm vụ rõ ràng giữa các bộ phận.
+            </p>
+        </div>
+        <div class="system-header-actions">
+            <a href="{% url 'user_list' %}" class="btn-primary-action">
+                <span>Quản lý tài khoản</span> &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- ROLES CARDS GRID -->
+    <div class="roles-cards-grid">
+        {% for role in roles_data %}
+            <div class="role-card-item {% if role.name == 'Admin' %}admin-theme{% elif role.name == 'Học vụ' %}academic-theme{% else %}finance-theme{% endif %}">
+                <div class="role-card-header">
+                    <div class="role-icon-box">{{ role.icon }}</div>
+                    <div>
+                        <h3 class="role-card-title">{{ role.title }}</h3>
+                        <span class="badge-role {{ role.badge_class }}">{{ role.name }}</span>
+                    </div>
+                </div>
+
+                <p class="role-card-desc">{{ role.description }}</p>
+
+                <div class="role-features-box">
+                    <div class="features-title">Phạm vi quyền hạn chính:</div>
+                    <ul class="features-list">
+                        {% for feature in role.features %}
+                            <li>{{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="role-members-box">
+                    <div class="members-title">
+                        <span>Thành viên đang gán vai trò:</span>
+                        <a href="{% url 'user_list' %}?role={{ role.name }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                            {{ role.users|length }} tài khoản
+                        </a>
+                    </div>
+                    <div class="member-pills-list">
+                        {% for member in role.users %}
+                            <span class="member-pill" title="{{ member.get_full_name|default:member.username }}">
+                                👤 {{ member.username }}
+                            </span>
+                        {% empty %}
+                            <span style="font-size: 12px; color: var(--muted); font-style: italic;">Chưa có tài khoản nào được gán vai trò này.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- PERMISSIONS MATRIX SECTION -->
+    <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--ink-heading); margin: 0 0 6px;">
+            Bảng ma trận phân quyền chi tiết các phân hệ
+        </h2>
+        <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Đối chiếu quyền hạn thao tác cụ thể giữa các vai trò trên toàn bộ các tính năng của trung tâm.
+        </p>
+    </div>
+
+    <div class="matrix-card">
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th style="width: 40%; text-align: left;">Phân hệ chức năng</th>
+                    <th style="width: 20%; color: #7c3aed;">Quản trị viên (Admin)</th>
+                    <th style="width: 20%; color: #16a34a;">Cán bộ Học vụ</th>
+                    <th style="width: 20%; color: #d97706;">Cán bộ Tài chính</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix %}
+                    <tr>
+                        <td>{{ row.module }}</td>
+                        <td>
+                            {% if row.admin %}
+                                <span class="matrix-check" title="Có quyền truy cập">✓</span>
+                            {% else %}
+                                <span class="matrix-cross">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.academic %}
+                                <span class="matrix-check" title="Có quyền truy cập">✓</span>
+                            {% else %}
+                                <span class="matrix-cross">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.finance %}
+                                <span class="matrix-check" title="Có quyền truy cập">✓</span>
+                            {% else %}
+                                <span class="matrix-cross">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

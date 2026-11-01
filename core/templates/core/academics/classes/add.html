@@ -1,0 +1,160 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Thêm lớp học | English Center{% endblock %}
+{% block breadcrumb %}Thêm lớp học{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/academics/classes/add.css' %}?v=20261101_v2">
+{% endblock %}
+
+{% block page_content %}
+<div class="student-form-page">
+    <!-- Header Bar with Back Button -->
+    <div class="form-page-header">
+        <a href="{% url 'class_list' %}" class="btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Quay lại danh sách</span>
+        </a>
+        <div class="header-intro">
+            <h1 class="page-title">Mở lớp học mới</h1>
+            <p class="page-desc">Tạo lớp học, liên kết khóa học và phân công giảng viên phụ trách</p>
+        </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="form-container-card">
+        <div class="card-hero-banner" style="background: linear-gradient(135deg, #1e3a8a, #4338ca);">
+            <div class="hero-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="12" rx="2"/>
+                    <path d="M7 20h10"/>
+                    <path d="M12 16v4"/>
+                </svg>
+            </div>
+            <div class="hero-text">
+                <h2>Thông tin lớp học</h2>
+                <p>Điền các trường thông tin đào tạo bắt buộc có dấu (<span class="req-star">*</span>)</p>
+            </div>
+        </div>
+
+        <form method="POST" class="student-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <div class="section-badge">1</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thông tin lớp & Khóa đào tạo</h3>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="name">Tên lớp học <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    value="{{ request.POST.name|default:'' }}"
+                                    placeholder="Ví dụ: IELTS-K24-EVENING"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="course">Khóa học đào tạo <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <select id="course" name="course" required>
+                                    <option value="">-- Chọn khóa học --</option>
+                                    {% for course in courses %}
+                                        <option value="{{ course.id }}"
+                                            {% if request.POST.course == course.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ course.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-field-group full-col">
+                            <label for="teacher">Giáo viên phụ trách</label>
+                            <div class="input-wrapper">
+                                <select id="teacher" name="teacher">
+                                    <option value="">-- Chưa phân công (có thể bổ sung sau) --</option>
+                                    {% for teacher in teachers %}
+                                        <option value="{{ teacher.id }}"
+                                            {% if request.POST.teacher == teacher.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ teacher.full_name }} — {{ teacher.specialization|default:"Giảng viên" }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-badge">2</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thời gian & Sĩ số</h3>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="start_date">Ngày bắt đầu <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="date"
+                                    id="start_date"
+                                    name="start_date"
+                                    value="{{ request.POST.start_date }}"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="end_date">Ngày kết thúc dự kiến</label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="date"
+                                    id="end_date"
+                                    name="end_date"
+                                    value="{{ request.POST.end_date }}"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-field-group full-col">
+                            <label for="max_students">Sĩ số tối đa <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="number"
+                                    id="max_students"
+                                    name="max_students"
+                                    min="1"
+                                    value="{{ request.POST.max_students|default:'20' }}"
+                                    required
+                                >
+                            </div>
+                            <span class="field-hint">Số lượng học viên tối đa được phép xếp vào lớp này</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions-bar">
+                <a href="{% url 'class_list' %}" class="btn-action-cancel">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn-action-submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Lưu lớp học</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

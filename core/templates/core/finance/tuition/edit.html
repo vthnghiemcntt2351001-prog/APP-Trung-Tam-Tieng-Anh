@@ -1,0 +1,85 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Cập nhật phiếu học phí{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/finance/tuition/edit.css' %}?v=20261018e">{% endblock %}
+{% block page_content %}
+<div class="container">
+
+    <h1>✏️ Cập nhật phiếu học phí</h1>
+    <p class="subtitle">Điều chỉnh khoản đã thu và thông tin thanh toán.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+
+        <div class="info">
+            <p><strong>Học viên:</strong> {{ tuition.student.full_name }}</p>
+            <p><strong>Lớp học:</strong> {{ tuition.english_class.name }}</p>
+            <p><strong>Khóa học:</strong> {{ tuition.english_class.course.name }}</p>
+            <p>
+                <strong>Tổng học phí:</strong>
+                {{ tuition.total_fee|floatformat:0 }} VNĐ
+            </p>
+            <p>
+                <strong>Còn phải đóng:</strong>
+                {{ tuition.remaining_amount|floatformat:0 }} VNĐ
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="paid_amount">Tổng số tiền đã đóng (VNĐ) *</label>
+                <input
+                    type="number"
+                    id="paid_amount"
+                    name="paid_amount"
+                    min="0"
+                    max="{{ tuition.total_fee }}"
+                    step="1"
+                    value="{{ tuition.paid_amount|floatformat:0 }}"
+                    required
+                >
+                <p class="hint">
+                    Nhập tổng số tiền đã thu từ học viên tính đến hiện tại,
+                    không phải chỉ riêng khoản thu mới nhất.
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_date">Ngày thanh toán gần nhất</label>
+                <input
+                    type="date"
+                    id="payment_date"
+                    name="payment_date"
+                    value="{{ tuition.payment_date|date:'Y-m-d' }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="note">Ghi chú</label>
+                <textarea
+                    id="note"
+                    name="note"
+                    placeholder="Nhập ghi chú nếu có..."
+                >{{ tuition.note }}</textarea>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="button primary">
+                    Lưu thay đổi
+                </button>
+
+                <a href="{% url 'tuition_list' %}" class="button secondary">
+                    Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

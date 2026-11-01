@@ -1,23 +1,141 @@
 
 # core/admin.py
 
-import hashlib
-import json
-
 from django.contrib import admin, messages
 
 from .models import (
     Student,
     Course,
     EnglishClass,
+    Enrollment,
+    ClassTransfer,
+    AssessmentPolicy,
+    AssessmentComponent,
+    AssessmentEvent,
+    AssessmentResult,
+    AssessmentResultAudit,
+    FinalResult,
     Teacher,
     Grade,
     Tuition,
+    PaymentTransaction,
     Certificate,
+    ClassSession,
+    Attendance,
 )
 
-from .blockchain.blockchain_service import issue_certificate
+from .blockchain.blockchain_service import issue_database_certificate
 
+
+class AssessmentComponentInline(admin.TabularInline):
+    model = AssessmentComponent
+    extra = 1
+
+
+@admin.register(AssessmentPolicy)
+class AssessmentPolicyAdmin(admin.ModelAdmin):
+    list_display = ("name", "course", "version", "scale", "status", "pass_score")
+    list_filter = ("status", "scale", "course")
+    search_fields = ("name", "course__name")
+    inlines = (AssessmentComponentInline,)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(AssessmentEvent)
+class AssessmentEventAdmin(admin.ModelAdmin):
+    list_display = ("name", "english_class", "component", "assessment_date")
+    list_filter = ("english_class__course", "english_class", "component")
+    search_fields = ("name", "english_class__name", "component__name")
+
+
+@admin.register(AssessmentResult)
+class AssessmentResultAdmin(admin.ModelAdmin):
+    list_display = ("enrollment", "event", "attempt_number", "score", "status", "graded_by", "graded_at")
+    list_filter = ("status", "event__english_class", "event__component")
+    search_fields = ("enrollment__student__full_name", "event__name")
+    readonly_fields = tuple(field.name for field in AssessmentResult._meta.fields)
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(FinalResult)
+class FinalResultAdmin(admin.ModelAdmin):
+    list_display = ("enrollment", "policy", "final_score", "status", "calculated_at", "confirmed_by")
+    list_filter = ("status", "policy", "enrollment__english_class")
+    search_fields = ("enrollment__student__full_name",)
+    readonly_fields = tuple(field.name for field in FinalResult._meta.fields)
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(AssessmentResultAudit)
+class AssessmentResultAuditAdmin(admin.ModelAdmin):
+    list_display = ("result", "old_score", "new_score", "changed_by", "changed_at")
+    readonly_fields = tuple(field.name for field in AssessmentResultAudit._meta.fields)
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ClassTransfer)
+class ClassTransferAdmin(admin.ModelAdmin):
+    list_display = (
+        "student",
+        "source_class",
+        "target_class",
+        "status",
+        "requested_at",
+        "transferred_at",
+        "requested_by",
+        "performed_by",
+    )
+    list_filter = ("status", "source_class__course", "target_class__course")
+    search_fields = (
+        "student__full_name",
+        "source_class__name",
+        "target_class__name",
+        "reason",
+    )
+    readonly_fields = tuple(
+        field.name for field in ClassTransfer._meta.fields
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 # =====================================================
 # QUAN LY HOC VIEN
@@ -136,6 +254,12 @@ class GradeAdmin(admin.ModelAdmin):
 # QUAN LY HOC PHI
 # =====================================================
 
+class PaymentTransactionInline(admin.TabularInline):
+    model = PaymentTransaction
+    extra = 0
+    readonly_fields = ("created_at",)
+
+
 @admin.register(Tuition)
 class TuitionAdmin(admin.ModelAdmin):
     list_display = (
@@ -144,18 +268,25 @@ class TuitionAdmin(admin.ModelAdmin):
         "english_class",
         "total_fee",
         "paid_amount",
+        "remaining_amount",
+        "payment_status",
         "payment_date",
     )
 
     list_filter = (
+        "english_class__course",
         "english_class",
         "payment_date",
     )
 
     search_fields = (
         "student__full_name",
+        "student__email",
         "english_class__name",
     )
+    readonly_fields = ("paid_amount", "created_at")
+    inlines = (PaymentTransactionInline,)
+
 
 
 # =====================================================
@@ -251,50 +382,7 @@ class CertificateAdmin(admin.ModelAdmin):
             return
 
         try:
-            # Tao du lieu chung chi de tinh SHA-256
-            certificate_data = {
-                "certificate_code": obj.certificate_code,
-                "student_id": obj.student_id,
-                "student_name": obj.student.full_name,
-                "class_id": obj.english_class_id,
-                "class_name": obj.english_class.name,
-                "issue_date": obj.issue_date.isoformat(),
-                "score": str(obj.score),
-                "classification": obj.classification or "",
-            }
-
-            # Chuan hoa JSON de tao ma bam on dinh
-            json_data = json.dumps(
-                certificate_data,
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            )
-
-            data_hash = "0x" + hashlib.sha256(
-                json_data.encode("utf-8")
-            ).hexdigest()
-
-            # Ghi ma chung chi va ma bam len Blockchain
-            result = issue_certificate(
-                obj.certificate_code,
-                data_hash,
-            )
-
-            # Cap nhat ket qua giao dich
-            obj.data_hash = result["data_hash"]
-            obj.transaction_hash = result["transaction_hash"]
-            obj.block_number = result["block_number"]
-            obj.blockchain_status = "issued"
-
-            obj.save(
-                update_fields=[
-                    "data_hash",
-                    "transaction_hash",
-                    "block_number",
-                    "blockchain_status",
-                ]
-            )
+            result = issue_database_certificate(obj)
 
             self.message_user(
                 request,
@@ -322,3 +410,66 @@ class CertificateAdmin(admin.ModelAdmin):
                 ),
                 level=messages.ERROR,
             )
+
+
+@admin.register(PaymentTransaction)
+class PaymentTransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        "receipt_code",
+        "tuition",
+        "amount",
+        "payment_method",
+        "payment_date",
+        "collected_by",
+        "created_at",
+    )
+    list_filter = ("payment_method", "payment_date")
+    search_fields = (
+        "receipt_code",
+        "tuition__student__full_name",
+        "tuition__student__email",
+    )
+
+
+class AttendanceInline(admin.TabularInline):
+    model = Attendance
+    extra = 0
+    fields = ("student", "status", "note", "recorded_by")
+    autocomplete_fields = ("student",)
+
+
+@admin.register(ClassSession)
+class ClassSessionAdmin(admin.ModelAdmin):
+    list_display = (
+        "english_class",
+        "session_number",
+        "session_date",
+        "room",
+        "teacher",
+        "topic",
+        "is_completed",
+    )
+    list_filter = ("english_class__course", "english_class", "is_completed", "session_date")
+    search_fields = ("english_class__name", "topic", "room", "teacher__full_name")
+    inlines = (AttendanceInline,)
+
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = (
+        "student",
+        "session",
+        "status",
+        "note",
+        "recorded_by",
+        "recorded_at",
+    )
+    list_filter = ("status", "session__english_class", "session__session_date")
+    search_fields = (
+        "student__full_name",
+        "student__phone",
+        "session__english_class__name",
+        "session__topic",
+    )
+
+

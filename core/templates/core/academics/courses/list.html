@@ -1,0 +1,262 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Quản lý khóa học | English Center{% endblock %}
+{% block breadcrumb %}Khóa học{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/students/list.css' %}?v=20261027_v4">
+<style>
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    .course-card-item {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .course-card-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        border-color: #cbd5e1;
+    }
+    .course-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .course-icon-badge {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+    }
+    .course-title-box {
+        display: grid;
+        gap: 2px;
+        flex: 1;
+    }
+    .course-tag {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+    .course-name-text {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 750;
+        color: #0f172a;
+        line-height: 1.35;
+    }
+    .course-desc-text {
+        margin: 0;
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .course-metrics-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        font-size: 12.5px;
+    }
+    .course-metric-col {
+        display: grid;
+        gap: 2px;
+    }
+    .course-metric-label {
+        color: #94a3b8;
+        font-size: 10.5px;
+        font-weight: 650;
+        text-transform: uppercase;
+    }
+    .course-metric-val {
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 13px;
+    }
+    .course-metric-val.tuition {
+        color: #16a34a;
+        font-weight: 750;
+    }
+    .course-card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="students-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-intro">
+            <div class="header-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0"/>
+                    <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0"/>
+                    <line x1="3" y1="6" x2="3" y2="19"/>
+                    <line x1="12" y1="6" x2="12" y2="19"/>
+                    <line x1="21" y1="6" x2="21" y2="19"/>
+                </svg>
+                <span>Chương trình đào tạo</span>
+            </div>
+            <h1 class="page-title">Quản lý khóa học</h1>
+            <p class="page-desc">Danh sách và thông tin chi tiết các chương trình đào tạo tại trung tâm</p>
+        </div>
+
+        <div class="header-actions">
+            {% if can_manage_academics %}
+            <a class="btn-primary-action" href="{% url 'course_add' %}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Thêm khóa học</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Toolbar: Search & Stats -->
+    <div class="toolbar-card">
+        <form method="get" class="search-form">
+            <div class="search-input-wrap">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ keyword|default:'' }}"
+                    placeholder="Tìm theo tên hoặc mô tả khóa học..."
+                    autocomplete="off"
+                >
+                {% if keyword %}
+                <a href="{% url 'course_list' %}" class="search-clear-btn" title="Xóa tìm kiếm">✕</a>
+                {% endif %}
+            </div>
+            <button class="btn-search" type="submit">
+                <span>Tìm kiếm</span>
+            </button>
+        </form>
+
+        <div class="stat-pill">
+            <span class="stat-dot"></span>
+            <span>Tổng cộng: <strong>{{ courses|length }}</strong> khóa học</span>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    {% if courses %}
+    <div class="courses-grid">
+        {% for course in courses %}
+        <article class="course-card-item">
+            <div class="course-card-top">
+                <div class="course-icon-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5a2.5 2.5 0 0 1 2.5 -2.5h11"/>
+                        <path d="M6 4h11a2 2 0 0 1 2 2v14"/>
+                        <path d="M6 4a2 2 0 0 0 -2 2v13.5"/>
+                    </svg>
+                </div>
+                <div class="course-title-box">
+                    <span class="course-tag">Khóa học #{{ course.id }}</span>
+                    <h3 class="course-name-text">{{ course.name }}</h3>
+                </div>
+            </div>
+
+            <p class="course-desc-text">
+                {{ course.description|default:"Chương trình chuẩn theo lộ trình quốc tế của trung tâm." }}
+            </p>
+
+            <div class="course-metrics-row">
+                <div class="course-metric-col">
+                    <span class="course-metric-label">Học phí</span>
+                    <span class="course-metric-val tuition">{{ course.tuition|default:"0" }} đ</span>
+                </div>
+                <div class="course-metric-col" style="text-align: right;">
+                    <span class="course-metric-label">Thời lượng</span>
+                    <span class="course-metric-val">{{ course.duration|default:"—" }} tháng</span>
+                </div>
+            </div>
+
+            {% if can_manage_academics or is_admin %}
+            <div class="course-card-actions">
+                {% if can_manage_academics %}
+                <a class="action-btn edit" href="{% url 'course_edit' course.id %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                        <path d="M13.5 6.5l4 4" />
+                    </svg>
+                    <span>Sửa</span>
+                </a>
+                {% endif %}
+
+                {% if is_admin %}
+                <a class="action-btn delete" href="{% url 'course_delete' course.id %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="7" x2="20" y2="7" />
+                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                    </svg>
+                    <span>Xóa</span>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% include "core/partials/pagination.html" %}
+    {% else %}
+    <div class="table-card">
+        <div class="empty-cell" style="padding: 60px 20px;">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0"/>
+                        <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0"/>
+                        <line x1="3" y1="6" x2="3" y2="19"/>
+                        <line x1="12" y1="6" x2="12" y2="19"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <h3>Không tìm thấy khóa học nào</h3>
+                <p>{% if keyword %}Không có khóa học nào khớp với từ khóa "<strong>{{ keyword }}</strong>".{% else %}Hiện tại trung tâm chưa có khóa học nào.{% endif %}</p>
+                {% if can_manage_academics %}
+                <a href="{% url 'course_add' %}" class="btn-primary-action" style="margin-top: 14px;">+ Thêm khóa học mới</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

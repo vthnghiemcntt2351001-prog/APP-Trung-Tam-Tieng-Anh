@@ -1,0 +1,430 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Tạo quy chế đánh giá mới | English Center{% endblock %}
+{% block breadcrumb %}Tạo quy chế đánh giá{% endblock %}
+
+{% block extra_head %}
+<style>
+/* High-specificity override for input paddings */
+.app-content .input-wrapper input,
+.app-content .input-wrapper select {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    height: 42px !important;
+}
+.app-content .components-table input,
+.app-content .components-table select {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    height: 38px !important;
+}
+</style>
+{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/assessments/policy_form.css' %}?v=20261027_v1">
+{% endblock %}
+
+{% block page_content %}
+<div class="student-form-page">
+    <!-- Header Bar with Back Button -->
+    <div class="form-page-header">
+        <a href="{% url 'assessment_policy_list' %}" class="btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Quay lại danh sách quy chế</span>
+        </a>
+        <div class="header-intro">
+            <h1 class="page-title">Tạo quy chế đánh giá mới</h1>
+            <p class="page-desc">Thiết lập cấu trúc điểm, tỷ trọng các bài thi và tiêu chí xếp loại cho khóa học</p>
+        </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="form-container-card">
+        <div class="card-hero-banner">
+            <div class="hero-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </div>
+            <div class="hero-text">
+                <h2>Cấu hình khung quy chế đào tạo</h2>
+                <p>Quy chế đã kích hoạt sẽ không thể thay đổi để đảm bảo tính toàn vẹn của kết quả thi học viên</p>
+            </div>
+        </div>
+
+        <form method="POST" class="student-form" id="policyCreateForm">
+            {% csrf_token %}
+
+            <!-- Section 1: Thông tin cơ bản -->
+            <div class="form-section">
+                <div class="section-badge">1</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thông tin quy chế cơ bản</h3>
+                    <p class="section-desc">Gán quy chế cho khóa học tương ứng và đặt tên phiên bản nhận diện</p>
+
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="course">Khóa học áp dụng <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <select id="course" name="course" required>
+                                    <option value="">-- Chọn khóa học --</option>
+                                    {% for c in courses %}
+                                        <option value="{{ c.id }}" {% if form_data.course == c.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ c.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="name">Tên quy chế đánh giá <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input id="name" type="text" name="name" maxlength="150" required
+                                       placeholder="VD: Quy chế đánh giá Chuẩn IELTS Foundation"
+                                       value="{{ form_data.name|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="version">Phiên bản quy chế <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input id="version" type="number" name="version" min="1" required
+                                       value="{{ form_data.version|default:'1' }}">
+                            </div>
+                            <span class="input-help-text">Tăng phiên bản (v2, v3) khi cập nhật quy chế cho khóa học</span>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="scale">Thang đánh giá <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <select id="scale" name="scale" required>
+                                    <option value="numeric" {% if form_data.scale == "numeric" or not form_data.scale %}selected{% endif %}>Điểm số (Thang 10, 100)</option>
+                                    <option value="band" {% if form_data.scale == "band" %}selected{% endif %}>Band điểm (0.0 – 9.0)</option>
+                                    <option value="pass_fail" {% if form_data.scale == "pass_fail" %}selected{% endif %}>Đạt / Chưa đạt</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Tiêu chí và thang điểm -->
+            <div class="form-section">
+                <div class="section-badge">2</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Tiêu chí và thang điểm</h3>
+                    <p class="section-desc">Cấu hình giới hạn điểm, điểm sàn đạt tiêu chuẩn và thời gian hiệu lực</p>
+
+                    <div class="form-grid-3">
+                        <div class="input-field-group">
+                            <label for="max_score">Điểm tối đa quy chế <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input id="max_score" type="number" name="max_score" min="0.01" step="0.01" required
+                                       value="{{ form_data.max_score|default:'10' }}">
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="pass_score">Điểm tối thiểu để đạt</label>
+                            <div class="input-wrapper">
+                                <input id="pass_score" type="number" name="pass_score" min="0" step="0.01"
+                                       placeholder="VD: 5.0"
+                                       value="{{ form_data.pass_score|default:'5.0' }}">
+                            </div>
+                            <span class="input-help-text">Bắt buộc khi kích hoạt (trừ Đạt/Chưa đạt)</span>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="rounding_precision">Làm tròn số lẻ <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <input id="rounding_precision" type="number" name="rounding_precision" min="0" max="4" required
+                                       value="{{ form_data.rounding_precision|default:'1' }}">
+                            </div>
+                            <span class="input-help-text">0: làm tròn nguyên, 1: 0.1, 2: 0.01</span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="effective_from">Ngày bắt đầu áp dụng</label>
+                            <div class="input-wrapper">
+                                <input id="effective_from" type="date" name="effective_from"
+                                       value="{{ form_data.effective_from|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="effective_to">Ngày kết thúc áp dụng</label>
+                            <div class="input-wrapper">
+                                <input id="effective_to" type="date" name="effective_to"
+                                       value="{{ form_data.effective_to|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Cấu hình thành phần và tỷ trọng -->
+            <div class="form-section">
+                <div class="section-badge">3</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Cấu hình thành phần và tỷ trọng (%)</h3>
+                    <p class="section-desc">Khai báo các bài thi, bài tập và tỷ lệ phần trăm đóng góp vào điểm tổng kết</p>
+
+                    <!-- Live Total Weight Tracker Card -->
+                    <div class="weight-tracker-card">
+                        <div class="weight-tracker-header">
+                            <div class="tracker-title-box">
+                                <span class="tracker-title">Tổng tỷ trọng hiện tại:</span>
+                                <span class="tracker-status-pill is-under" id="trackerStatusPill">
+                                    <span id="totalWeightDisplay">0%</span> / 100%
+                                </span>
+                            </div>
+                            <div id="trackerValidationMsg" style="font-size: 12.5px; font-weight: 600; color: #d97706;">
+                                Cần thêm 100% để đủ điều kiện kích hoạt
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar is-under" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Presets Selector -->
+                    <div class="presets-box">
+                        <span class="presets-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            Gợi ý mẫu:
+                        </span>
+                        <button type="button" class="btn-preset" onclick="applyPreset('four_skills')">
+                            4 Kỹ năng (Nghe 25%, Nói 25%, Đọc 25%, Viết 25%)
+                        </button>
+                        <button type="button" class="btn-preset" onclick="applyPreset('standard')">
+                            Tiêu chuẩn (Chuyên cần 10%, Giữa kỳ 30%, Cuối kỳ 60%)
+                        </button>
+                        <button type="button" class="btn-preset" onclick="applyPreset('continuous')">
+                            Quá trình (Chuyên cần 15%, Bài tập 15%, Giữa kỳ 30%, Cuối kỳ 40%)
+                        </button>
+                    </div>
+
+                    <!-- Components Table -->
+                    <div class="components-table-wrap">
+                        <table class="components-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 170px;">Tên thành phần <span class="req-star">*</span></th>
+                                    <th style="width: 120px;">Tỷ trọng (%) <span class="req-star">*</span></th>
+                                    <th style="width: 110px;">Điểm tối đa</th>
+                                    <th style="width: 110px;">Điểm sàn</th>
+                                    <th style="min-width: 160px;">Cách tính lần thi</th>
+                                    <th style="width: 80px; text-align: center;">Bắt buộc</th>
+                                    <th style="width: 50px; text-align: center;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="component-rows">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="button" id="add-component" class="btn-add-component">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>Thêm thành phần đánh giá</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section 4: Kích hoạt & Hoàn tất -->
+            <div class="form-section">
+                <div class="section-badge">4</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Kích hoạt & Hoàn tất</h3>
+
+                    <label class="activate-card">
+                        <input type="checkbox" name="activate" value="yes" id="activateCheckbox">
+                        <div class="activate-text">
+                            <strong>Kích hoạt quy chế ngay sau khi lưu</strong>
+                            <span>Quy chế sẽ sẵn sàng áp dụng ngay cho các lớp học. (Yêu cầu tổng tỷ trọng phải bằng đúng 100%)</span>
+                        </div>
+                    </label>
+
+                    <div class="form-actions-bar">
+                        <a href="{% url 'assessment_policy_list' %}" class="btn-cancel-secondary">
+                            <span>Hủy bỏ</span>
+                        </a>
+                        <button type="submit" class="btn-submit-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Lưu quy chế đánh giá</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(() => {
+    const body = document.getElementById("component-rows");
+    const totalWeightDisplay = document.getElementById("totalWeightDisplay");
+    const progressBar = document.getElementById("progressBar");
+    const trackerStatusPill = document.getElementById("trackerStatusPill");
+    const trackerValidationMsg = document.getElementById("trackerValidationMsg");
+    const activateCheckbox = document.getElementById("activateCheckbox");
+
+    function renumber() {
+        [...body.rows].forEach((row, index) => {
+            const chk = row.querySelector("input[name='component_required']");
+            if (chk) chk.value = String(index);
+        });
+        updateWeightTotal();
+    }
+
+    function updateWeightTotal() {
+        let total = 0;
+        const weights = body.querySelectorAll("input[name='component_weight']");
+        weights.forEach(input => {
+            const val = parseFloat(input.value) || 0;
+            total += val;
+        });
+
+        total = Math.round(total * 100) / 100;
+        totalWeightDisplay.textContent = total + "%";
+
+        const percentClamped = Math.min(Math.max(total, 0), 100);
+        progressBar.style.width = percentClamped + "%";
+
+        progressBar.classList.remove("is-valid", "is-under", "is-over");
+        trackerStatusPill.classList.remove("is-valid", "is-under", "is-over");
+
+        if (total === 100) {
+            progressBar.classList.add("is-valid");
+            trackerStatusPill.classList.add("is-valid");
+            trackerValidationMsg.style.color = "#059669";
+            trackerValidationMsg.textContent = "✓ Tổng tỷ trọng chính xác 100% (Đủ điều kiện kích hoạt)";
+        } else if (total < 100) {
+            progressBar.classList.add("is-under");
+            trackerStatusPill.classList.add("is-under");
+            const diff = Math.round((100 - total) * 100) / 100;
+            trackerValidationMsg.style.color = "#d97706";
+            trackerValidationMsg.textContent = `Thiếu ${diff}% để đạt đủ 100%`;
+        } else {
+            progressBar.classList.add("is-over");
+            trackerStatusPill.classList.add("is-over");
+            const diff = Math.round((total - 100) * 100) / 100;
+            trackerValidationMsg.style.color = "#dc2626";
+            trackerValidationMsg.textContent = `Vượt quá 100% (Đang dư ${diff}%)`;
+        }
+    }
+
+    function createRow(name = "", weight = 0, maxScore = 10, minimum = "", aggregation = "average", required = true) {
+        const row = body.insertRow();
+        row.innerHTML = `
+            <td>
+                <input name="component_name" type="text" maxlength="120" placeholder="VD: Giữa kỳ" value="${name}" required>
+            </td>
+            <td>
+                <input name="component_weight" type="number" min="0.01" max="100" step="0.01" value="${weight}" required>
+            </td>
+            <td>
+                <input name="component_max_score" type="number" min="0.01" step="0.01" value="${maxScore}" required>
+            </td>
+            <td>
+                <input name="component_minimum" type="number" min="0" step="0.01" placeholder="—" value="${minimum}">
+            </td>
+            <td>
+                <select name="component_aggregation">
+                    <option value="average" ${aggregation === 'average' ? 'selected' : ''}>Trung bình các lần</option>
+                    <option value="highest" ${aggregation === 'highest' ? 'selected' : ''}>Điểm cao nhất</option>
+                    <option value="latest" ${aggregation === 'latest' ? 'selected' : ''}>Điểm gần nhất</option>
+                </select>
+            </td>
+            <td style="text-align: center;">
+                <input name="component_required" type="checkbox" ${required ? 'checked' : ''}>
+            </td>
+            <td style="text-align: center;">
+                <button type="button" class="btn-remove-row" title="Xóa dòng">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </td>
+        `;
+
+        row.querySelector(".btn-remove-row").addEventListener("click", () => {
+            if (body.rows.length <= 1) {
+                alert("Quy chế cần có ít nhất một thành phần đánh giá.");
+                return;
+            }
+            row.remove();
+            renumber();
+        });
+
+        row.querySelector("input[name='component_weight']").addEventListener("input", updateWeightTotal);
+
+        renumber();
+    }
+
+    document.getElementById("add-component").addEventListener("click", () => {
+        createRow();
+    });
+
+    // Preset configurations
+    window.applyPreset = function(type) {
+        body.innerHTML = "";
+        if (type === 'four_skills') {
+            createRow("Kỹ năng Nghe (Listening)", 25, 10, 4.0, "average", true);
+            createRow("Kỹ năng Nói (Speaking)", 25, 10, 4.0, "average", true);
+            createRow("Kỹ năng Đọc (Reading)", 25, 10, 4.0, "average", true);
+            createRow("Kỹ năng Viết (Writing)", 25, 10, 4.0, "average", true);
+        } else if (type === 'standard') {
+            createRow("Chuyên cần & Thái độ", 10, 10, "", "average", true);
+            createRow("Kiểm tra Giữa kỳ", 30, 10, 4.0, "highest", true);
+            createRow("Thi Cuối khóa", 60, 10, 5.0, "latest", true);
+        } else if (type === 'continuous') {
+            createRow("Chuyên cần", 15, 10, "", "average", true);
+            createRow("Bài tập trên lớp / Quá trình", 15, 10, "", "average", true);
+            createRow("Kiểm tra Giữa kỳ", 30, 10, 4.0, "highest", true);
+            createRow("Thi Cuối khóa", 40, 10, 5.0, "latest", true);
+        }
+        updateWeightTotal();
+    };
+
+    // Initial state: Start with standard preset or empty row
+    applyPreset('four_skills');
+
+    // Validation on submit
+    document.getElementById("policyCreateForm").addEventListener("submit", function(e) {
+        let total = 0;
+        const weights = body.querySelectorAll("input[name='component_weight']");
+        weights.forEach(input => {
+            total += parseFloat(input.value) || 0;
+        });
+        total = Math.round(total * 100) / 100;
+
+        if (activateCheckbox.checked && total !== 100) {
+            e.preventDefault();
+            alert("Bạn đang chọn kích hoạt ngay nhưng tổng tỷ trọng chưa đạt đúng 100% (Hiện tại là " + total + "%). Vui lòng điều chỉnh lại tỷ trọng.");
+        }
+    });
+})();
+</script>
+{% endblock %}

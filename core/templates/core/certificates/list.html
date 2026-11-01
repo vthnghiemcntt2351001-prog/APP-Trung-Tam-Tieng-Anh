@@ -1,0 +1,400 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Quản lý Chứng chỉ & Blockchain | English Center{% endblock %}
+{% block breadcrumb %}Chứng chỉ & Blockchain{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/certificates/list.css' %}?v=20261027_v7">
+{% endblock %}
+
+{% block page_content %}
+<div class="certificates-page">
+
+    <!-- 1. Top Action Bar -->
+    <div class="cert-header-bar">
+        <div class="cert-title-box">
+            <h1 class="cert-page-title">
+                Quản lý Chứng chỉ & Blockchain
+                <span class="chain-pill">Smart Contract</span>
+            </h1>
+            <p class="cert-page-desc">Theo dõi chứng chỉ tốt nghiệp đã cấp, phát hành và xác thực tính toàn vẹn trên Blockchain</p>
+        </div>
+        <div class="cert-actions-group">
+            <a href="{% url 'certificate_verify' %}" class="btn-verify-action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+                <span>Trang xác minh chứng chỉ</span>
+            </a>
+            <a href="{% url 'certificate_add' %}" class="btn-add-cert">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span>Cấp chứng chỉ mới</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. Blockchain Network Banner -->
+    {% if not blockchain_available %}
+    <div class="blockchain-banner">
+        <div class="bc-banner-left">
+            <div class="bc-banner-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <div class="bc-banner-body">
+                <strong>Mạng Blockchain (Ganache RPC) hiện đang ngắt kết nối</strong>
+                <span>Hệ thống vẫn quản lý chứng chỉ nội bộ bình thường. Thao tác phát hành và xác thực trên sổ cái sẽ tự động kích hoạt khi Ganache được bật.</span>
+            </div>
+        </div>
+        <div class="bc-status-pill">
+            <span class="bc-pulse-dot"></span>
+            <span>Mạng ngoại tuyến</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="blockchain-banner is-live">
+        <div class="bc-banner-left">
+            <div class="bc-banner-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
+            <div class="bc-banner-body">
+                <strong>Mạng Blockchain (Ganache) đang hoạt động ổn định</strong>
+                <span>Sổ cái Smart Contract sẵn sàng ghi nhận và đối chiếu chứng chỉ tốt nghiệp trong thời gian thực.</span>
+            </div>
+        </div>
+        <div class="bc-status-pill">
+            <span class="bc-pulse-dot"></span>
+            <span>Node kết nối tốt</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 3. Stat Cards Grid -->
+    <div class="stats-cards-grid">
+        <div class="stat-item-card">
+            <div class="stat-icon-wrap purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="6"/>
+                    <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Tổng số chứng chỉ</span>
+                <span class="stat-num">{{ total_count|default:"0" }}</span>
+            </div>
+        </div>
+
+        <div class="stat-item-card">
+            <div class="stat-icon-wrap green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Đã ghi Blockchain</span>
+                <span class="stat-num">{{ issued_count|default:"0" }}</span>
+            </div>
+        </div>
+
+        <div class="stat-item-card">
+            <div class="stat-icon-wrap amber">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Chờ cấp phát</span>
+                <span class="stat-num">{{ pending_count|default:"0" }}</span>
+            </div>
+        </div>
+
+        <div class="stat-item-card">
+            <div class="stat-icon-wrap blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Tốt nghiệp Xuất sắc/Giỏi</span>
+                <span class="stat-num">{{ distinction_count|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Filter & Search Bar -->
+    <div class="filter-container-card">
+        <form method="get" class="filter-form-grid">
+            <div class="search-field-box">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" name="q" value="{{ keyword }}" placeholder="Tìm theo mã chứng chỉ, tên học viên, lớp học...">
+            </div>
+
+            <div class="select-filter-box">
+                <select name="course_id">
+                    <option value="">-- Tất cả khóa học --</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" {% if selected_course_id == course.id|stringformat:"s" %}selected{% endif %}>
+                        {{ course.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="select-filter-box">
+                <select name="status">
+                    <option value="all" {% if selected_status == 'all' or not selected_status %}selected{% endif %}>Tất cả trạng thái</option>
+                    <option value="issued" {% if selected_status == 'issued' %}selected{% endif %}>Đã ghi Blockchain</option>
+                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Chờ cấp (Pending)</option>
+                    <option value="failed" {% if selected_status == 'failed' %}selected{% endif %}>Ghi thất bại</option>
+                </select>
+            </div>
+
+            <div class="select-filter-box" style="min-width: 150px;">
+                <select name="classification">
+                    <option value="all" {% if selected_classification == 'all' or not selected_classification %}selected{% endif %}>Tất cả xếp loại</option>
+                    <option value="Xuất sắc" {% if selected_classification == 'Xuất sắc' %}selected{% endif %}>Xuất sắc</option>
+                    <option value="Giỏi" {% if selected_classification == 'Giỏi' %}selected{% endif %}>Giỏi</option>
+                    <option value="Khá" {% if selected_classification == 'Khá' %}selected{% endif %}>Khá</option>
+                    <option value="Trung bình" {% if selected_classification == 'Trung bình' %}selected{% endif %}>Trung bình</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-filter-action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span>Lọc</span>
+            </button>
+
+            {% if keyword or selected_status != 'all' or selected_course_id or selected_classification != 'all' %}
+            <a href="{% url 'certificate_list' %}" class="btn-filter-reset">
+                <span>Xóa bộ lọc</span>
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- 5. Data Table -->
+    <div class="cert-table-container">
+        <div class="table-responsive">
+            <table class="saas-table">
+                <thead>
+                    <tr>
+                        <th style="width: 14%;">Mã chứng chỉ</th>
+                        <th style="width: 16%;">Học viên</th>
+                        <th style="width: 20%;">Lớp & Khóa học</th>
+                        <th style="width: 8%;">Ngày cấp</th>
+                        <th style="width: 11%;">Điểm & Xếp loại</th>
+                        <th style="width: 13%;">Trạng thái</th>
+                        <th style="width: 5%;">Tx Hash</th>
+                        <th style="width: 13%; text-align: right;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr>
+                        <!-- Mã chứng chỉ -->
+                        <td>
+                            <div class="cert-code-pill">
+                                <span>{{ cert.certificate_code }}</span>
+                                <button type="button" class="btn-copy-code" onclick="copyToClipboard('{{ cert.certificate_code }}', this)" title="Sao chép mã">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Học viên -->
+                        <td>
+                            <div class="student-cell">
+                                <div class="student-avatar">
+                                    {{ cert.student.full_name|slice:":1"|upper }}
+                                </div>
+                                <div class="student-info">
+                                    <span class="student-name">{{ cert.student.full_name }}</span>
+                                    <span class="student-code">{{ cert.student.student_code }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Lớp & Khóa học -->
+                        <td>
+                            <div class="class-info-cell">
+                                <span class="class-title">{{ cert.english_class.name }}</span>
+                                <span class="course-subtitle">{{ cert.english_class.course.name }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Ngày cấp -->
+                        <td style="color: #475569; font-weight: 500;">
+                            {{ cert.issue_date|date:"d/m/Y" }}
+                        </td>
+
+                        <!-- Điểm & Xếp loại -->
+                        <td>
+                            <div class="score-box">
+                                <span class="score-badge">{{ cert.score|floatformat:2 }}</span>
+                                {% if cert.classification %}
+                                <span class="rank-pill {{ cert.classification|slugify }}">
+                                    {{ cert.classification }}
+                                </span>
+                                {% else %}
+                                <span class="rank-pill default">--</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Trạng thái Blockchain -->
+                        <td>
+                            {% if cert.blockchain_status == "issued" %}
+                            <span class="status-badge issued">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <span>Đã ghi Blockchain</span>
+                            </span>
+                            {% elif cert.blockchain_status == "failed" %}
+                            <span class="status-badge failed">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="15" y1="9" x2="9" y2="15"/>
+                                    <line x1="9" y1="9" x2="15" y2="15"/>
+                                </svg>
+                                <span>Ghi thất bại</span>
+                            </span>
+                            {% else %}
+                            <span class="status-badge pending">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <span>Chờ cấp (Pending)</span>
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Tx Hash & Block -->
+                        <td>
+                            {% if cert.transaction_hash %}
+                            <div class="tx-hash-cell">
+                                <span class="tx-hash-pill" title="{{ cert.transaction_hash }}">
+                                    {{ cert.transaction_hash }}
+                                </span>
+                                <button type="button" class="btn-copy-code" onclick="copyToClipboard('{{ cert.transaction_hash }}', this)" title="Sao chép Tx Hash">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                    </svg>
+                                </button>
+                                {% if cert.block_number %}
+                                <span class="tx-block-tag">#{{ cert.block_number }}</span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span style="color: #94a3b8; font-size: 13px;">--</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Thao tác -->
+                        <td style="text-align: right;">
+                            <div class="row-actions-wrap">
+                                {% if is_admin and cert.blockchain_status != "issued" %}
+                                <form method="post" action="{% url 'certificate_issue' cert.id %}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn phát hành chứng chỉ này lên Blockchain?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-issue-chain" title="Phát hành lên Smart Contract">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m22 2-7 20-4-9-9-4Z"/>
+                                            <path d="M22 2 11 13"/>
+                                        </svg>
+                                        <span>Phát hành</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <a href="{% url 'certificate_verify' %}?code={{ cert.certificate_code }}" class="btn-row-verify" title="Kiểm tra đối chiếu với Smart Contract">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                        <path d="m9 12 2 2 4-4"/>
+                                    </svg>
+                                    <span>Xác minh</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="cert-empty-state">
+                                <div class="empty-icon-wrap">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="8" r="6"/>
+                                        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                                    </svg>
+                                </div>
+                                <h3 class="empty-title">Không tìm thấy chứng chỉ phù hợp</h3>
+                                <p class="empty-desc">
+                                    {% if keyword or selected_status != 'all' or selected_course_id or selected_classification != 'all' %}
+                                    Không có dữ liệu trùng khớp với bộ lọc hiện tại. Thử xóa lọc hoặc điều chỉnh từ khóa tìm kiếm.
+                                    {% else %}
+                                    Hiện chưa có chứng chỉ tốt nghiệp nào được cấp trong hệ thống.
+                                    {% endif %}
+                                </p>
+                                {% if keyword or selected_status != 'all' or selected_course_id or selected_classification != 'all' %}
+                                <a href="{% url 'certificate_list' %}" class="btn-filter-reset" style="margin-top: 6px;">
+                                    <span>Đặt lại bộ lọc</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "core/partials/pagination.html" %}
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text, btn) {
+    if (!navigator.clipboard) {
+        const input = document.createElement('textarea');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+    } else {
+        navigator.clipboard.writeText(text);
+    }
+
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+    `;
+    setTimeout(() => {
+        btn.innerHTML = origHtml;
+    }, 1500);
+}
+</script>
+{% endblock %}

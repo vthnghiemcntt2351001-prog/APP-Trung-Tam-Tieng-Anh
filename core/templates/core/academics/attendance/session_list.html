@@ -1,0 +1,139 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Điểm danh & Buổi học - {{ english_class.name }} | EnglishCenter{% endblock %}
+
+{% block page_content %}
+<div class="page-container" style="max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Breadcrumb & Header -->
+    <div style="margin-bottom: 1.5rem;">
+        <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            <a href="{% url 'home' %}" style="color: var(--primary);">Trang chủ</a> / 
+            <a href="{% url 'class_list' %}" style="color: var(--primary);">Lớp học</a> / 
+            <a href="{% url 'class_detail' english_class.id %}" style="color: var(--primary);">{{ english_class.name }}</a> / 
+            <span>Điểm danh & Buổi học</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin: 0;">
+                    Lớp {{ english_class.name }}
+                </h1>
+                <p style="color: var(--text-muted); margin: 0.25rem 0 0 0; font-size: 0.95rem;">
+                    Khóa học: <strong>{{ english_class.course.name }}</strong> &bull; Giáo viên: <strong>{{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa phân công" }}</strong>
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <a href="{% url 'class_attendance_report' english_class.id %}" class="btn" style="background: var(--surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    📊 Báo cáo chuyên cần
+                </a>
+                <a href="{% url 'session_add' english_class.id %}" class="btn btn-primary" style="background: var(--primary); color: #fff; padding: 0.6rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">
+                    ➕ Thêm buổi học mới
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Tổng số buổi học</div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-main); margin-top: 0.25rem;">{{ total_sessions }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Lịch học của lớp</div>
+        </div>
+        <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Buổi đã điểm danh</div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--success, #16a34a); margin-top: 0.25rem;">{{ completed_sessions }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Đã ghi nhận dữ liệu chuyên cần</div>
+        </div>
+        <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Sĩ số học viên</div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--primary); margin-top: 0.25rem;">{{ active_students_count }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Học viên chính thức của lớp</div>
+        </div>
+    </div>
+
+    <!-- Sessions Table Card -->
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0;">Danh sách các buổi học</h2>
+            <span style="font-size: 0.875rem; color: var(--text-muted);">{{ total_sessions }} buổi</span>
+        </div>
+
+        {% if sessions %}
+        <div class="table-responsive" style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: var(--bg-secondary, rgba(0,0,0,0.02)); border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">
+                        <th style="padding: 0.85rem 1.25rem;">Buổi</th>
+                        <th style="padding: 0.85rem 1rem;">Ngày học</th>
+                        <th style="padding: 0.85rem 1rem;">Thời gian & Phòng</th>
+                        <th style="padding: 0.85rem 1rem;">Chủ đề bài học</th>
+                        <th style="padding: 0.85rem 1rem;">Giáo viên</th>
+                        <th style="padding: 0.85rem 1rem;">Tình trạng điểm danh</th>
+                        <th style="padding: 0.85rem 1.25rem; text-align: right;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sessions %}
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;">
+                        <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--primary);">
+                            #{{ s.session_number }}
+                        </td>
+                        <td style="padding: 1rem 1rem; color: var(--text-main); font-weight: 500;">
+                            {{ s.session_date|date:"d/m/Y" }}
+                        </td>
+                        <td style="padding: 1rem 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                            {% if s.start_time %}
+                                {{ s.start_time|time:"H:i" }}{% if s.end_time %} - {{ s.end_time|time:"H:i" }}{% endif %}
+                            {% else %}
+                                <em>Chưa xếp giờ</em>
+                            {% endif %}
+                            {% if s.room %}
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Phòng: <strong>{{ s.room }}</strong></div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem 1rem; color: var(--text-main);">
+                            <strong>{{ s.topic|default:"Chưa có chủ đề" }}</strong>
+                            {% if s.notes %}
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">{{ s.notes|truncatechars:50 }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem 1rem; color: var(--text-main); font-size: 0.9rem;">
+                            {{ s.teacher.full_name|default:"Theo lớp" }}
+                        </td>
+                        <td style="padding: 1rem 1rem;">
+                            {% if s.is_completed %}
+                                <span style="display: inline-block; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: rgba(22,163,74,0.12); color: #16a34a;">
+                                    ✓ Đã điểm danh
+                                </span>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                    Có mặt: <strong>{{ s.present_count }}</strong> &bull; Muộn: <strong>{{ s.late_count }}</strong> &bull; Vắng: <strong>{{ s.absent_count }}</strong>
+                                </div>
+                            {% else %}
+                                <span style="display: inline-block; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: rgba(234,179,8,0.15); color: #b45309;">
+                                    ⏳ Chưa điểm danh
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem 1.25rem; text-align: right;">
+                            <a href="{% url 'session_attendance' s.id %}" class="btn" style="background: {% if s.is_completed %}var(--surface){% else %}var(--primary){% endif %}; color: {% if s.is_completed %}var(--primary){% else %}#fff{% endif %}; border: 1px solid var(--primary); padding: 0.45rem 0.9rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                {% if s.is_completed %}✏️ Sửa điểm danh{% else %}📋 Điểm danh ngay{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding: 3rem 1.5rem; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📅</div>
+            <h3 style="color: var(--text-main); font-size: 1.1rem; margin-bottom: 0.5rem;">Chưa có buổi học nào được tạo</h3>
+            <p style="font-size: 0.9rem; margin-bottom: 1.25rem;">Hãy thêm các buổi học trong lộ trình đào tạo của lớp để bắt đầu điểm danh chuyên cần.</p>
+            <a href="{% url 'session_add' english_class.id %}" class="btn btn-primary" style="background: var(--primary); color: #fff; padding: 0.6rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                ➕ Thêm buổi học đầu tiên
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Điểm danh Buổi {{ session.session_number }} - {{ english_class.name }} | EnglishCenter{% endblock %}
+
+{% block page_content %}
+<div class="page-container" style="max-width: 1100px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        <a href="{% url 'home' %}" style="color: var(--primary);">Trang chủ</a> / 
+        <a href="{% url 'class_list' %}" style="color: var(--primary);">Lớp học</a> / 
+        <a href="{% url 'session_list' english_class.id %}" style="color: var(--primary);">Lớp {{ english_class.name }}</a> / 
+        <span>Điểm danh Buổi #{{ session.session_number }}</span>
+    </div>
+
+    <!-- Header Card -->
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+                    <span style="background: var(--primary); color: #fff; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem;">
+                        Buổi #{{ session.session_number }}
+                    </span>
+                    <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: 0;">
+                        Lớp {{ english_class.name }}
+                    </h1>
+                </div>
+                <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">
+                    📅 Ngày: <strong>{{ session.session_date|date:"d/m/Y" }}</strong>
+                    {% if session.start_time %}&bull; ⏰ <strong>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</strong>{% endif %}
+                    {% if session.room %}&bull; 📍 Phòng: <strong>{{ session.room }}</strong>{% endif %}
+                    &bull; 👨‍🏫 Giáo viên: <strong>{{ session.teacher.full_name|default:english_class.teacher.full_name|default:"Chưa gán" }}</strong>
+                </div>
+                {% if session.topic %}
+                <div style="color: var(--text-main); font-size: 0.95rem; margin-top: 0.5rem; font-weight: 500;">
+                    📖 Chủ đề: {{ session.topic }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Action Counters -->
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <button type="button" id="btnMarkAllPresent" class="btn" style="background: rgba(22,163,74,0.12); border: 1px solid #16a34a; color: #16a34a; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    ✓ Tất cả có mặt
+                </button>
+                <div style="display: flex; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; padding: 0.4rem 0.75rem; background: var(--bg-secondary, rgba(0,0,0,0.03)); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <span style="color: #16a34a;">🟢 Có mặt: <strong id="countPresent">0</strong></span>
+                    <span style="color: #0284c7;">&bull; 🔵 Muộn: <strong id="countLate">0</strong></span>
+                    <span style="color: #d97706;">&bull; 🟡 Phép: <strong id="countExcused">0</strong></span>
+                    <span style="color: #dc2626;">&bull; 🔴 K.phép: <strong id="countUnexcused">0</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Form -->
+    <form method="POST" id="attendanceForm">
+        {% csrf_token %}
+
+        <div class="card" style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05)); margin-bottom: 2rem;">
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="background: var(--bg-secondary, rgba(0,0,0,0.02)); border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">
+                            <th style="padding: 0.85rem 1rem; width: 50px; text-align: center;">STT</th>
+                            <th style="padding: 0.85rem 1rem; width: 100px;">Mã HV</th>
+                            <th style="padding: 0.85rem 1.25rem;">Học viên</th>
+                            <th style="padding: 0.85rem 1rem; min-width: 360px;">Trạng thái điểm danh</th>
+                            <th style="padding: 0.85rem 1.25rem; min-width: 200px;">Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in student_records %}
+                        <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;">
+                            <td style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                                {{ forloop.counter }}
+                            </td>
+                            <td style="padding: 1rem; font-weight: 600; color: var(--primary); font-size: 0.85rem;">
+                                {{ record.student.student_code }}
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="font-weight: 600; color: var(--text-main);">{{ record.student.full_name }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ record.student.phone|default:record.student.email }}</div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <label class="status-option status-present" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s ease;">
+                                        <input type="radio" name="status_{{ record.student.id }}" value="present" {% if record.status == 'present' %}checked{% endif %} class="status-radio" data-type="present">
+                                        <span>🟢 Có mặt</span>
+                                    </label>
+                                    <label class="status-option status-late" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s ease;">
+                                        <input type="radio" name="status_{{ record.student.id }}" value="late" {% if record.status == 'late' %}checked{% endif %} class="status-radio" data-type="late">
+                                        <span>🔵 Đi muộn</span>
+                                    </label>
+                                    <label class="status-option status-excused" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s ease;">
+                                        <input type="radio" name="status_{{ record.student.id }}" value="absent_excused" {% if record.status == 'absent_excused' %}checked{% endif %} class="status-radio" data-type="excused">
+                                        <span>🟡 Có phép</span>
+                                    </label>
+                                    <label class="status-option status-unexcused" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s ease;">
+                                        <input type="radio" name="status_{{ record.student.id }}" value="absent_unexcused" {% if record.status == 'absent_unexcused' %}checked{% endif %} class="status-radio" data-type="unexcused">
+                                        <span>🔴 Không phép</span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <input type="text" name="note_{{ record.student.id }}" value="{{ record.note }}" placeholder="Ghi chú (nếu có)..."
+                                    style="width: 100%; padding: 0.45rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.85rem; box-sizing: border-box;">
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                                Chưa có học viên nào được ghi danh vào lớp học này.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bottom Action Footer -->
+            <div style="padding: 1.25rem 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-secondary, rgba(0,0,0,0.02)); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Sĩ số lớp: <strong>{{ total_students }}</strong> học viên
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <a href="{% url 'session_list' english_class.id %}" class="btn"
+                        style="background: var(--surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.65rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                        Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary"
+                        style="background: var(--primary); color: #fff; border: none; padding: 0.65rem 1.75rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: 0 2px 8px rgba(37,99,235,0.3); display: inline-flex; align-items: center; gap: 0.5rem;">
+                        💾 Lưu kết quả điểm danh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+.status-option:has(input:checked) {
+    font-weight: 700;
+}
+.status-present:has(input:checked) {
+    background: rgba(22, 163, 74, 0.15) !important;
+    border-color: #16a34a !important;
+    color: #16a34a !important;
+}
+.status-late:has(input:checked) {
+    background: rgba(2, 132, 199, 0.15) !important;
+    border-color: #0284c7 !important;
+    color: #0284c7 !important;
+}
+.status-excused:has(input:checked) {
+    background: rgba(217, 119, 6, 0.15) !important;
+    border-color: #d97706 !important;
+    color: #d97706 !important;
+}
+.status-unexcused:has(input:checked) {
+    background: rgba(220, 38, 38, 0.15) !important;
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    function updateCounters() {
+        var presents = document.querySelectorAll('.status-radio[data-type="present"]:checked').length;
+        var lates = document.querySelectorAll('.status-radio[data-type="late"]:checked').length;
+        var excused = document.querySelectorAll('.status-radio[data-type="excused"]:checked').length;
+        var unexcused = document.querySelectorAll('.status-radio[data-type="unexcused"]:checked').length;
+
+        document.getElementById('countPresent').textContent = presents;
+        document.getElementById('countLate').textContent = lates;
+        document.getElementById('countExcused').textContent = excused;
+        document.getElementById('countUnexcused').textContent = unexcused;
+    }
+
+    // Lắng nghe thay đổi
+    document.querySelectorAll('.status-radio').forEach(function(radio) {
+        radio.addEventListener('change', updateCounters);
+    });
+
+    // Nút "Tất cả có mặt"
+    var btnAllPresent = document.getElementById('btnMarkAllPresent');
+    if (btnAllPresent) {
+        btnAllPresent.addEventListener('click', function() {
+            document.querySelectorAll('.status-radio[data-type="present"]').forEach(function(radio) {
+                radio.checked = true;
+            });
+            updateCounters();
+        });
+    }
+
+    updateCounters();
+});
+</script>
+{% endblock %}

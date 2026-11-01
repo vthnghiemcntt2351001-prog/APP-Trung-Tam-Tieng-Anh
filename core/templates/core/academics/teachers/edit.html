@@ -1,0 +1,168 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Cập nhật giáo viên | English Center{% endblock %}
+{% block breadcrumb %}Cập nhật giáo viên{% endblock %}
+{% block extra_head %}
+<style>
+.app-content .input-wrapper input {
+    padding-left: 44px !important;
+    padding-right: 14px !important;
+}
+</style>
+{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/academics/teachers/add.css' %}?v=20261027_v2">
+{% endblock %}
+
+{% block page_content %}
+<div class="student-form-page">
+    <!-- Header Bar with Back Button -->
+    <div class="form-page-header">
+        <a href="{% url 'teacher_list' %}" class="btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Quay lại danh sách</span>
+        </a>
+        <div class="header-intro">
+            <h1 class="page-title">Cập nhật thông tin giáo viên</h1>
+            <p class="page-desc">Chỉnh sửa thông tin hồ sơ của giáo viên <strong>{{ teacher.full_name }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="form-container-card">
+        <div class="card-hero-banner" style="background: linear-gradient(135deg, #1e3a8a, #0284c7);">
+            <div class="hero-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <path d="M13.5 6.5l4 4" />
+                </svg>
+            </div>
+            <div class="hero-text">
+                <h2>Hồ sơ #{{ teacher.id }}</h2>
+                <p>Kiểm tra kỹ các thông tin trước khi lưu thay đổi</p>
+            </div>
+        </div>
+
+        <form method="POST" class="student-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <div class="section-badge">1</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thông tin giảng viên</h3>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="full_name">Họ và tên <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="7" r="4"/>
+                                    <path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/>
+                                </svg>
+                                <input
+                                    type="text"
+                                    id="full_name"
+                                    name="full_name"
+                                    value="{{ request.POST.full_name|default:teacher.full_name }}"
+                                    placeholder="Ví dụ: ThS. Lê Văn Minh"
+                                    maxlength="100"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="specialization">Chuyên môn giảng dạy</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5a2.5 2.5 0 0 1 2.5 -2.5h11"/>
+                                    <path d="M6 4h11a2 2 0 0 1 2 2v14"/>
+                                    <path d="M6 4a2 2 0 0 0 -2 2v13.5"/>
+                                </svg>
+                                <input
+                                    type="text"
+                                    id="specialization"
+                                    name="specialization"
+                                    value="{{ request.POST.specialization|default:teacher.specialization }}"
+                                    placeholder="Ví dụ: IELTS 7.5+, TOEIC, Giao tiếp nâng cao"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-badge">2</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thông tin liên lạc</h3>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="email">Địa chỉ email <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                    <polyline points="3 7 12 13 21 7"/>
+                                </svg>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value="{{ request.POST.email|default:teacher.email }}"
+                                    placeholder="teacher@englishcenter.edu.vn"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="phone">Số điện thoại <span class="req-star">*</span></label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/>
+                                </svg>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    value="{{ request.POST.phone|default:teacher.phone }}"
+                                    placeholder="Ví dụ: 0912345678"
+                                    maxlength="15"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-field-group full-col">
+                            <label for="address">Địa chỉ / Ghi chú</label>
+                            <div class="input-wrapper">
+                                <textarea
+                                    id="address"
+                                    name="address"
+                                    rows="3"
+                                    placeholder="Nhập địa chỉ hoặc thông tin bổ sung về giáo viên..."
+                                >{{ request.POST.address|default:teacher.address }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions-bar">
+                <a href="{% url 'teacher_list' %}" class="btn-action-cancel">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn-action-submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Lưu thay đổi</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

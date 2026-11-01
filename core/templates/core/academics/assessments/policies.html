@@ -1,0 +1,294 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Quy chế đánh giá đào tạo | English Center{% endblock %}
+{% block breadcrumb %}Quy chế đánh giá{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/grades/list.css' %}?v=20261027_v4">
+{% endblock %}
+
+{% block page_content %}
+<div class="grades-page">
+    <!-- Top Action Bar -->
+    <div class="grades-header-bar">
+        <div class="header-title-box">
+            <h1 class="page-title">Quy chế đánh giá đào tạo</h1>
+            <p class="page-desc">Thiết lập khung đánh giá, tỷ trọng điểm và tiêu chí hoàn thành theo từng khóa học</p>
+        </div>
+        <div>
+            <a href="{% url 'assessment_policy_create' %}" class="btn-primary-action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Tạo quy chế mới</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-navigation Tabs -->
+    <nav class="grades-nav-tabs" aria-label="Phân hệ đánh giá">
+        <a href="{% url 'grade_list' %}" class="tab-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <span>Bảng điểm 4 kỹ năng</span>
+        </a>
+        <a href="{% url 'assessment_class_list' %}" class="tab-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            <span>Đánh giá theo quy chế</span>
+        </a>
+        {% if is_admin %}
+        <a href="{% url 'assessment_policy_list' %}" class="tab-link is-active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>Quy chế đánh giá</span>
+        </a>
+        {% endif %}
+    </nav>
+
+    <!-- Quick Stats Cards Grid -->
+    <div class="stats-cards-grid">
+        <div class="stat-item-card">
+            <div class="stat-icon-wrap blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Tổng số quy chế</span>
+                <span class="stat-num">{{ total_count|default:"0" }}</span>
+            </div>
+        </div>
+
+        <div class="stat-item-card green">
+            <div class="stat-icon-wrap green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Đang áp dụng</span>
+                <span class="stat-num">{{ active_count|default:"0" }}</span>
+            </div>
+        </div>
+
+        <div class="stat-item-card orange">
+            <div class="stat-icon-wrap orange">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Bản nháp</span>
+                <span class="stat-num">{{ draft_count|default:"0" }}</span>
+            </div>
+        </div>
+
+        <div class="stat-item-card purple">
+            <div class="stat-icon-wrap purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="21 8 21 21 3 21 3 8"/>
+                    <rect x="1" y="3" width="22" height="5"/>
+                    <line x1="10" y1="12" x2="14" y2="12"/>
+                </svg>
+            </div>
+            <div class="stat-data">
+                <span class="stat-title">Lưu trữ / Đã đóng</span>
+                <span class="stat-num">{{ archived_count|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Section -->
+    <div class="filter-container-card">
+        <form method="GET" action="{% url 'assessment_policy_list' %}" class="filter-form-grid">
+            <div class="search-field-box">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" name="q" value="{{ q }}" placeholder="Tìm theo tên quy chế...">
+            </div>
+
+            <div class="select-filter-box">
+                <select name="course_id">
+                    <option value="">-- Tất cả khóa học --</option>
+                    {% for course in courses %}
+                        <option value="{{ course.id }}" {% if selected_course_id == course.id|stringformat:"s" %}selected{% endif %}>
+                            {{ course.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="select-filter-box" style="min-width: 170px;">
+                <select name="status">
+                    <option value="">-- Trạng thái --</option>
+                    <option value="active" {% if selected_status == "active" %}selected{% endif %}>Đang áp dụng</option>
+                    <option value="draft" {% if selected_status == "draft" %}selected{% endif %}>Bản nháp</option>
+                    <option value="archived" {% if selected_status == "archived" %}selected{% endif %}>Ngừng áp dụng</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-filter-action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span>Lọc</span>
+            </button>
+
+            {% if q or selected_course_id or selected_status %}
+            <a href="{% url 'assessment_policy_list' %}" class="btn-filter-reset">
+                <span>Đặt lại</span>
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="data-table-card">
+        <div class="table-wrapper">
+            <table class="grades-table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 220px;">Quy chế & Phiên bản</th>
+                        <th>Khóa học</th>
+                        <th>Thang đánh giá</th>
+                        <th>Điểm đạt</th>
+                        <th style="min-width: 260px;">Thành phần & Tỷ trọng</th>
+                        <th>Trạng thái</th>
+                        <th style="text-align: right; min-width: 140px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for policy in policies %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <strong style="font-size: 14px; color: #0f172a;">{{ policy.name }}</strong>
+                                    <span style="display: inline-block; padding: 1px 6px; border-radius: 4px; background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700;">v{{ policy.version }}</span>
+                                </div>
+                                <span style="font-size: 12px; color: #64748b;">
+                                    {% if policy.effective_from or policy.effective_to %}
+                                        Áp dụng: {{ policy.effective_from|date:"d/m/Y"|default:"—" }} → {{ policy.effective_to|date:"d/m/Y"|default:"Vô thời hạn" }}
+                                    {% else %}
+                                        Tạo ngày: {{ policy.created_at|date:"d/m/Y" }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 6px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 12.5px; font-weight: 600; color: #334155;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                </svg>
+                                {{ policy.course.name }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-weight: 650; color: #0f172a;">{{ policy.get_scale_display }}</span>
+                                <span style="font-size: 11.5px; color: #64748b;">Tối đa: <strong>{{ policy.max_score }}</strong> | Làm tròn: {{ policy.rounding_precision }} số lẻ</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if policy.pass_score %}
+                                <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 750; font-size: 12.5px;">
+                                    ≥ {{ policy.pass_score }}
+                                </span>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 13px;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="component-tags-list">
+                                {% for comp in policy.components.all %}
+                                    <span class="component-tag" title="Điểm tối đa: {{ comp.max_score }}, {{ comp.get_aggregation_display }}">
+                                        {{ comp.name }} (<strong>{{ comp.weight }}%</strong>)
+                                    </span>
+                                {% empty %}
+                                    <span style="font-size: 12px; color: #94a3b8; font-style: italic;">Chưa cấu hình thành phần</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if policy.status == "active" %}
+                                <span class="status-badge active">Đang áp dụng</span>
+                            {% elif policy.status == "draft" %}
+                                <span class="status-badge draft">Bản nháp</span>
+                            {% else %}
+                                <span class="status-badge archived">Ngừng áp dụng</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <div class="action-buttons-wrap" style="justify-content: flex-end;">
+                                {% if policy.status == "draft" %}
+                                    <form method="post" action="{% url 'assessment_policy_activate' policy_id=policy.id %}" style="display: inline-block;" onsubmit="return confirm('Kích hoạt quy chế này? Tổng tỷ trọng các thành phần phải đúng 100%.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-table-edit" style="background: #ecfdf5; border-color: #a7f3d0; color: #059669;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Kích hoạt</span>
+                                        </button>
+                                    </form>
+                                {% elif policy.status == "active" %}
+                                    <form method="post" action="{% url 'assessment_policy_archive' policy_id=policy.id %}" style="display: inline-block;" onsubmit="return confirm('Ngừng dùng quy chế này cho lớp mới? Các lớp đang áp dụng vẫn giữ kết quả.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-table-delete" style="background: #f8fafc; border-color: #cbd5e1; color: #475569;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                                            </svg>
+                                            <span>Ngừng dùng</span>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span style="font-size: 12px; color: #94a3b8;">Đã lưu trữ</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-data-box">
+                                <div class="empty-data-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                    </svg>
+                                </div>
+                                <h3>Chưa có quy chế đánh giá nào</h3>
+                                <p>Tạo khung quy chế đánh giá để thiết lập tiêu chí tính điểm và tỷ trọng bài thi cho khóa học</p>
+                                <a href="{% url 'assessment_policy_create' %}" class="btn-primary-action" style="margin-top: 6px;">
+                                    <span>Tạo quy chế đầu tiên</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

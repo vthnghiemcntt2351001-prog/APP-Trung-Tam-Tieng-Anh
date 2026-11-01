@@ -1,0 +1,174 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Xác minh chứng chỉ Blockchain | English Center{% endblock %}
+{% block breadcrumb %}Xác minh chứng chỉ{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/certificates/verify.css' %}?v=20261027_v1">
+{% endblock %}
+
+{% block page_content %}
+<div class="verify-page-container">
+
+    <!-- Header Navigation -->
+    <div class="verify-header-nav">
+        <a href="{% url 'certificate_list' %}" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Quay lại Quản lý chứng chỉ</span>
+        </a>
+    </div>
+
+    <!-- Verification Search Hero Card -->
+    <div class="verify-hero-card">
+        <div class="hero-shield-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="m9 12 2 2 4-4"/>
+            </svg>
+        </div>
+
+        <h1 class="verify-hero-title">Xác minh Chứng chỉ trên Blockchain</h1>
+        <p class="verify-hero-desc">
+            Nhập mã chứng chỉ (CERT-XXXXX) để đối chiếu thông tin lưu trữ với hàm băm mật mã học đã ghi nhận trên Smart Contract Ethereum/Ganache.
+        </p>
+
+        <form method="post" class="verify-search-form">
+            {% csrf_token %}
+            <div class="verify-search-input-wrap">
+                <svg class="verify-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" name="certificate_code" value="{{ certificate_code }}" placeholder="Ví dụ: CERT-B7BEF64AA6FA..." required autofocus>
+            </div>
+            <button type="submit" class="btn-verify-submit">Kiểm tra tính toàn vẹn</button>
+        </form>
+    </div>
+
+    <!-- Result Box -->
+    {% if result %}
+    <div class="result-card {% if result.valid %}valid{% else %}invalid{% endif %}" role="region" aria-live="polite">
+        <div class="result-banner-header">
+            <div class="result-banner-icon">
+                {% if result.valid %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="result-banner-title">
+                    {% if result.valid %}
+                    Chứng chỉ Hợp lệ & Đã được xác thực trên Blockchain
+                    {% else %}
+                    Chưa xác minh được chứng chỉ
+                    {% endif %}
+                </h2>
+                <p class="result-banner-desc">{{ result.message }}</p>
+            </div>
+        </div>
+
+        <div class="result-details-body">
+            {% if result.valid and certificate %}
+            <!-- Structured Metadata -->
+            <div class="details-grid">
+                <div class="detail-item-box">
+                    <span class="detail-item-label">Mã chứng chỉ</span>
+                    <span class="detail-item-value" style="font-family: ui-monospace, monospace; color: #2563eb;">{{ certificate.certificate_code }}</span>
+                </div>
+                <div class="detail-item-box">
+                    <span class="detail-item-label">Học viên nhận</span>
+                    <span class="detail-item-value">{{ certificate.student.full_name }} ({{ certificate.student.student_code }})</span>
+                </div>
+                <div class="detail-item-box">
+                    <span class="detail-item-label">Khóa học & Lớp</span>
+                    <span class="detail-item-value">{{ certificate.english_class.name }} - {{ certificate.english_class.course.name }}</span>
+                </div>
+                <div class="detail-item-box">
+                    <span class="detail-item-label">Ngày phát hành</span>
+                    <span class="detail-item-value">{{ certificate.issue_date|date:"d/m/Y" }}</span>
+                </div>
+                <div class="detail-item-box">
+                    <span class="detail-item-label">Điểm tổng kết & Xếp loại</span>
+                    <span class="detail-item-value">{{ certificate.score }} ({{ certificate.classification|default:"Đạt" }})</span>
+                </div>
+                <div class="detail-item-box">
+                    <span class="detail-item-label">Số Block Blockchain</span>
+                    <span class="detail-item-value" style="color: #7c3aed;">
+                        Block #{{ result.block_number|default:certificate.block_number|default:"--" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Cryptographic Hashes -->
+            {% if certificate.transaction_hash %}
+            <div class="detail-hash-box">
+                <div class="hash-label-row">
+                    <span class="detail-item-label">Mã giao dịch Blockchain (Tx Hash)</span>
+                    <button type="button" class="btn-mini-copy" onclick="copyHash('{{ certificate.transaction_hash }}', this)">Sao chép</button>
+                </div>
+                <div class="hash-code-display">{{ certificate.transaction_hash }}</div>
+            </div>
+            {% endif %}
+
+            {% if certificate.data_hash or result.data_hash %}
+            <div class="detail-hash-box">
+                <div class="hash-label-row">
+                    <span class="detail-item-label">Mã băm dữ liệu gốc (SHA-256 Data Hash)</span>
+                    <button type="button" class="btn-mini-copy" onclick="copyHash('{{ result.data_hash|default:certificate.data_hash }}', this)">Sao chép</button>
+                </div>
+                <div class="hash-code-display">{{ result.data_hash|default:certificate.data_hash }}</div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- When invalid or not found -->
+            <div style="font-size: 13.5px; color: #475569; line-height: 1.6;">
+                <p><strong>Gợi ý kiểm tra:</strong></p>
+                <ul style="padding-left: 20px; margin: 0; display: grid; gap: 6px;">
+                    <li>Kiểm tra xem mã chứng chỉ <code>{{ result.certificate_code }}</code> đã nhập đúng chữ in hoa và gạch nối chưa.</li>
+                    <li>Đảm bảo chứng chỉ này đã được Quản trị viên kích hoạt nút <strong>Phát hành</strong> trên danh sách chứng chỉ.</li>
+                    <li>Kiểm tra mạng Blockchain (Ganache) có đang chạy ở cổng RPC nội bộ hay không.</li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function copyHash(text, btn) {
+    if (!navigator.clipboard) {
+        const input = document.createElement('textarea');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+    } else {
+        navigator.clipboard.writeText(text);
+    }
+
+    const origText = btn.innerText;
+    btn.innerText = 'Đã chép!';
+    btn.style.color = '#10b981';
+    btn.style.borderColor = '#10b981';
+    setTimeout(() => {
+        btn.innerText = origText;
+        btn.style.color = '';
+        btn.style.borderColor = '';
+    }, 1500);
+}
+</script>
+{% endblock %}

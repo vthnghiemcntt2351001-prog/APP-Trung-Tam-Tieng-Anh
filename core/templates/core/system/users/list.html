@@ -1,0 +1,435 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Quản lý tài khoản người dùng | EnglishCenter{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/system/system.css' %}?v=20261101a">
+{% endblock %}
+
+{% block page_content %}
+<div class="system-page-wrapper">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="system-header-area">
+        <div class="system-header-left">
+            <nav class="system-breadcrumb" aria-label="Breadcrumb">
+                <a href="{% url 'home' %}">Trang chủ</a>
+                <span class="sep">/</span>
+                <span>Hệ thống</span>
+                <span class="sep">/</span>
+                <span>Quản lý tài khoản</span>
+            </nav>
+            <h1 class="system-title">
+                <span class="system-title-icon">👥</span>
+                Quản lý tài khoản người dùng
+            </h1>
+            <p class="system-subtitle">
+                Xem danh sách tài khoản nội bộ, tạo mới, phân bổ vai trò và kiểm soát trạng thái đăng nhập hệ thống.
+            </p>
+        </div>
+        <div class="system-header-actions">
+            <button type="button" class="btn-primary-action" onclick="openAddUserModal()">
+                <span>+ Tạo tài khoản mới</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- STATS OVERVIEW CARDS -->
+    <div class="system-stats-grid">
+        <div class="system-stat-card">
+            <div class="stat-icon total">👤</div>
+            <div class="stat-info">
+                <div class="stat-num">{{ total_users }}</div>
+                <div class="stat-text">Tổng tài khoản ({{ active_users }} hoạt động)</div>
+            </div>
+        </div>
+
+        <div class="system-stat-card">
+            <div class="stat-icon admin">🛡️</div>
+            <div class="stat-info">
+                <div class="stat-num">{{ admin_count }}</div>
+                <div class="stat-text">Quản trị viên (Admin)</div>
+            </div>
+        </div>
+
+        <div class="system-stat-card">
+            <div class="stat-icon academic">🎓</div>
+            <div class="stat-info">
+                <div class="stat-num">{{ academic_count }}</div>
+                <div class="stat-text">Cán bộ Học vụ</div>
+            </div>
+        </div>
+
+        <div class="system-stat-card">
+            <div class="stat-icon finance">💳</div>
+            <div class="stat-info">
+                <div class="stat-num">{{ finance_count }}</div>
+                <div class="stat-text">Cán bộ Tài chính</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        <div class="messages" style="margin-bottom: 20px;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}" style="padding: 12px 16px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; background: var(--surface); border: 1px solid var(--line);">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- TOOLBAR & FILTERS -->
+    <div class="system-toolbar">
+        <form method="get" action="{% url 'user_list' %}" class="search-form">
+            <div class="search-input-wrapper">
+                <span class="search-icon-inside">🔍</span>
+                <input
+                    type="text"
+                    name="q"
+                    class="search-input"
+                    placeholder="Tìm theo tên đăng nhập, họ tên, email..."
+                    value="{{ query }}"
+                >
+            </div>
+            {% if role_filter %}
+                <input type="hidden" name="role" value="{{ role_filter }}">
+            {% endif %}
+            <button type="submit" class="btn-primary-action" style="padding: 0 14px; height: 38px; min-height: 38px;">
+                Tìm kiếm
+            </button>
+            {% if query or role_filter or status_filter %}
+                <a href="{% url 'user_list' %}" class="btn-modal-cancel" style="display: inline-flex; align-items: center; height: 38px; text-decoration: none;">
+                    Đặt lại
+                </a>
+            {% endif %}
+        </form>
+
+        <div class="filter-group">
+            <a href="?{% if query %}q={{ query }}&{% endif %}" class="role-pill-btn {% if not role_filter %}is-active{% endif %}">
+                Tất cả ({{ total_users }})
+            </a>
+            <a href="?{% if query %}q={{ query }}&{% endif %}role=Admin" class="role-pill-btn {% if role_filter == 'Admin' %}is-active{% endif %}">
+                Admin ({{ admin_count }})
+            </a>
+            <a href="?{% if query %}q={{ query }}&{% endif %}role=Học vụ" class="role-pill-btn {% if role_filter == 'Học vụ' %}is-active{% endif %}">
+                Học vụ ({{ academic_count }})
+            </a>
+            <a href="?{% if query %}q={{ query }}&{% endif %}role=Tài chính" class="role-pill-btn {% if role_filter == 'Tài chính' %}is-active{% endif %}">
+                Tài chính ({{ finance_count }})
+            </a>
+        </div>
+    </div>
+
+    <!-- USERS TABLE CARD -->
+    <div class="system-table-card">
+        <div class="system-table-wrapper">
+            <table class="system-table">
+                <thead>
+                    <tr>
+                        <th>Tài khoản / Người dùng</th>
+                        <th>Email</th>
+                        <th>Vai trò hệ thống</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Đăng nhập gần nhất</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-circle">
+                                        {{ u.username|slice:":2" }}
+                                    </div>
+                                    <div>
+                                        <div class="user-name-title">
+                                            {{ u.get_full_name|default:u.username }}
+                                            {% if u.id == request.user.id %}
+                                                <span style="font-size: 11px; color: var(--primary); font-weight: bold;">(Bạn)</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="user-username-sub">
+                                            <span>@{{ u.username }}</span>
+                                            {% if u.is_superuser %}
+                                                <span style="font-size: 10px; background: #e0e7ff; color: #4338ca; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Superuser</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="color: var(--ink-subtle);">{{ u.email|default:"—" }}</span>
+                            </td>
+                            <td>
+                                {% with role_obj=u.groups.first %}
+                                    {% if u.is_superuser or role_obj.name == "Admin" %}
+                                        <span class="badge-role badge-role-admin">🛡️ Quản trị viên</span>
+                                    {% elif role_obj.name == "Học vụ" %}
+                                        <span class="badge-role badge-role-academic">🎓 Học vụ</span>
+                                    {% elif role_obj.name == "Tài chính" %}
+                                        <span class="badge-role badge-role-finance">💳 Tài chính</span>
+                                    {% else %}
+                                        <span class="badge-role badge-role-none">Chưa phân quyền</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% if u.is_active %}
+                                    <span class="badge-user-status active">● Đang hoạt động</span>
+                                {% else %}
+                                    <span class="badge-user-status inactive">● Bị khóa</span>
+                                {% endif %}
+                            </td>
+                            <td style="white-space: nowrap;">
+                                <span style="font-size: 12px; color: var(--muted);">{{ u.date_joined|date:"d/m/Y H:i" }}</span>
+                            </td>
+                            <td style="white-space: nowrap;">
+                                <span style="font-size: 12px; color: var(--muted);">{{ u.last_login|date:"d/m/Y H:i"|default:"Chưa đăng nhập" }}</span>
+                            </td>
+                            <td>
+                                <div class="table-actions-cell">
+                                    <button
+                                        type="button"
+                                        class="btn-table-sm"
+                                        title="Chỉnh sửa thông tin"
+                                        onclick="openEditUserModal('{{ u.id }}', '{{ u.username|escapejs }}', '{{ u.first_name|escapejs }}', '{{ u.last_name|escapejs }}', '{{ u.email|escapejs }}', '{{ u.groups.first.name|default:''|escapejs }}', {{ u.is_active|yesno:'true,false' }})"
+                                    >
+                                        ✏️ Sửa
+                                    </button>
+
+                                    {% if u.id != request.user.id and not u.is_superuser %}
+                                        <form method="post" action="{% url 'user_toggle_status' user_id=u.id %}" style="margin: 0;" onsubmit="return confirm('Bạn có chắc muốn {% if u.is_active %}KHÓA{% else %}MỞ KHÓA{% endif %} tài khoản {{ u.username }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-table-sm toggle-lock" title="{% if u.is_active %}Tạm khóa tài khoản{% else %}Mở khóa tài khoản{% endif %}">
+                                                {% if u.is_active %}🔒 Khóa{% else %}🔓 Mở{% endif %}
+                                            </button>
+                                        </form>
+
+                                        <form method="post" action="{% url 'user_delete' user_id=u.id %}" style="margin: 0;" onsubmit="return confirm('XÁC NHẬN: Bạn có chắc chắn muốn XÓA vĩnh viễn tài khoản {{ u.username }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-table-sm delete" title="Xóa tài khoản">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px 16px; color: var(--muted);">
+                                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                                <strong>Không tìm thấy tài khoản người dùng phù hợp.</strong>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: TẠO TÀI KHOẢN MỚI -->
+<div id="addUserModal" class="system-modal-backdrop" style="display: none;" onclick="handleModalBackdropClick(event, 'addUserModal')">
+    <div class="system-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="addUserModalTitle">
+        <div class="system-modal-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">👤</span>
+                <h3 id="addUserModalTitle" class="system-modal-title">Tạo tài khoản người dùng mới</h3>
+            </div>
+            <button type="button" class="btn-modal-close" onclick="closeAddUserModal()" aria-label="Đóng">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'user_add' %}">
+            {% csrf_token %}
+            <div class="system-modal-body">
+                <div class="form-group-field">
+                    <label for="newUsername" class="form-label-title">Tên đăng nhập (Username) <span style="color: #ef4444;">*</span></label>
+                    <input type="text" id="newUsername" name="username" required class="form-control-input" placeholder="ví dụ: gv_nguyenan, hocvu_linh...">
+                </div>
+
+                <div class="form-group-field">
+                    <label for="newPassword" class="form-label-title">Mật khẩu khởi tạo <span style="color: #ef4444;">*</span></label>
+                    <input type="password" id="newPassword" name="password" required class="form-control-input" placeholder="Tối thiểu 6 ký tự...">
+                </div>
+
+                <div class="modal-row-grid">
+                    <div class="form-group-field">
+                        <label for="newFirstName" class="form-label-title">Tên</label>
+                        <input type="text" id="newFirstName" name="first_name" class="form-control-input" placeholder="An, Linh...">
+                    </div>
+                    <div class="form-group-field">
+                        <label for="newLastName" class="form-label-title">Họ đệm</label>
+                        <input type="text" id="newLastName" name="last_name" class="form-control-input" placeholder="Nguyễn Văn, Trần...">
+                    </div>
+                </div>
+
+                <div class="form-group-field">
+                    <label for="newEmail" class="form-label-title">Địa chỉ Email</label>
+                    <input type="email" id="newEmail" name="email" class="form-control-input" placeholder="user@englishcenter.edu.vn">
+                </div>
+
+                <div class="form-group-field">
+                    <label for="newRole" class="form-label-title">Vai trò / Phân quyền <span style="color: #ef4444;">*</span></label>
+                    <select id="newRole" name="role" required class="form-control-select">
+                        <option value="">-- Chọn vai trò hệ thống --</option>
+                        <option value="Admin">🛡️ Quản trị viên (Admin - Toàn quyền hệ thống)</option>
+                        <option value="Học vụ">🎓 Cán bộ Học vụ (Quản lý học viên, lớp, điểm danh, điểm số)</option>
+                        <option value="Tài chính">💳 Cán bộ Tài chính (Quản lý học phí, thu tiền, biên lai)</option>
+                    </select>
+                </div>
+
+                <div class="form-group-field" style="margin-bottom: 0;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink);">
+                        <input type="checkbox" name="is_active" checked style="width: 16px; height: 16px;">
+                        <span>Kích hoạt tài khoản ngay sau khi tạo</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="system-modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeAddUserModal()">Hủy bỏ</button>
+                <button type="submit" class="btn-modal-submit">
+                    <span>Xác nhận tạo tài khoản</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: CHỈNH SỬA TÀI KHOẢN -->
+<div id="editUserModal" class="system-modal-backdrop" style="display: none;" onclick="handleModalBackdropClick(event, 'editUserModal')">
+    <div class="system-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="editUserModalTitle">
+        <div class="system-modal-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">✏️</span>
+                <h3 id="editUserModalTitle" class="system-modal-title">Cập nhật tài khoản</h3>
+            </div>
+            <button type="button" class="btn-modal-close" onclick="closeEditUserModal()" aria-label="Đóng">&times;</button>
+        </div>
+
+        <form id="editUserForm" method="post" action="">
+            {% csrf_token %}
+            <div class="system-modal-body">
+                <div class="form-group-field">
+                    <label class="form-label-title">Tên đăng nhập</label>
+                    <input type="text" id="editUsername" disabled class="form-control-input" style="background: var(--canvas); color: var(--muted); cursor: not-allowed;">
+                </div>
+
+                <div class="modal-row-grid">
+                    <div class="form-group-field">
+                        <label for="editFirstName" class="form-label-title">Tên</label>
+                        <input type="text" id="editFirstName" name="first_name" class="form-control-input">
+                    </div>
+                    <div class="form-group-field">
+                        <label for="editLastName" class="form-label-title">Họ đệm</label>
+                        <input type="text" id="editLastName" name="last_name" class="form-control-input">
+                    </div>
+                </div>
+
+                <div class="form-group-field">
+                    <label for="editEmail" class="form-label-title">Địa chỉ Email</label>
+                    <input type="email" id="editEmail" name="email" class="form-control-input">
+                </div>
+
+                <div class="form-group-field">
+                    <label for="editRole" class="form-label-title">Vai trò / Phân quyền</label>
+                    <select id="editRole" name="role" class="form-control-select">
+                        <option value="">-- Chưa phân quyền --</option>
+                        <option value="Admin">🛡️ Quản trị viên (Admin)</option>
+                        <option value="Học vụ">🎓 Cán bộ Học vụ</option>
+                        <option value="Tài chính">💳 Cán bộ Tài chính</option>
+                    </select>
+                </div>
+
+                <div class="form-group-field">
+                    <label for="editNewPassword" class="form-label-title">Đặt lại mật khẩu mới (Bỏ trống nếu giữ nguyên)</label>
+                    <input type="password" id="editNewPassword" name="new_password" class="form-control-input" placeholder="Để trống nếu không đổi mật khẩu...">
+                </div>
+
+                <div class="form-group-field" style="margin-bottom: 0;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink);">
+                        <input type="checkbox" id="editIsActive" name="is_active" style="width: 16px; height: 16px;">
+                        <span>Tài khoản đang hoạt động (Cho phép đăng nhập)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="system-modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeEditUserModal()">Hủy bỏ</button>
+                <button type="submit" class="btn-modal-submit">
+                    <span>Lưu thay đổi</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddUserModal() {
+        var modal = document.getElementById('addUserModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            setTimeout(function() {
+                var input = document.getElementById('newUsername');
+                if (input) input.focus();
+            }, 60);
+        }
+    }
+
+    function closeAddUserModal() {
+        var modal = document.getElementById('addUserModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    function openEditUserModal(userId, username, firstName, lastName, email, role, isActive) {
+        var modal = document.getElementById('editUserModal');
+        var form = document.getElementById('editUserForm');
+        if (modal && form) {
+            form.action = '/system/users/' + userId + '/edit/';
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editFirstName').value = firstName;
+            document.getElementById('editLastName').value = lastName;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editRole').value = role;
+            document.getElementById('editNewPassword').value = '';
+            document.getElementById('editIsActive').checked = isActive;
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeEditUserModal() {
+        var modal = document.getElementById('editUserModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    function handleModalBackdropClick(event, modalId) {
+        if (event.target === document.getElementById(modalId)) {
+            if (modalId === 'addUserModal') closeAddUserModal();
+            if (modalId === 'editUserModal') closeEditUserModal();
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeAddUserModal();
+            closeEditUserModal();
+        }
+    });
+</script>
+{% endblock %}

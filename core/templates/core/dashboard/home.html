@@ -1,0 +1,797 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Bảng điều khiển - English Center{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/dashboard/home.css' %}?v=20261027_v5">
+{% endblock %}
+
+{% block page_content %}
+<div class="dashboard-page">
+
+    <!-- 1. UNIFIED KPI OVERVIEW (Tầng chỉ số vận hành thống nhất) -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">Tổng quan chỉ số hoạt động</h2>
+            <div class="today-chip">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <rect x="4" y="5" width="16" height="16" rx="2" />
+                    <line x1="16" y1="3" x2="16" y2="7" />
+                    <line x1="8" y1="3" x2="8" y2="7" />
+                    <line x1="4" y1="11" x2="20" y2="11" />
+                    <rect x="8" y="15" width="2" height="2" />
+                </svg>
+                <span>{% now "l, d/m/Y" %}</span>
+            </div>
+        </div>
+
+        {% if can_manage_academics %}
+        <!-- Dãy chỉ số Đào tạo -->
+        <div class="stats" style="margin-bottom: 16px;">
+            <!-- Thẻ Học viên -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Tổng số học viên</span>
+                    <div class="stat-icon blue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" />
+                            <path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number">{{ total_students }}</div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Hồ sơ trong hệ thống</span>
+                    <span class="stat-badge success">Hoạt động</span>
+                </div>
+            </div>
+
+            <!-- Thẻ Giáo viên -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Giảng viên & Trợ giảng</span>
+                    <div class="stat-icon emerald">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chalkboard-teacher">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M8 19h-3a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v11a1 1 0 0 1 -1 1" />
+                            <path d="M12 14a2 2 0 1 0 4.001 -.001a2 2 0 0 0 -4.001 .001" />
+                            <path d="M17 19a2 2 0 0 0 -2 -2h-2a2 2 0 0 0 -2 2" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number">{{ total_teachers }}</div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Đội ngũ sư phạm</span>
+                    <span class="stat-badge info">Sẵn sàng</span>
+                </div>
+            </div>
+
+            <!-- Thẻ Khóa học -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Chương trình đào tạo</span>
+                    <div class="stat-icon purple">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-book">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" />
+                            <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" />
+                            <path d="M3 6l0 13" />
+                            <path d="M12 6l0 13" />
+                            <path d="M21 6l0 13" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number">{{ total_courses }}</div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Khóa học tiêu chuẩn</span>
+                    <span class="stat-badge info">IELTS/TOEIC</span>
+                </div>
+            </div>
+
+            <!-- Thẻ Lớp học -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Lớp học đang mở</span>
+                    <div class="stat-icon amber">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-users-group">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                            <path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1" />
+                            <path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                            <path d="M17 10h2a2 2 0 0 1 2 2v1" />
+                            <path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                            <path d="M3 13v-1a2 2 0 0 1 2 -2h2" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number">{{ total_classes }}</div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Đang trong tiến độ</span>
+                    <span class="stat-badge warning">Đang học</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if can_manage_finance %}
+        <!-- Dãy chỉ số Tài chính -->
+        <div class="finance-stats">
+            <!-- Tổng dự thu -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Tổng học phí dự thu</span>
+                    <div class="stat-icon blue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-wallet">
+                            <path stroke="none" d="M0 0h24v24H0" fill="none"/>
+                            <path d="M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12" />
+                            <path d="M20 12v4h-4a2 2 0 0 1 0 -4h4" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number" style="color: #1e3a8a;">
+                    {{ total_fee|floatformat:0 }} <small style="font-size: 14px; font-weight: 600;">đ</small>
+                </div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Tổng doanh thu theo lớp</span>
+                    <span class="stat-badge info">Hợp đồng</span>
+                </div>
+            </div>
+
+            <!-- Đã thu -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Số tiền thực thu</span>
+                    <div class="stat-icon emerald">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-cash-banknote">
+                            <path stroke="none" d="M0 0h24v24H0" fill="none"/>
+                            <circle cx="12" cy="12" r="3" />
+                            <rect x="3" y="6" width="18" height="12" rx="2" />
+                            <line x1="18" y1="12" x2="18.01" y2="12" />
+                            <line x1="6" y1="12" x2="6.01" y2="12" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number" style="color: #065f46;">
+                    {{ total_paid|floatformat:0 }} <small style="font-size: 14px; font-weight: 600;">đ</small>
+                </div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Đã nộp vào quỹ</span>
+                    <span class="stat-badge success">Tiền thực</span>
+                </div>
+            </div>
+
+            <!-- Công nợ còn lại -->
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Công nợ cần thu</span>
+                    <div class="stat-icon rose">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-clock-pause">
+                            <path stroke="none" d="M0 0h24v24H0" fill="none"/>
+                            <path d="M20.942 13.018a9 9 0 1 0 -7.909 7.922" />
+                            <path d="M12 7v5l2 2" />
+                            <path d="M17 17v5" />
+                            <path d="M21 17v5" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-number" style="color: #991b1b;">
+                    {{ total_debt|floatformat:0 }} <small style="font-size: 14px; font-weight: 600;">đ</small>
+                </div>
+                <div class="stat-bottom">
+                    <span class="stat-note">Học viên chưa hoàn tất</span>
+                    <span class="stat-badge warning">Cần nhắc phí</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- 4. BALANCED TWO-COLUMN BODY (Cột trái Đào tạo & Sĩ số, Cột phải Tài chính & Chất lượng) -->
+    <section class="content-grid" style="margin-top: 26px;">
+
+        <!-- CỘT TRÁI: ĐÀO TẠO & SĨ SỐ LỚP HỌC (~60%) -->
+        <div class="content-col-main" style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- 1. Biểu đồ Phân tích Đào tạo & Vận hành (Doanh thu tháng / Sĩ số lớp) -->
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <rect x="3" y="12" width="5" height="8" rx="1" />
+                                <rect x="9.5" y="8" width="5" height="12" rx="1" />
+                                <rect x="16" y="4" width="5" height="16" rx="1" />
+                                <line x1="3" y1="20" x2="21" y2="20" />
+                            </svg>
+                            <span id="mainChartHeading">Doanh thu học phí theo tháng</span>
+                        </h3>
+                        <span id="mainChartDesc">Biến động thực thu và dự thu trong 6 tháng gần nhất</span>
+                    </div>
+                    <div class="chart-controls">
+                        <div class="chart-tabs">
+                            <button type="button" class="chart-tab-btn active" id="tabRevenueBtn" onclick="switchMainChart('revenue')">Doanh thu tháng</button>
+                            <button type="button" class="chart-tab-btn" id="tabClassBtn" onclick="switchMainChart('classes')">Sĩ số theo lớp</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-canvas-wrap" id="revenueChartWrap">
+                    <canvas id="monthlyRevenueChart"></canvas>
+                </div>
+                <div class="chart-canvas-wrap" id="classesChartWrap" style="display: none;">
+                    <canvas id="classStudentsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 2. Bảng theo dõi tiến độ & sĩ số lớp học -->
+            {% if can_manage_academics %}
+            <div class="panel" style="margin-bottom: 0;">
+                <div class="panel-header">
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -4px; margin-right: 6px;">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 21h18" />
+                            <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" />
+                            <path d="M9 9h1" /><path d="M9 13h1" /><path d="M9 17h1" />
+                            <path d="M14 9h1" /><path d="M14 13h1" /><path d="M14 17h1" />
+                        </svg>
+                        Theo dõi tiến độ & sĩ số lớp học
+                    </h2>
+                    <a href="{% url 'class_list' %}" class="view-all">Xem tất cả lớp ({{ total_classes }}) →</a>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên lớp học</th>
+                                <th>Khóa học</th>
+                                <th style="min-width: 140px;">Sĩ số hiện tại</th>
+                                <th style="text-align: right;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in class_statistics %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'class_detail' item.id %}" class="class-title">
+                                        {{ item.name }}
+                                    </a>
+                                    <div class="class-course">
+                                        GV: {{ item.teacher.full_name|default:item.teacher_name|default:"Chưa phân công" }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span style="font-weight: 500; color: #475569;">{{ item.course.name }}</span>
+                                </td>
+
+                                <td class="capacity-cell">
+                                    <div class="capacity-text">
+                                        <span>{{ item.student_count }} học viên</span>
+                                        <span style="color: #64748b;">Tối đa: {{ item.max_students }}</span>
+                                    </div>
+                                    <div class="progress">
+                                        {% if item.max_students > 0 %}
+                                        <div class="progress-bar {% if item.student_count >= item.max_students %}warning{% endif %}"
+                                             style="width: {% widthratio item.student_count item.max_students 100 %}%;">
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <td style="text-align: right;">
+                                    <a href="{% url 'class_detail' item.id %}" class="view-all" style="font-size: 11px;">
+                                        Vào lớp →
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="empty">
+                                    Hiện chưa có lớp học nào đang hoạt động.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- CỘT PHẢI: TÀI CHÍNH & CHẤT LƯỢNG ĐÀO TẠO (~40%) -->
+        <div class="content-col-side" style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- 1. Biểu đồ Phân tích Cơ cấu (Khóa học / Thu nợ học phí) -->
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a1 1 0 0 1 -1 -1v-6.8a1 1 0 0 0 -1 -1" />
+                                <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" />
+                            </svg>
+                            <span id="donutChartHeading">Phân bổ theo khóa học</span>
+                        </h3>
+                        <span id="donutChartDesc">Tỷ trọng học viên đang theo học từng chương trình</span>
+                    </div>
+                    <div class="chart-controls">
+                        <div class="chart-tabs">
+                            <button type="button" class="chart-tab-btn active" id="tabCourseBtn" onclick="switchDonutChart('course')">Khóa học</button>
+                            {% if can_manage_finance %}
+                            <button type="button" class="chart-tab-btn" id="tabFinanceBtn" onclick="switchDonutChart('finance')">Thu nợ</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-canvas-wrap" id="courseChartWrap">
+                    <canvas id="courseDoughnutChart"></canvas>
+                </div>
+                {% if can_manage_finance %}
+                <div class="chart-canvas-wrap" id="financeChartWrap" style="display: none;">
+                    <canvas id="financeDoughnutChart"></canvas>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 2. Điểm tổng quan đánh giá chung -->
+            {% if can_manage_academics %}
+            <div class="panel" style="margin-bottom: 0;">
+                <div class="panel-header">
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;">
+                            <circle cx="12" cy="12" r="9" />
+                            <circle cx="12" cy="12" r="5" />
+                            <circle cx="12" cy="12" r="1" />
+                        </svg>
+                        Kết quả đánh giá chung
+                    </h2>
+                    <span style="font-size: 11px; color: #64748b;">{{ total_grades }} bài kiểm tra</span>
+                </div>
+
+                <div class="score-highlight">
+                    <div class="score-number">{{ average_score|floatformat:2 }}</div>
+                    <div class="score-caption">Điểm trung bình toàn trung tâm (Thang 10)</div>
+                </div>
+
+                <a href="{% url 'assessment_class_list' %}" class="view-all" style="display: block; text-align: center; padding-top: 4px;">
+                    Mở sổ đánh giá học thuật theo quy chế →
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- 3. Học viên mới đăng ký -->
+            {% if recent_students %}
+            <div class="panel" style="margin-bottom: 0;">
+                <div class="panel-header">
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                            <path d="M16 11l2 2l4 -4" />
+                        </svg>
+                        Học viên mới ghi danh
+                    </h2>
+                    <a href="{% url 'student_list' %}" class="view-all">Xem tất cả →</a>
+                </div>
+
+                <div class="activity-list">
+                    {% for st in recent_students %}
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-avatar">
+                                {{ st.full_name|slice:":1" }}
+                            </div>
+                            <div class="activity-meta">
+                                <span class="activity-name">{{ st.full_name }}</span>
+                                <span class="activity-sub">{{ st.phone|default:st.email }}</span>
+                            </div>
+                        </div>
+                        <span class="stat-badge success" style="font-size: 10px;">Học viên</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        Hệ thống Quản lý Vận hành Trung tâm Ngoại ngữ · English Center Enterprise v1.0
+    </footer>
+</div>
+
+<!-- 6. CHART.JS SCRIPT ENHANCEMENT -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Tab switching handlers
+    window.switchMainChart = function (type) {
+        const revWrap = document.getElementById("revenueChartWrap");
+        const clsWrap = document.getElementById("classesChartWrap");
+        const revBtn = document.getElementById("tabRevenueBtn");
+        const clsBtn = document.getElementById("tabClassBtn");
+        const heading = document.getElementById("mainChartHeading");
+        const desc = document.getElementById("mainChartDesc");
+
+        if (type === "revenue") {
+            if (revWrap) revWrap.style.display = "block";
+            if (clsWrap) clsWrap.style.display = "none";
+            if (revBtn) revBtn.classList.add("active");
+            if (clsBtn) clsBtn.classList.remove("active");
+            if (heading) heading.textContent = "Doanh thu học phí theo tháng";
+            if (desc) desc.textContent = "Biến động thực thu và dự thu trong 6 tháng gần nhất";
+            if (window.monthlyChart) window.monthlyChart.resize();
+        } else {
+            if (revWrap) revWrap.style.display = "none";
+            if (clsWrap) clsWrap.style.display = "block";
+            if (revBtn) revBtn.classList.remove("active");
+            if (clsBtn) clsBtn.classList.add("active");
+            if (heading) heading.textContent = "Phân bổ sĩ số học viên theo từng lớp";
+            if (desc) desc.textContent = "Tương quan giữa sĩ số thực tế và sức chứa tối đa của phòng học";
+            if (window.classChart) window.classChart.resize();
+        }
+    };
+
+    window.switchDonutChart = function (type) {
+        const crsWrap = document.getElementById("courseChartWrap");
+        const finWrap = document.getElementById("financeChartWrap");
+        const crsBtn = document.getElementById("tabCourseBtn");
+        const finBtn = document.getElementById("tabFinanceBtn");
+        const heading = document.getElementById("donutChartHeading");
+        const desc = document.getElementById("donutChartDesc");
+
+        if (type === "course") {
+            if (crsWrap) crsWrap.style.display = "block";
+            if (finWrap) finWrap.style.display = "none";
+            if (crsBtn) crsBtn.classList.add("active");
+            if (finBtn) finBtn.classList.remove("active");
+            if (heading) heading.textContent = "Phân bổ theo khóa học";
+            if (desc) desc.textContent = "Tỷ trọng học viên đang theo học từng chương trình";
+            if (window.courseChart) window.courseChart.resize();
+        } else {
+            if (crsWrap) crsWrap.style.display = "none";
+            if (finWrap) finWrap.style.display = "block";
+            if (crsBtn) crsBtn.classList.remove("active");
+            if (finBtn) finBtn.classList.add("active");
+            if (heading) heading.textContent = "Tỷ lệ hoàn thành học phí";
+            if (desc) desc.textContent = "Cơ cấu giữa số tiền đã nộp và dư nợ hiện tại";
+            if (window.financeChart) window.financeChart.resize();
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Cấu hình chung cho Chart.js
+        Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.color = "#64748b";
+
+        // 1. BIỂU ĐỒ DOANH THU HỌC PHÍ THEO THÁNG (CỘT TRÁI - TAB 1)
+        const monthlyLabels = [
+            {% for label in monthly_labels %}
+                "{{ label|escapejs }}",
+            {% endfor %}
+        ];
+        const monthlyPaid = [
+            {% for p in monthly_paid %}
+                {{ p }},
+            {% endfor %}
+        ];
+        const monthlyExpected = [
+            {% for exp in monthly_expected %}
+                {{ exp }},
+            {% endfor %}
+        ];
+
+        const ctxMonthly = document.getElementById("monthlyRevenueChart");
+        if (ctxMonthly && monthlyLabels.length > 0) {
+            window.monthlyChart = new Chart(ctxMonthly, {
+                type: "bar",
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [
+                        {
+                            label: "Thực thu thực tế",
+                            data: monthlyPaid,
+                            backgroundColor: "rgba(16, 185, 129, 0.88)",
+                            hoverBackgroundColor: "#059669",
+                            borderRadius: 8,
+                            barPercentage: 0.65,
+                            categoryPercentage: 0.6,
+                        },
+                        {
+                            label: "Tổng dự thu",
+                            data: monthlyExpected,
+                            backgroundColor: "rgba(226, 232, 240, 0.85)",
+                            hoverBackgroundColor: "#cbd5e1",
+                            borderRadius: 8,
+                            barPercentage: 0.65,
+                            categoryPercentage: 0.6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 850,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "end",
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 12, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 13, weight: '700' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function (context) {
+                                    let val = context.raw || 0;
+                                    return " " + context.dataset.label + ": " + val.toLocaleString("vi-VN") + " đ";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '600' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: "rgba(241, 245, 249, 1)" },
+                            ticks: {
+                                callback: function (val) {
+                                    if (val >= 1000000) {
+                                        return (val / 1000000).toLocaleString("vi-VN") + " tr";
+                                    }
+                                    return val.toLocaleString("vi-VN") + " đ";
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. BIỂU ĐỒ SĨ SỐ HỌC VIÊN THEO LỚP (CỘT TRÁI - TAB 2)
+        const classLabels = [
+            {% for item in class_statistics %}
+                "{{ item.name|escapejs }}",
+            {% endfor %}
+        ];
+        const studentCounts = [
+            {% for item in class_statistics %}
+                {{ item.student_count }},
+            {% endfor %}
+        ];
+        const maxStudents = [
+            {% for item in class_statistics %}
+                {{ item.max_students }},
+            {% endfor %}
+        ];
+
+        const ctxClass = document.getElementById("classStudentsChart");
+        if (ctxClass && classLabels.length > 0) {
+            window.classChart = new Chart(ctxClass, {
+                type: "bar",
+                data: {
+                    labels: classLabels,
+                    datasets: [
+                        {
+                            label: "Học viên đang học",
+                            data: studentCounts,
+                            backgroundColor: "rgba(37, 99, 235, 0.88)",
+                            hoverBackgroundColor: "#1d4ed8",
+                            borderRadius: 8,
+                            barPercentage: 0.65,
+                            categoryPercentage: 0.6,
+                        },
+                        {
+                            label: "Sức chứa tối đa",
+                            data: maxStudents,
+                            backgroundColor: "rgba(226, 232, 240, 0.8)",
+                            hoverBackgroundColor: "#cbd5e1",
+                            borderRadius: 8,
+                            barPercentage: 0.65,
+                            categoryPercentage: 0.6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "end",
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 12, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 13, weight: '700' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '500' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: "rgba(241, 245, 249, 1)" },
+                            ticks: { stepSize: 5 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. BIỂU ĐỒ TRÒN: PHÂN BỔ HỌC VIÊN THEO KHÓA HỌC (CỘT PHẢI - TAB 1)
+        const courseLabels = [
+            {% for label in course_labels %}
+                "{{ label|escapejs }}",
+            {% endfor %}
+        ];
+        const courseStudentCounts = [
+            {% for count in course_student_counts %}
+                {{ count }},
+            {% endfor %}
+        ];
+
+        const ctxCourse = document.getElementById("courseDoughnutChart");
+        if (ctxCourse && courseLabels.length > 0) {
+            window.courseChart = new Chart(ctxCourse, {
+                type: "doughnut",
+                data: {
+                    labels: courseLabels,
+                    datasets: [{
+                        data: courseStudentCounts,
+                        backgroundColor: [
+                            "#2563eb",
+                            "#10b981",
+                            "#8b5cf6",
+                            "#f59e0b",
+                            "#06b6d4",
+                            "#ec4899",
+                            "#64748b"
+                        ],
+                        hoverOffset: 8,
+                        borderWidth: 3,
+                        borderColor: "#ffffff"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 900
+                    },
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 12,
+                                font: { size: 11, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 13, weight: '700' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function (context) {
+                                    let val = context.raw || 0;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                                    return " " + context.label + ": " + val + " học viên (" + pct + "%)";
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. BIỂU ĐỒ TRÒN: HỌC PHÍ THỰC THU & DƯ NỢ (CỘT PHẢI - TAB 2)
+        {% if can_manage_finance %}
+        const ctxFinance = document.getElementById("financeDoughnutChart");
+        if (ctxFinance) {
+            const totalPaid = {{ total_paid|default:0 }};
+            const totalDebt = {{ total_debt|default:0 }};
+
+            window.financeChart = new Chart(ctxFinance, {
+                type: "doughnut",
+                data: {
+                    labels: ["Đã thu thực tế", "Công nợ còn lại"],
+                    datasets: [{
+                        data: [totalPaid, totalDebt],
+                        backgroundColor: ["#10b981", "#f59e0b"],
+                        hoverBackgroundColor: ["#059669", "#d97706"],
+                        borderWidth: 3,
+                        borderColor: "#ffffff",
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 900
+                    },
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 16,
+                                font: { size: 12, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 13, weight: '700' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function (context) {
+                                    let val = context.raw || 0;
+                                    return " " + context.label + ": " + val.toLocaleString("vi-VN") + " đ";
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        {% endif %}
+    });
+</script>
+{% endblock %}

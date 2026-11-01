@@ -1,0 +1,126 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Thêm phiếu học phí{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/finance/tuition/add.css' %}?v=20261018e">{% endblock %}
+{% block page_content %}
+<div class="container">
+
+    <div class="header">
+        <h1>💰 Tạo phiếu học phí</h1>
+        <p class="subtitle">
+            Ghi nhận học phí và số tiền học viên đã thanh toán.
+        </p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="error">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="student">Học viên *</label>
+                <select id="student" name="student" required>
+                    <option value="">-- Chọn học viên --</option>
+                    {% for student in students %}
+                        <option value="{{ student.id }}">
+                            {{ student.full_name }} - {{ student.email }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="english_class">Lớp học *</label>
+                <select id="english_class" name="english_class" required>
+                    <option value="">-- Chọn lớp học --</option>
+                    {% for class in classes %}
+                        <option
+                            value="{{ class.id }}"
+                            data-fee="{{ class.course.tuition }}"
+                        >
+                            {{ class.name }} - {{ class.course.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="hint">
+                    Chỉ lập phiếu cho học viên đã đăng ký vào lớp được chọn.
+                </p>
+            </div>
+
+            <div class="fee-preview">
+                <div class="fee-row">
+                    <span>Tổng học phí khóa học</span>
+                    <strong id="total-fee" class="fee-total">0 đ</strong>
+                </div>
+                <div class="fee-row">
+                    <span>Số tiền còn lại sau khi đóng</span>
+                    <strong id="remaining-fee">0 đ</strong>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="paid_amount">Số tiền đóng lần này (VNĐ) *</label>
+                <input
+                    type="number"
+                    id="paid_amount"
+                    name="paid_amount"
+                    min="0"
+                    step="1"
+                    value="0"
+                    required
+                >
+                <p class="hint">
+                    Nhập 0 nếu tạo phiếu ghi nhận học phí nhưng chưa thu tiền.
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_method">Phương thức thanh toán *</label>
+                <select id="payment_method" name="payment_method" required>
+                    {% for val, label in payment_methods %}
+                        <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_date">Ngày thanh toán</label>
+                <input
+                    type="date"
+                    id="payment_date"
+                    name="payment_date"
+                    value="{{ today }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="note">Ghi chú</label>
+                <textarea
+                    id="note"
+                    name="note"
+                    placeholder="Ví dụ: Đóng học phí đợt 1..."
+                ></textarea>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="button primary">
+                    Lưu phiếu học phí
+                </button>
+
+                <a href="{% url 'tuition_list' %}" class="button secondary">
+                    Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script id="studentClassesData" type="application/json">{{ student_classes_json|safe }}</script>
+<script defer src="{% static 'core/js/tuition_add.js' %}?v=20261031_v2"></script>
+{% endblock %}

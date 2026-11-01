@@ -1,0 +1,212 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Duyệt yêu cầu chuyển lớp | EnglishCenter{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/academics/class_transfers.css' %}?v=20261101a">
+{% endblock %}
+
+{% block page_content %}
+<div class="transfer-page-wrapper">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="transfer-header-area">
+        <div class="transfer-header-left">
+            <nav class="transfer-breadcrumb" aria-label="Breadcrumb">
+                <a href="{% url 'home' %}">Trang chủ</a>
+                <span class="sep">/</span>
+                <a href="{% url 'class_list' %}">Học vụ</a>
+                <span class="sep">/</span>
+                <span>Duyệt chuyển lớp</span>
+            </nav>
+            <h1 class="transfer-title">
+                <span class="transfer-title-icon">🔄</span>
+                Duyệt yêu cầu chuyển lớp khác khóa học
+            </h1>
+            <p class="transfer-subtitle">
+                Xem xét, phê duyệt hoặc từ chối các đề xuất chuyển học viên sang lớp thuộc khóa học khác do giáo vụ gửi lên.
+            </p>
+        </div>
+        <div class="transfer-header-actions">
+            <a href="{% url 'class_list' %}" class="btn-header-back">
+                ← Danh sách lớp học
+            </a>
+        </div>
+    </div>
+
+    <!-- STATS OVERVIEW CARDS -->
+    <div class="transfer-stats-grid">
+        <div class="transfer-stat-card stat-pending">
+            <div class="stat-icon-wrapper">⏳</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ pending_transfers|length }}</div>
+                <div class="stat-label">Yêu cầu chờ duyệt</div>
+            </div>
+        </div>
+
+        <div class="transfer-stat-card stat-processed">
+            <div class="stat-icon-wrapper">📋</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ processed_transfers|length }}</div>
+                <div class="stat-label">Đã xử lý gần đây</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        <div class="messages" style="margin-bottom: 24px;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}" style="padding: 12px 16px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; background: var(--surface); border: 1px solid var(--line);">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- PENDING TRANSFERS SECTION -->
+    <section class="transfer-section">
+        <div class="section-title-bar">
+            <h2 class="section-heading">
+                <span>Đang chờ duyệt</span>
+                <span class="section-counter">{{ pending_transfers|length }}</span>
+            </h2>
+        </div>
+
+        {% if pending_transfers %}
+            <div class="pending-cards-grid">
+                {% for transfer in pending_transfers %}
+                    <article class="transfer-review-card">
+                        <!-- TOP STUDENT & REQUEST META -->
+                        <div class="card-top-meta">
+                            <div class="student-meta-group">
+                                <div class="student-avatar-badge">👨‍🎓</div>
+                                <div>
+                                    <h3 class="student-name-text">{{ transfer.student.full_name|default:transfer.student }}</h3>
+                                    <div class="request-meta-text">
+                                        <span>Gửi lúc {{ transfer.requested_at|date:"d/m/Y H:i" }}</span>
+                                        &bull;
+                                        <span>Bởi {{ transfer.requested_by.get_full_name|default:transfer.requested_by.username }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="badge-pending-tag">⏳ Chờ duyệt</span>
+                        </div>
+
+                        <!-- ROUTE VISUALIZATION -->
+                        <div class="transfer-route-box">
+                            <div class="route-step">
+                                <span class="step-label">Lớp nguồn (Hiện tại)</span>
+                                <div class="step-class-name" title="{{ transfer.source_class.name }}">{{ transfer.source_class.name }}</div>
+                                <div class="step-course-name" title="{{ transfer.source_class.course.name }}">{{ transfer.source_class.course.name }}</div>
+                            </div>
+                            <div class="route-arrow">➔</div>
+                            <div class="route-step">
+                                <span class="step-label">Lớp đích (Chuyển đến)</span>
+                                <div class="step-class-name" title="{{ transfer.target_class.name }}">{{ transfer.target_class.name }}</div>
+                                <div class="step-course-name" title="{{ transfer.target_class.course.name }}">{{ transfer.target_class.course.name }}</div>
+                            </div>
+                        </div>
+
+                        <!-- REASON CALLOUT -->
+                        <div class="transfer-reason-callout">
+                            <div class="reason-callout-header">
+                                <span>💬 Lý do đề xuất chuyển lớp:</span>
+                            </div>
+                            <div class="reason-text">
+                                &ldquo;{{ transfer.reason|linebreaksbr }}&rdquo;
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS BAR -->
+                        <div class="transfer-actions-bar">
+                            <form method="post" action="{% url 'class_transfer_reject' transfer_id=transfer.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn TỪ CHỐI yêu cầu chuyển lớp của học viên {{ transfer.student }}?');">
+                                {% csrf_token %}
+                                <button class="btn-reject-transfer" type="submit">
+                                    ✕ Từ chối
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'class_transfer_approve' transfer_id=transfer.id %}" onsubmit="return confirm('Duyệt và điều chuyển học viên {{ transfer.student }} sang lớp {{ transfer.target_class.name }}?');">
+                                {% csrf_token %}
+                                <button class="btn-approve-transfer" type="submit">
+                                    ✓ Phê duyệt chuyển lớp
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="transfer-empty-card">
+                <div class="empty-illustration">🎉</div>
+                <div class="empty-title">Không có yêu cầu nào đang chờ duyệt</div>
+                <p class="empty-desc">Tất cả yêu cầu chuyển lớp đã được phê duyệt hoặc chưa phát sinh yêu cầu mới.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- PROCESSED TRANSFERS HISTORY -->
+    <section class="transfer-section">
+        <div class="section-title-bar">
+            <h2 class="section-heading">
+                <span>Lịch sử xử lý gần đây</span>
+            </h2>
+        </div>
+
+        <div class="history-table-card">
+            <div class="history-table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Học viên</th>
+                            <th>Lộ trình chuyển lớp</th>
+                            <th>Lý do</th>
+                            <th>Kết quả</th>
+                            <th>Người xử lý</th>
+                            <th>Thời điểm xử lý</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transfer in processed_transfers %}
+                            <tr>
+                                <td>
+                                    <span class="student-col-name">{{ transfer.student }}</span>
+                                </td>
+                                <td>
+                                    <span class="history-route-pill">
+                                        <strong>{{ transfer.source_class.name }}</strong>
+                                        <span class="history-arrow">→</span>
+                                        <strong>{{ transfer.target_class.name }}</strong>
+                                    </span>
+                                </td>
+                                <td style="max-width: 260px;" title="{{ transfer.reason }}">
+                                    <span style="color: var(--muted); font-size: 13px;">{{ transfer.reason|truncatechars:45 }}</span>
+                                </td>
+                                <td>
+                                    {% if transfer.status == "approved" %}
+                                        <span class="badge-history-status status-approved">✓ Đã duyệt</span>
+                                    {% elif transfer.status == "rejected" %}
+                                        <span class="badge-history-status status-rejected">✕ Từ chối</span>
+                                    {% else %}
+                                        <span class="badge-history-status">{{ transfer.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ transfer.approved_by.get_full_name|default:transfer.approved_by|default:"—" }}</td>
+                                <td>{{ transfer.approved_at|date:"d/m/Y H:i"|default:"—" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 32px 16px; color: var(--muted);">
+                                    Chưa có yêu cầu nào được xử lý trong hệ thống.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

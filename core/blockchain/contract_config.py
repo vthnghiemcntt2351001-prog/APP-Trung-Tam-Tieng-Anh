@@ -198,77 +198,83 @@ def validate_blockchain_config():
 
 
 # =====================================================
-# 4. KHOI TAO KET NOI WEB3
+# 4. CAC HAM KIEM TRA BLOCKCHAIN
 # =====================================================
 
-# Kiem tra cau hinh truoc khi ket noi
-validate_blockchain_config()
+def create_web3_client():
+    """
+    Tao Web3 client khi can dung Blockchain.
 
-# Tao doi tuong Web3 ket noi voi Ganache
-web3 = Web3(
-    Web3.HTTPProvider(
-        BLOCKCHAIN_RPC_URL,
-        request_kwargs={"timeout": 10}
-    )
-)
+    Khong ket noi RPC o cap module de Django van khoi dong duoc
+    khi Ganache hoac Smart Contract chua san sang.
+    """
 
-# Kiem tra ket noi Blockchain
-if not web3.is_connected():
-    raise ConnectionError(
-        f"Khong the ket noi Blockchain tai "
-        f"{BLOCKCHAIN_RPC_URL}. "
-        f"Hay kiem tra Ganache va RPC."
+    validate_blockchain_config()
+
+    web3 = Web3(
+        Web3.HTTPProvider(
+            BLOCKCHAIN_RPC_URL,
+            request_kwargs={"timeout": 10}
+        )
     )
 
+    return web3
 
-# =====================================================
-# 5. KIEM TRA DIA CHI SMART CONTRACT
-# =====================================================
 
-# Chuyen dia chi sang checksum address
-CHECKSUM_CONTRACT_ADDRESS = Web3.to_checksum_address(
-    CONTRACT_ADDRESS
-)
+def get_contract():
+    """
+    Tao Smart Contract instance khi can thao tac Blockchain.
+    """
 
-# Kiem tra Smart Contract co ton tai tren mang hien tai
-contract_code = web3.eth.get_code(
-    CHECKSUM_CONTRACT_ADDRESS
-)
+    web3 = create_web3_client()
 
-if not contract_code or contract_code == b"\x00":
-    raise ValueError(
-        "Khong tim thay bytecode Smart Contract tai "
-        f"{CHECKSUM_CONTRACT_ADDRESS}. "
-        "Hay kiem tra dia chi hop dong va mang Ganache."
+    if not web3.is_connected():
+        raise ConnectionError(
+            f"Khong the ket noi Blockchain tai "
+            f"{BLOCKCHAIN_RPC_URL}. "
+            f"Hay kiem tra Ganache va RPC."
+        )
+
+    checksum_contract_address = Web3.to_checksum_address(
+        CONTRACT_ADDRESS
     )
 
+    contract_code = web3.eth.get_code(
+        checksum_contract_address
+    )
 
-# =====================================================
-# 6. KHOI TAO DOI TUONG SMART CONTRACT
-# =====================================================
+    if not contract_code or contract_code == b"\x00":
+        raise ValueError(
+            "Khong tim thay bytecode Smart Contract tai "
+            f"{checksum_contract_address}. "
+            "Hay kiem tra dia chi hop dong va mang Ganache."
+        )
 
-contract = web3.eth.contract(
-    address=CHECKSUM_CONTRACT_ADDRESS,
-    abi=CONTRACT_ABI
-)
+    contract = web3.eth.contract(
+        address=checksum_contract_address,
+        abi=CONTRACT_ABI
+    )
 
-
-# =====================================================
-# 7. CAC HAM KIEM TRA BLOCKCHAIN
-# =====================================================
+    return web3, contract
 
 def check_blockchain_connection():
     """
     Kiem tra ket noi Blockchain.
     Tra ve True neu ket noi thanh cong.
     """
-    return web3.is_connected()
+    try:
+        web3 = create_web3_client()
+        return web3.is_connected()
+    except Exception:
+        return False
 
 
 def get_blockchain_info():
     """
     Lay thong tin co ban cua Blockchain.
     """
+    web3, contract = get_contract()
+
     return {
         "connected": web3.is_connected(),
         "rpc_url": BLOCKCHAIN_RPC_URL,
