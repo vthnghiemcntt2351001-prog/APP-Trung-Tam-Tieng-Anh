@@ -330,14 +330,35 @@
                         </div>
                     </div>
                 </div>
-                <div class="chart-canvas-wrap" id="courseChartWrap">
+                <div class="chart-canvas-wrap" id="courseChartWrap" style="height: 220px;">
                     <canvas id="courseDoughnutChart"></canvas>
                 </div>
                 {% if can_manage_finance %}
-                <div class="chart-canvas-wrap" id="financeChartWrap" style="display: none;">
+                <div class="chart-canvas-wrap" id="financeChartWrap" style="display: none; height: 220px;">
                     <canvas id="financeDoughnutChart"></canvas>
                 </div>
                 {% endif %}
+
+                <!-- Tỷ trọng học viên theo từng khóa học phong cách hiện đại -->
+                <div class="traffic-stats-row" id="trafficStatsRow">
+                    {% for course in top_courses %}
+                    <div class="traffic-stat-col">
+                        <div class="traffic-percent">{{ course.percentage }}%</div>
+                        <div class="traffic-label">
+                            <span class="traffic-bullet" style="background-color: {{ course.color }};"></span>
+                            <span class="traffic-name" title="{{ course.name }}">{{ course.name }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="traffic-stat-col" style="grid-column: 1 / -1;">
+                        <div class="traffic-percent">100%</div>
+                        <div class="traffic-label">
+                            <span class="traffic-bullet" style="background-color: #8b5cf6;"></span>
+                            <span class="traffic-name">Đang học</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
 
             <!-- 2. Điểm tổng quan đánh giá chung -->
@@ -449,6 +470,7 @@
         const heading = document.getElementById("donutChartHeading");
         const desc = document.getElementById("donutChartDesc");
 
+        const statsRow = document.getElementById("trafficStatsRow");
         if (type === "course") {
             if (crsWrap) crsWrap.style.display = "block";
             if (finWrap) finWrap.style.display = "none";
@@ -456,6 +478,7 @@
             if (finBtn) finBtn.classList.remove("active");
             if (heading) heading.textContent = "Phân bổ theo khóa học";
             if (desc) desc.textContent = "Tỷ trọng học viên đang theo học từng chương trình";
+            if (statsRow) statsRow.style.display = "grid";
             if (window.courseChart) window.courseChart.resize();
         } else {
             if (crsWrap) crsWrap.style.display = "none";
@@ -464,6 +487,7 @@
             if (finBtn) finBtn.classList.add("active");
             if (heading) heading.textContent = "Tỷ lệ hoàn thành học phí";
             if (desc) desc.textContent = "Cơ cấu giữa số tiền đã nộp và dư nợ hiện tại";
+            if (statsRow) statsRow.style.display = "none";
             if (window.financeChart) window.financeChart.resize();
         }
     };
@@ -492,28 +516,49 @@
 
         const ctxMonthly = document.getElementById("monthlyRevenueChart");
         if (ctxMonthly && monthlyLabels.length > 0) {
+            const ctxM = ctxMonthly.getContext("2d");
+            const gradPurple = ctxM.createLinearGradient(0, 0, 0, 270);
+            gradPurple.addColorStop(0, "rgba(139, 92, 246, 0.35)");
+            gradPurple.addColorStop(0.65, "rgba(139, 92, 246, 0.08)");
+            gradPurple.addColorStop(1, "rgba(139, 92, 246, 0.00)");
+
+            const gradPink = ctxM.createLinearGradient(0, 0, 0, 270);
+            gradPink.addColorStop(0, "rgba(244, 63, 94, 0.28)");
+            gradPink.addColorStop(0.65, "rgba(244, 63, 94, 0.06)");
+            gradPink.addColorStop(1, "rgba(244, 63, 94, 0.00)");
+
             window.monthlyChart = new Chart(ctxMonthly, {
-                type: "bar",
+                type: "line",
                 data: {
                     labels: monthlyLabels,
                     datasets: [
                         {
                             label: "Thực thu thực tế",
                             data: monthlyPaid,
-                            backgroundColor: "rgba(16, 185, 129, 0.88)",
-                            hoverBackgroundColor: "#059669",
-                            borderRadius: 8,
-                            barPercentage: 0.65,
-                            categoryPercentage: 0.6,
+                            borderColor: "#8b5cf6",
+                            backgroundColor: gradPurple,
+                            borderWidth: 3,
+                            tension: 0.42,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: "#8b5cf6",
+                            pointBorderColor: "#ffffff",
+                            pointBorderWidth: 2,
                         },
                         {
                             label: "Tổng dự thu",
                             data: monthlyExpected,
-                            backgroundColor: "rgba(226, 232, 240, 0.85)",
-                            hoverBackgroundColor: "#cbd5e1",
-                            borderRadius: 8,
-                            barPercentage: 0.65,
-                            categoryPercentage: 0.6,
+                            borderColor: "#f43f5e",
+                            backgroundColor: gradPink,
+                            borderWidth: 3,
+                            tension: 0.42,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: "#f43f5e",
+                            pointBorderColor: "#ffffff",
+                            pointBorderWidth: 2,
                         }
                     ]
                 },
@@ -524,13 +569,17 @@
                         duration: 850,
                         easing: 'easeOutQuart'
                     },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
                     plugins: {
                         legend: {
                             position: "top",
                             align: "end",
                             labels: {
-                                boxWidth: 12,
-                                boxHeight: 12,
+                                boxWidth: 10,
+                                boxHeight: 10,
                                 usePointStyle: true,
                                 pointStyle: 'circle',
                                 font: { size: 12, weight: '600' }
@@ -557,7 +606,10 @@
                         },
                         y: {
                             beginAtZero: true,
-                            grid: { color: "rgba(241, 245, 249, 1)" },
+                            grid: {
+                                color: "rgba(226, 232, 240, 0.6)",
+                                borderDash: [4, 4]
+                            },
                             ticks: {
                                 callback: function (val) {
                                     if (val >= 1000000) {
@@ -672,21 +724,14 @@
 
         const ctxCourse = document.getElementById("courseDoughnutChart");
         if (ctxCourse && courseLabels.length > 0) {
+            const donutColors = ["#f43f5e", "#8b5cf6", "#f59e0b", "#06b6d4", "#10b981", "#6366f1"];
             window.courseChart = new Chart(ctxCourse, {
                 type: "doughnut",
                 data: {
                     labels: courseLabels,
                     datasets: [{
                         data: courseStudentCounts,
-                        backgroundColor: [
-                            "#2563eb",
-                            "#10b981",
-                            "#8b5cf6",
-                            "#f59e0b",
-                            "#06b6d4",
-                            "#ec4899",
-                            "#64748b"
-                        ],
+                        backgroundColor: donutColors.slice(0, courseLabels.length),
                         hoverOffset: 8,
                         borderWidth: 3,
                         borderColor: "#ffffff"
@@ -695,7 +740,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '68%',
+                    cutout: '72%',
                     animation: {
                         animateScale: true,
                         animateRotate: true,
@@ -703,15 +748,7 @@
                     },
                     plugins: {
                         legend: {
-                            position: "bottom",
-                            labels: {
-                                boxWidth: 10,
-                                boxHeight: 10,
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                padding: 12,
-                                font: { size: 11, weight: '600' }
-                            }
+                            display: false
                         },
                         tooltip: {
                             backgroundColor: '#0f172a',

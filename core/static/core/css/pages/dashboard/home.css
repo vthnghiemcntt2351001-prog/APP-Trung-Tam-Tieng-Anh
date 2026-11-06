@@ -908,3 +908,67 @@
         transform: none !important;
     }
 }
+
+
+/* --------------------------------------------------------------------------
+   TRAFFIC STATS ROW (Percentage breakdown under Donut chart)
+   -------------------------------------------------------------------------- */
+.traffic-stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+    gap: 8px;
+    text-align: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.traffic-stat-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+}
+
+.traffic-percent {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.traffic-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    width: 100%;
+}
+
+.traffic-bullet {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.traffic-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 75px;
+}
+
+[data-theme="dark"] .traffic-stats-row {
+    border-top-color: #334155;
+}
+
+[data-theme="dark"] .traffic-percent {
+    color: #f8fafc;
+}

@@ -1,94 +1,417 @@
-* { box-sizing: border-box; }
+/* ==========================================================================
+   TUITION PAYMENT / EDIT FORM - MODERN SAAS VIEW
+   Compatible with English Center design tokens & Dark/Light mode
+   ========================================================================== */
 
-        body {
-            margin: 0;
-            padding: 30px 15px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
+.tuition-form-wrapper {
+    max-width: 820px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    animation: fadeInTuitionEdit 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-        .container { max-width: 720px; margin: auto; }
+@keyframes fadeInTuitionEdit {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        h1 { font-size: 27px; margin: 0 0 8px; }
+/* 1. BREADCRUMB & HEADER */
+.form-header-area {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-        .subtitle {
-            color: #64748b;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
+.form-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted, #64748b);
+    margin-bottom: 8px;
+}
 
-        .form-card {
-            background: white;
-            padding: 28px;
-            border-radius: 14px;
-            box-shadow: 0 5px 20px #0f172a0a;
-        }
+.form-breadcrumb a {
+    color: var(--muted, #64748b);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
 
-        .info {
-            background: #eef2ff;
-            border-radius: 10px;
-            padding: 17px;
-            margin-bottom: 23px;
-        }
+.form-breadcrumb a:hover {
+    color: var(--primary, #2563eb);
+}
 
-        .info p { margin: 7px 0; font-size: 14px; }
+.form-breadcrumb .sep {
+    opacity: 0.6;
+    font-size: 11px;
+}
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            font-size: 14px;
-        }
+.form-badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #10b981;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
 
-        .form-group { margin-bottom: 20px; }
+.form-title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ink-heading, #0f172a);
+    letter-spacing: -0.025em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
-        }
+.form-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted, #64748b);
+    line-height: 1.5;
+}
 
-        textarea { resize: vertical; min-height: 90px; }
+/* 2. MAIN FORM CARD */
+.form-card {
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: var(--shadow, 0 4px 20px -2px rgba(15, 23, 42, 0.05));
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
 
-        .hint {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 7px;
-        }
+/* TUITION SUMMARY INFO BOX */
+.tuition-summary-box {
+    background: var(--surface-hover, #f8fafc);
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 25px;
-        }
+.summary-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
 
-        .button {
-            padding: 12px 18px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
+.summary-student-name {
+    font-size: 15px;
+    font-weight: 750;
+    color: var(--ink-heading, #0f172a);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-        .primary { background: #4f46e5; color: white; }
-        .secondary { background: #e2e8f0; color: #334155; }
+.summary-student-badge {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted, #64748b);
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--line, #cbd5e1);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
 
-        .message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
+.summary-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line, #cbd5e1);
+}
 
-        @media (max-width: 500px) {
-            .form-card { padding: 18px; }
-            h1 { font-size: 23px; }
-        }
+.summary-metric-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.summary-metric-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted, #64748b);
+}
+
+.summary-metric-val {
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-heading, #0f172a);
+}
+
+.summary-metric-val.paid {
+    color: #10b981;
+}
+
+.summary-metric-val.debt {
+    color: #f59e0b;
+}
+
+/* FORM FIELDS */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--ink-heading, #0f172a);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.req-star {
+    color: #ef4444;
+}
+
+.input-control,
+.select-control,
+.textarea-control {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: var(--surface-hover, #f8fafc);
+    border: 1.5px solid var(--line, #cbd5e1);
+    color: var(--ink, #0f172a);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.textarea-control {
+    height: auto;
+    min-height: 85px;
+    padding: 12px 14px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.input-control:focus,
+.select-control:focus,
+.textarea-control:focus {
+    border-color: var(--primary, #2563eb);
+    background: var(--surface, #ffffff);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-hint {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--muted, #64748b);
+}
+
+/* FORM ACTIONS */
+.form-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line, #e2e8f0);
+}
+
+.btn-form-pay {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 10px;
+    background: #10b981;
+    color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-form-pay:hover {
+    background: #059669;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+}
+
+.btn-form-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 10px;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--line, #cbd5e1);
+    color: var(--ink, #334155);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-form-secondary:hover {
+    background: var(--surface-hover, #f8fafc);
+    color: var(--ink-heading, #0f172a);
+    border-color: #94a3b8;
+}
+
+/* 3. PAYMENT HISTORY CARD */
+.payment-history-card {
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: var(--shadow, 0 4px 20px -2px rgba(15, 23, 42, 0.05));
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.history-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.history-card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 750;
+    color: var(--ink-heading, #0f172a);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.history-count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary, #2563eb);
+    background: rgba(37, 99, 235, 0.1);
+    padding: 2px 8px;
+    border-radius: 9999px;
+}
+
+.history-table-box {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.history-table th {
+    background: var(--surface-hover, #f8fafc);
+    color: var(--muted, #64748b);
+    font-size: 11.5px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--line, #e2e8f0);
+}
+
+.history-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line, #e2e8f0);
+    color: var(--ink, #0f172a);
+    vertical-align: middle;
+}
+
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.history-table tbody tr:hover {
+    background: var(--surface-hover, #f8fafc);
+}
+
+.method-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary, #2563eb);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.btn-print-receipt {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--surface-hover, #f1f5f9);
+    border: 1px solid var(--line, #cbd5e1);
+    color: var(--primary, #2563eb);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.btn-print-receipt:hover {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: var(--primary, #2563eb);
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+    .form-card,
+    .payment-history-card {
+        padding: 20px 16px;
+    }
+    .summary-metrics-grid,
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .form-actions-bar {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+    .btn-form-pay,
+    .btn-form-secondary {
+        width: 100%;
+    }
+}

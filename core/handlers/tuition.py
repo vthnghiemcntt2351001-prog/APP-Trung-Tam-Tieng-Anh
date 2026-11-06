@@ -53,6 +53,7 @@ def tuition_list(request):
         "total_fee": total_fee,
         "total_paid": total_paid,
         "total_debt": total_debt,
+        "total_records": paginator.count,
         **admin_context(request),
     }
 

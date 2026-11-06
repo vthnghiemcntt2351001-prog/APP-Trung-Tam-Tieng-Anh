@@ -26,7 +26,7 @@
     <div class="detail-hero-banner">
         <div class="hero-left-content">
             <div class="hero-badge-pill">
-                <span>🎓</span>
+                <i class="ri-graduation-cap-line" style="font-size: 15px;"></i>
                 <span>Khóa: {{ english_class.course.name }}</span>
             </div>
             <h1 class="hero-class-title">{{ english_class.name }}</h1>
@@ -38,34 +38,25 @@
 
         <div class="hero-actions-group">
             <a href="{% url 'session_list' english_class.id %}" class="btn-hero-primary" title="Quản lý buổi học và điểm danh học viên">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
+                <i class="ri-calendar-check-line" style="font-size: 16px;"></i>
                 <span>Điểm danh & Buổi học</span>
             </a>
 
             <a href="{% url 'class_assessments' class_id=english_class.id %}" class="btn-hero-ghost" title="Quản lý đợt đánh giá & bảng điểm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                </svg>
+                <i class="ri-bar-chart-grouped-line" style="font-size: 16px;"></i>
                 <span>Đánh giá & Điểm số</span>
             </a>
 
             {% if can_manage_academics %}
                 <a href="{% url 'class_edit' english_class.id %}" class="btn-hero-ghost" title="Chỉnh sửa thông tin lớp học">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
+                    <i class="ri-edit-line" style="font-size: 16px;"></i>
                     <span>Sửa</span>
                 </a>
             {% endif %}
 
             <a href="{% url 'class_list' %}" class="btn-hero-ghost" title="Quay lại danh sách lớp">
-                <span>← Danh sách</span>
+                <i class="ri-arrow-left-line" style="font-size: 16px;"></i>
+                <span>Danh sách</span>
             </a>
         </div>
     </div>
@@ -75,7 +66,7 @@
         <div class="messages-container" style="display: flex; flex-direction: column; gap: 8px;">
             {% for message in messages %}
                 <div class="notice-box {% if message.tags == 'error' %}warning{% else %}info{% endif %}">
-                    <span>{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
+                    <span>{% if message.tags == 'success' %}<i class="ri-checkbox-circle-line"></i>{% elif message.tags == 'error' %}<i class="ri-error-warning-line"></i>{% else %}<i class="ri-information-line"></i>{% endif %}</span>
                     <div>{{ message }}</div>
                 </div>
             {% endfor %}
@@ -86,7 +77,7 @@
     <div class="class-info-card">
         <div class="card-title-row">
             <h2 class="card-title-text">
-                <span class="card-title-icon">📋</span>
+                <span class="card-title-icon"><i class="ri-file-list-3-line"></i></span>
                 <span>Thông số & Quy mô lớp học</span>
             </h2>
             <span class="badge-status-pill badge-secondary">
@@ -150,7 +141,7 @@
     <div class="class-info-card">
         <div class="card-title-row">
             <h2 class="card-title-text">
-                <span class="card-title-icon">➕</span>
+                <span class="card-title-icon"><i class="ri-user-add-line"></i></span>
                 <span>Đăng ký học viên vào lớp</span>
             </h2>
         </div>
@@ -173,16 +164,13 @@
                     </select>
 
                     <button type="submit" class="btn-enroll-submit">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
+                        <i class="ri-user-add-line" style="font-size: 16px;"></i>
                         <span>Xác nhận đăng ký vào lớp</span>
                     </button>
                 </form>
             {% else %}
                 <div class="notice-box info">
-                    <span>ℹ️</span>
+                    <span><i class="ri-information-line"></i></span>
                     <div>
                         <strong>Không còn học viên khả dụng để xếp lớp.</strong>
                         <div>Tất cả học viên trong hệ thống hiện đã được xếp vào lớp này hoặc bạn chưa tạo thêm hồ sơ học viên mới.</div>
@@ -191,7 +179,7 @@
             {% endif %}
         {% else %}
             <div class="notice-box warning">
-                <span>⚠️</span>
+                <span><i class="ri-alert-line"></i></span>
                 <div>
                     <strong>Lớp học đã đạt sĩ số tối đa ({{ students.count }}/{{ english_class.max_students }}).</strong>
                     <div>Để tiếp tục ghi danh thêm học viên, vui lòng tăng chỉ tiêu sĩ số tối đa tại trang chỉnh sửa lớp học.</div>
@@ -265,7 +253,7 @@
                             <td>
                                 {% if enrollment.student_id in pending_transfer_student_ids %}
                                     <span class="badge-status-pill badge-warning" title="Đang chờ Admin duyệt chuyển lớp">
-                                        ⏳ Chờ duyệt chuyển
+                                        <i class="ri-time-line"></i> Chờ duyệt chuyển
                                     </span>
                                 {% elif enrollment.status == "transferred" %}
                                     <span class="badge-status-pill badge-secondary">
@@ -286,8 +274,8 @@
 
                             <td style="text-align: right;">
                                 {% if enrollment.student_id in pending_transfer_student_ids %}
-                                    <span style="font-size: 12px; color: #b45309; font-weight: 600;">
-                                        🔒 Đang chờ duyệt
+                                    <span style="font-size: 12px; color: #b45309; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="ri-lock-line"></i> Đang chờ duyệt
                                     </span>
                                 {% elif enrollment.status == "studying" and target_classes %}
                                     <button
@@ -295,7 +283,7 @@
                                         class="btn-transfer-trigger"
                                         onclick="openTransferModal('{{ student.id }}', '{{ student.full_name|escapejs }}', '{% url 'enrollment_transfer' class_id=english_class.id student_id=student.id %}')"
                                     >
-                                        <span>🔄</span>
+                                        <i class="ri-arrow-left-right-line" style="font-size: 14px;"></i>
                                         <span>Chuyển lớp</span>
                                     </button>
                                 {% elif enrollment.status == "studying" and not target_classes %}
@@ -311,7 +299,7 @@
                             <td colspan="6">
                                 <div class="class-empty-state">
                                     <div class="class-empty-icon">
-                                        👨‍🎓
+                                        <i class="ri-graduation-cap-line" style="font-size: 38px; color: var(--primary, #2563eb);"></i>
                                     </div>
                                     <h3 class="class-empty-title">Lớp học chưa có học viên</h3>
                                     <p class="class-empty-desc">
@@ -333,7 +321,7 @@
     <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="transferModalTitle">
         <div class="modal-header">
             <div class="modal-header-info">
-                <div class="modal-header-icon">🔄</div>
+                <div class="modal-header-icon"><i class="ri-arrow-left-right-line"></i></div>
                 <div>
                     <h3 id="transferModalTitle" class="modal-title">Yêu cầu Chuyển lớp</h3>
                     <p class="modal-subtitle">Điều chuyển học viên sang lớp học khác trong hệ thống</p>
@@ -346,7 +334,7 @@
             {% csrf_token %}
             <div class="modal-body">
                 <div class="transfer-student-summary">
-                    <div class="summary-avatar">👨‍🎓</div>
+                    <div class="summary-avatar"><i class="ri-user-smile-line" style="color: var(--primary, #2563eb);"></i></div>
                     <div class="summary-text">
                         <span class="summary-label">Học viên chuyển lớp:</span>
                         <strong class="summary-name" id="modalStudentName">...</strong>
@@ -367,7 +355,7 @@
                         {% endfor %}
                     </select>
                     <div class="modal-field-hint">
-                        💡 <em>Lưu ý:</em> Nếu lớp mới cùng khóa học, hệ thống sẽ chuyển ngay lập tức. Nếu khác khóa học, yêu cầu sẽ được chuyển tới quản trị viên để phê duyệt.
+                        <i class="ri-lightbulb-line" style="color: #f59e0b; vertical-align: middle;"></i> <em>Lưu ý:</em> Nếu lớp mới cùng khóa học, hệ thống sẽ chuyển ngay lập tức. Nếu khác khóa học, yêu cầu sẽ được chuyển tới quản trị viên để phê duyệt.
                     </div>
                 </div>
 
@@ -387,7 +375,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn-modal-cancel" onclick="closeTransferModal()">Hủy bỏ</button>
                 <button type="submit" class="btn-modal-submit">
-                    <span>Xác nhận chuyển lớp</span> &rarr;
+                    <span>Xác nhận chuyển lớp</span> <i class="ri-arrow-right-line" style="vertical-align: middle;"></i>
                 </button>
             </div>
         </form>

@@ -197,6 +197,11 @@ a { color: var(--secondary); }
     transition: color 0.18s ease, filter 0.18s ease;
 }
 
+.nav-icon i {
+    font-size: 19px;
+    line-height: 1;
+}
+
 .nav-link:hover:not(.is-active) .nav-icon {
     color: #60a5fa;
 }

@@ -1,162 +1,312 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% load query_tags %}
-{% block title %}Quản lý học phí | EnglishCenter{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/finance/tuition/list.css' %}?v=20261101_v3">{% endblock %}
+
+{% block title %}Quản lý học phí & Công nợ | English Center{% endblock %}
+{% block breadcrumb %}Học phí & thanh toán{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/css/pages/finance/tuition/list.css' %}?v=20261101_v4">
+{% endblock %}
 
 {% block page_content %}
-<div class="container">
+<div class="tuition-page-wrapper">
 
-    <div class="header">
-        <div>
-            <h1>💰 Quản lý học phí</h1>
-            <p class="subtitle">Theo dõi học phí, khoản đã đóng và công nợ học viên.</p>
+    <!-- 1. BREADCRUMB & HEADER -->
+    <div class="tuition-header-area">
+        <div class="tuition-header-left">
+            <nav class="tuition-breadcrumb" aria-label="Breadcrumb">
+                <a href="{% url 'home' %}">Trang chủ</a>
+                <span class="sep">/</span>
+                <span>Tài chính</span>
+                <span class="sep">/</span>
+                <span>Quản lý học phí</span>
+            </nav>
+            <div class="tuition-badge-tag">
+                <i class="ri-wallet-3-line"></i>
+                <span>Tài chính & Thu học phí</span>
+            </div>
+            <h1 class="tuition-title">Quản lý học phí & Công nợ</h1>
+            <p class="tuition-subtitle">Theo dõi các khoản thu học phí, lịch sử đóng tiền theo lớp và quản lý đối soát công nợ học viên.</p>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <a class="button gray" href="{% url 'tuition_export_excel' %}{% if keyword %}?q={{ keyword }}{% endif %}" style="display: inline-flex; align-items: center; gap: 6px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                    <line x1="12" y1="11" x2="12" y2="17" />
-                    <polyline points="9 14 12 17 15 14" />
-                </svg>
+
+        <div class="tuition-header-actions">
+            <a class="btn-tuition-secondary" href="{% url 'tuition_export_excel' %}{% if keyword %}?q={{ keyword }}{% endif %}" title="Xuất danh sách học phí ra file Excel">
+                <i class="ri-file-excel-2-line" style="font-size: 16px; color: #10b981;"></i>
                 <span>Xuất Excel</span>
             </a>
-            <a class="button" href="{% url 'tuition_add' %}">+ Tạo phiếu học phí</a>
+
+            <a class="btn-tuition-primary" href="{% url 'tuition_add' %}" title="Tạo mới phiếu thu học phí">
+                <i class="ri-add-circle-line" style="font-size: 16px;"></i>
+                <span>Tạo phiếu học phí</span>
+            </a>
         </div>
     </div>
 
+    <!-- 2. MESSAGES ALERT -->
     {% if messages %}
-        {% for message in messages %}
-            <div class="message">{{ message }}</div>
-        {% endfor %}
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            {% for message in messages %}
+                <div class="notice-box {% if message.tags == 'error' %}warning{% else %}info{% endif %}" style="display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line);">
+                    <span>{% if message.tags == 'success' %}<i class="ri-checkbox-circle-line" style="color: #10b981;"></i>{% elif message.tags == 'error' %}<i class="ri-error-warning-line" style="color: #ef4444;"></i>{% else %}<i class="ri-information-line" style="color: var(--primary);"></i>{% endif %}</span>
+                    <div style="font-size: 13.5px; color: var(--ink);">{{ message }}</div>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <div class="stats">
-        <div class="card">
-            <div class="card-label">Tổng học phí</div>
-            <div class="card-value blue">{{ total_fee|currency_vnd }}</div>
+    <!-- 3. KPI STATS OVERVIEW CARDS -->
+    <div class="tuition-stats-grid">
+        <div class="tuition-stat-card">
+            <div class="stat-icon-box stat-icon-blue">
+                <i class="ri-bank-card-line"></i>
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number text-primary">{{ total_fee|currency_vnd }}</div>
+                <div class="stat-title">Tổng học phí hệ thống</div>
+                <div class="stat-sub">Dự thu theo danh sách ghi danh</div>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="card-label">Tổng tiền đã thu</div>
-            <div class="card-value green">{{ total_paid|currency_vnd }}</div>
+        <div class="tuition-stat-card">
+            <div class="stat-icon-box stat-icon-emerald">
+                <i class="ri-checkbox-circle-line"></i>
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number text-emerald">{{ total_paid|currency_vnd }}</div>
+                <div class="stat-title">Tổng thực thu (Đã thu)</div>
+                <div class="stat-sub">Khoản tiền đã nhập quỹ thực tế</div>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="card-label">Tổng công nợ còn lại</div>
-            <div class="card-value orange">{{ total_debt|currency_vnd }}</div>
+        <div class="tuition-stat-card">
+            <div class="stat-icon-box stat-icon-amber">
+                <i class="ri-time-line"></i>
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number text-amber">{{ total_debt|currency_vnd }}</div>
+                <div class="stat-title">Tổng công nợ còn lại</div>
+                <div class="stat-sub">Khoản tiền cần đôn đốc thanh toán</div>
+            </div>
+        </div>
+
+        <div class="tuition-stat-card">
+            <div class="stat-icon-box stat-icon-purple">
+                <i class="ri-file-list-3-line"></i>
+            </div>
+            <div class="stat-content-wrap">
+                <div class="stat-number">{{ total_records }}</div>
+                <div class="stat-title">Hồ sơ học phí</div>
+                <div class="stat-sub">Tổng số phiếu thu đang quản lý</div>
+            </div>
         </div>
     </div>
 
-    <div class="table-card">
-        <div class="toolbar">
-            <form method="get" class="search">
+    <!-- 4. TOOLBAR & SEARCH FORM -->
+    <div class="tuition-toolbar-card">
+        <form method="get" class="tuition-search-form">
+            <div class="search-field-wrapper">
+                <span class="search-field-icon">
+                    <i class="ri-search-line"></i>
+                </span>
                 <input
                     type="text"
                     name="q"
-                    placeholder="Tìm theo tên học viên hoặc lớp..."
+                    class="search-field-input"
+                    placeholder="Tìm theo tên học viên hoặc tên lớp..."
                     value="{{ keyword }}"
+                    autocomplete="off"
                 >
-                <button class="button" type="submit">Tìm kiếm</button>
                 {% if keyword %}
-                    <a href="{% url 'tuition_list' %}" class="button gray">Xóa lọc</a>
+                    <a href="{% url 'tuition_list' %}" class="search-reset-btn" title="Xóa từ khóa">✕</a>
                 {% endif %}
-            </form>
-        </div>
+            </div>
 
-        <div class="table-wrap">
-            <table class="tuition-table">
+            <button class="btn-tuition-search" type="submit">
+                <i class="ri-search-2-line"></i>
+                <span>Tìm kiếm</span>
+            </button>
+
+            {% if keyword %}
+                <a href="{% url 'tuition_list' %}" class="btn-tuition-reset-link">
+                    <i class="ri-filter-off-line"></i>
+                    <span>Xóa bộ lọc</span>
+                </a>
+            {% endif %}
+        </form>
+
+        <div class="toolbar-stats-pill">
+            <i class="ri-file-text-line"></i>
+            <span>Hiển thị: <strong>{{ tuitions|length }}</strong> / {{ total_records }} phiếu</span>
+        </div>
+    </div>
+
+    <!-- 5. TUITION DATA TABLE -->
+    <div class="tuition-table-card">
+        <div class="table-responsive-box">
+            <table class="tuition-modern-table">
                 <thead>
                     <tr>
-                        <th style="width: 16%;">Học viên</th>
-                        <th style="width: 18%;">Lớp học</th>
-                        <th class="col-money" style="text-align: right; width: 11%;">Tổng học phí</th>
-                        <th class="col-money" style="text-align: right; width: 11%;">Đã đóng</th>
-                        <th class="col-money" style="text-align: right; width: 11%;">Còn nợ</th>
-                        <th style="text-align: center; width: 11%;">Trạng thái</th>
-                        <th style="text-align: right; width: 22%;">Thao tác</th>
+                        <th style="width: 50px;">STT</th>
+                        <th style="width: 22%;">Học viên</th>
+                        <th style="width: 20%;">Lớp học & Khóa</th>
+                        <th class="col-money-num" style="width: 12%;">Tổng học phí</th>
+                        <th class="col-money-num" style="width: 12%;">Đã đóng</th>
+                        <th class="col-money-num" style="width: 12%;">Còn nợ</th>
+                        <th style="text-align: center; width: 12%;">Trạng thái</th>
+                        <th style="text-align: right; width: 100px;">Thao tác</th>
                     </tr>
                 </thead>
 
                 <tbody>
                 {% for item in tuitions %}
                     <tr>
+                        <td style="color: var(--muted, #64748b); font-weight: 600;">
+                            {{ forloop.counter }}
+                        </td>
+
                         <td>
-                            <strong style="color: var(--text-main, #0f172a); font-size: 13.5px;">{{ item.student.full_name }}</strong>
-                            <div style="font-size: 11px; color: var(--muted, #64748b);">{{ item.student.student_code }}</div>
+                            <div class="student-meta-cell">
+                                <div class="student-avatar-round">
+                                    {{ item.student.full_name|slice:":1"|upper|default:"H" }}
+                                </div>
+                                <div class="student-info-col">
+                                    <a href="{% url 'student_edit' item.student.id %}" class="student-name-strong" title="Xem thông tin chi tiết học viên">
+                                        {{ item.student.full_name }}
+                                    </a>
+                                    <span class="student-sub-detail">
+                                        {{ item.student.student_code|default:"HV" }}
+                                        {% if item.student.phone %} &bull; {{ item.student.phone }}{% endif %}
+                                    </span>
+                                </div>
+                            </div>
                         </td>
+
                         <td>
-                            <div style="font-weight: 500; color: var(--text-main, #334155); font-size: 13px; line-height: 1.35;">{{ item.english_class.name }}</div>
-                        </td>
-                        <td class="col-money" style="text-align: right; font-weight: 600;">
-                            {{ item.total_fee|currency_vnd }}
-                        </td>
-                        <td class="col-money green" style="text-align: right; font-weight: 600;">
-                            {{ item.paid_amount|currency_vnd }}
-                        </td>
-                        <td class="col-money orange" style="text-align: right; font-weight: 600;">
-                            {{ item.remaining_amount|currency_vnd }}
-                        </td>
-                        <td style="text-align: center;">
-                            {% if item.payment_status == "Đã thanh toán" %}
-                                <span class="status paid">{{ item.payment_status }}</span>
-                            {% elif item.payment_status == "Thanh toán một phần" %}
-                                <span class="status partial">{{ item.payment_status }}</span>
-                            {% else %}
-                                <span class="status unpaid">{{ item.payment_status }}</span>
-                            {% endif %}
-                            {% if item.payment_date %}
-                                <div style="font-size: 11px; color: var(--muted, #64748b); margin-top: 2px;">{{ item.payment_date|date:"d/m/Y" }}</div>
-                            {% endif %}
-                        </td>
-                        <td style="text-align: right;">
-                            <div class="actions">
-                                {% if item.remaining_amount > 0 %}
-                                <a class="btn-action btn-pay" href="{% url 'tuition_payment_add' item.id %}" title="Thu học phí đợt tiếp theo">
-                                    <span>+ Thu</span>
+                            <div class="class-info-col">
+                                <a href="{% url 'class_detail' item.english_class.id %}" class="class-name-strong" title="Xem chi tiết lớp học">
+                                    {{ item.english_class.name }}
                                 </a>
+                                {% if item.english_class.course %}
+                                    <span class="course-mini-tag">
+                                        <i class="ri-book-mark-line"></i> {{ item.english_class.course.name }}
+                                    </span>
                                 {% endif %}
-                                <a class="btn-action btn-receipt" href="{% url 'tuition_receipt' item.id %}" title="In biên lai thu tiền">
+                            </div>
+                        </td>
+
+                        <td class="col-money-num">
+                            <span class="money-val-bold">{{ item.total_fee|currency_vnd }}</span>
+                        </td>
+
+                        <td class="col-money-num">
+                            <span class="money-val-paid">{{ item.paid_amount|currency_vnd }}</span>
+                            {% if item.total_fee and item.total_fee > 0 %}
+                                <div class="mini-payment-bar" title="Tiến độ đóng: {% widthratio item.paid_amount item.total_fee 100 %}%">
+                                    <div class="mini-payment-bar-fill" style="width: {% widthratio item.paid_amount item.total_fee 100 %}%;"></div>
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="col-money-num">
+                            {% if item.remaining_amount == 0 %}
+                                <span class="money-zero-muted">0 đ</span>
+                            {% else %}
+                                <span class="money-val-debt">{{ item.remaining_amount|currency_vnd }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td style="text-align: center;">
+                            <div class="status-cell-wrap">
+                                {% if item.payment_status == "Đã thanh toán" %}
+                                    <span class="badge-status-pill badge-paid">
+                                        <i class="ri-checkbox-circle-line"></i> Đã hoàn tất
+                                    </span>
+                                {% elif item.payment_status == "Thanh toán một phần" %}
+                                    <span class="badge-status-pill badge-partial">
+                                        <i class="ri-pie-chart-line"></i> Một phần
+                                    </span>
+                                {% else %}
+                                    <span class="badge-status-pill badge-unpaid">
+                                        <i class="ri-error-warning-line"></i> Chưa đóng
+                                    </span>
+                                {% endif %}
+
+                                {% if item.payment_date %}
+                                    <span class="tuition-date-sub">
+                                        <i class="ri-calendar-line"></i> {{ item.payment_date|date:"d/m/Y" }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td style="text-align: right;">
+                            <div class="tuition-actions-row">
+                                {% if item.remaining_amount > 0 %}
+                                    <a class="btn-table-action btn-table-pay" href="{% url 'tuition_payment_add' item.id %}" title="Thu học phí đợt tiếp theo">
+                                        <i class="ri-hand-coin-line"></i>
+                                        <span>Thu</span>
+                                    </a>
+                                {% endif %}
+
+                                <a class="btn-table-action btn-table-receipt" href="{% url 'tuition_receipt' item.id %}" title="In biên lai thu tiền">
+                                    <i class="ri-printer-line"></i>
                                     <span>In</span>
                                 </a>
-                                <a class="btn-action btn-edit" href="{% url 'tuition_edit' item.id %}" title="Sửa thông tin học phí">
-                                    <span>Sửa</span>
+
+                                <a class="btn-table-action btn-table-edit" href="{% url 'tuition_edit' item.id %}" title="Sửa thông tin học phí">
+                                    <i class="ri-edit-line"></i>
                                 </a>
+
                                 {% if is_admin %}
-                                <form
-                                    method="post"
-                                    action="{% url 'tuition_delete' item.id %}"
-                                    onsubmit="return confirm('Bạn có chắc muốn xóa phiếu học phí này?');"
-                                    style="margin: 0; display: inline-flex;"
-                                >
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-action btn-delete" title="Xóa phiếu">
-                                        <span>Xóa</span>
-                                    </button>
-                                </form>
+                                    <form
+                                        method="post"
+                                        action="{% url 'tuition_delete' item.id %}"
+                                        onsubmit="return confirm('Bạn có chắc muốn xóa phiếu học phí này? Thao tác không thể hoàn tác.');"
+                                        style="margin: 0; display: inline-flex;"
+                                    >
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-table-action btn-table-delete" title="Xóa phiếu học phí">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </form>
                                 {% endif %}
                             </div>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="7" class="empty">
-                            Chưa có phiếu học phí nào. Hãy tạo phiếu đầu tiên!
+                        <td colspan="8">
+                            <div class="tuition-empty-state">
+                                <div class="empty-icon-wrap">
+                                    <i class="ri-wallet-line" style="font-size: 32px; color: var(--primary, #2563eb);"></i>
+                                </div>
+                                <h3 class="empty-title">Không tìm thấy phiếu học phí nào</h3>
+                                <p class="empty-desc">
+                                    {% if keyword %}
+                                        Không có kết quả nào khớp với từ khóa "<strong>{{ keyword }}</strong>". Vui lòng thử tìm kiếm khác hoặc xóa bộ lọc.
+                                    {% else %}
+                                        Hệ thống chưa ghi nhận phiếu học phí nào. Bạn có thể nhấn nút "Tạo phiếu học phí" phía trên để mở phiếu mới.
+                                    {% endif %}
+                                </p>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
+
         {% include "core/partials/pagination.html" %}
     </div>
 
-    <p style="margin-top: 20px;">
-        <a href="{% url 'home' %}" style="color:var(--primary, #4f46e5); text-decoration:none; font-weight: 500;">
-            ← Quay về trang tổng quan
+    <!-- FOOTER NAV -->
+    <div class="tuition-footer-nav">
+        <a href="{% url 'home' %}" class="back-to-home-link">
+            <i class="ri-arrow-left-line"></i>
+            <span>Quay về trang tổng quan</span>
         </a>
-    </p>
+    </div>
 
 </div>
 {% endblock %}

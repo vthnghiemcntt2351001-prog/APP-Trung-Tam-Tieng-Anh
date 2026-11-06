@@ -1,238 +1,270 @@
-# KẾ HOẠCH VÀ LỘ TRÌNH NÂNG CẤP TOÀN DIỆN HỆ THỐNG
+# KẾ HOẠCH VÀ LỘ TRÌNH NÂNG CẤP TOÀN DIỆN HỆ THỐNG (CẬP NHẬT 2026)
 **Dự án:** Ứng dụng Quản trị Trung tâm Tiếng Anh (`APP-Trung-Tam-Tieng-Anh`)  
-**Mục tiêu:** Khắc phục triệt để lỗ hổng an ninh, hoàn thiện nghiệp vụ vận hành thực tế, chuẩn hóa kiến trúc CSDL MySQL, tối ưu hiệu năng và nâng cấp giao diện đạt chuẩn phần mềm thương mại hiện đại.  
-**Thời gian thực hiện dự kiến:** 30 ngày (5 Giai đoạn)  
-**Tài liệu tham chiếu:** [BAO_CAO_DANH_GIA_VA_DE_XUAT_NANG_CAP_TOAN_DIEN.md](BAO_CAO_DANH_GIA_VA_DE_XUAT_NANG_CAP_TOAN_DIEN.md)
+**Phiên bản tài liệu:** v2.0 (Cập nhật sau đợt kiểm tra, rà soát logic & UI/UX toàn diện)  
+**Mục tiêu:** Khắc phục triệt để các lỗi sai lệch dữ liệu tài chính, hoàn thiện tính liên kết - đồng bộ giữa các phân hệ, loại bỏ hoàn toàn lỗi hiển thị Dark Mode và nâng cấp trải nghiệm người dùng đạt chuẩn phần mềm thương mại thực tế.  
+**Thời gian thực hiện dự kiến:** 18 ngày làm việc (4 Giai đoạn trọng tâm)  
+**Tài liệu tham chiếu:** Báo cáo kiểm tra và đánh giá toàn diện logic & tính đồng bộ hệ thống.
 
 ---
 
-## I. NGUYÊN TẮC THI CÔNG & TIÊU CHUẨN KỸ THUẬT
+## I. TỔNG KẾT HIỆN TRẠNG HỆ THỐNG SAU AUDIT TOÀN DIỆN
 
-1. **Bảo toàn dữ liệu tuyệt đối (Zero Data Loss):** Toàn bộ các thay đổi CSDL trên MySQL 8.0 phải được thực hiện qua Django Migrations. Trước mỗi đợt migration, phải sao lưu dữ liệu (`mysqldump`).
-2. **Không đập đi xây lại:** Giữ vững kiến trúc Django Monolith đang hoạt động ổn định, phát triển theo phương thức module hóa (modular refactoring), kế thừa tối đa mã nguồn hiện có.
-3. **Commit vi mô (Atomic Commits):** Mỗi nhiệm vụ kỹ thuật phải được kiểm thử tự động hoặc kiểm thử giao diện đạt tiêu chuẩn mới tạo git commit tương ứng.
-4. **Bảo mật theo tiêu chuẩn (Security-First):** Triệt tiêu hoàn toàn mã backdoor/thử nghiệm, tuân thủ nguyên tắc đặc quyền tối thiểu (Least Privilege).
+### 1. Các hạng mục kỹ thuật đã hoàn thành tốt (Kế thừa & Duy trì)
+- [x] **Bảo mật xác thực:** Đã vá lỗ hổng P0 tại `core/backends.py`, mật khẩu kiểm tra an toàn qua `user.check_password()`.
+- [x] **Cơ sở dữ liệu & Migrations:** 18 migration áp dụng thành công trên MySQL 8.0 / SQLite; cấu trúc bảng quan hệ chặt chẽ.
+- [x] **Lịch sử thanh toán:** Bảng `PaymentTransaction` lưu vết từng đợt nộp tiền, hình thức thanh toán và sinh mã phiếu thu tự động.
+- [x] **Phòng thủ mạng Blockchain:** Đóng gói hàm `is_blockchain_available()`, hệ thống tự phát hiện trạng thái offline của node Ganache mà không gây crash trang.
+- [x] **Phân hệ Buổi học & Điểm danh:** Model `ClassSession`, `Attendance` và giao diện điểm danh nhanh hoạt động tốt.
+- [x] **Bộ kiểm thử tự động cơ sở:** Đã có 28 test cases chạy thành công (`Ran 28 tests in 28.7s - OK`).
+
+### 2. Các điểm nghẽn & Sai lệch phát hiện cần khắc phục ngay
+1. **Lỗi sai lệch doanh thu Dashboard (Critical):** Biểu đồ 6 tháng truy vấn tổng `Tuition.paid_amount` theo `Tuition.payment_date`, dẫn đến việc dồn toàn bộ tiền đóng lũy kế vào tháng gần nhất, sai lệch hoàn toàn so với thực tế các lần nộp trong `PaymentTransaction`.
+2. **Xung đột sửa học phí (High):** Hàm `tuition_edit` cho phép sửa tay `paid_amount`, phá vỡ liên kết với bảng `PaymentTransaction` và sẽ bị ghi đè khi phát sinh giao dịch mới.
+3. **Lỗ hổng cấp chứng chỉ không ràng buộc (High):** `certificate_add` cho phép cấp chứng chỉ cho học viên còn nợ học phí, vắng quá số buổi hoặc điểm liệt; tự động gán điểm 8.0 nếu học viên chưa từng thi.
+4. **Lỗi phân quyền gây 403 Forbidden (High):** Nút "Duyệt chuyển lớp" tại `classes/list.html` hiển thị cho Học vụ (`can_manage_academics`), nhưng view xử lý lại chặn bằng `@admin_required`.
+5. **Vỡ giao diện Dark Mode nghiêm trọng (High):** Thanh phân trang dùng chung (`pagination.html`), form cấp chứng chỉ (`certificates/add.html`), form khóa học và biên lai hardcode màu nền trắng `#ffffff`, tạo mảng chói lóa trên nền tối.
+6. **Mất liên thông Đào tạo ↔ Tài chính (Medium):** Ghi danh học viên vào lớp không tự động tạo phiếu học phí; chuyển lớp thành công thì tiền học ở lớp cũ bị kẹt lại, không được kết chuyển sang lớp mới.
+7. **Biểu mẫu chưa chuẩn hóa Django Forms (Medium):** Các view Thêm/Sửa Khóa học, Lớp học, Giáo viên vẫn đọc `request.POST` thô, mất trắng dữ liệu khi nhập sai.
+8. **Hệ thống Icon & Breakpoints phân mảnh (Medium):** Trộn lẫn 3 kiểu icon (RemixIcon, inline SVG, Emoji); media queries dùng tùy tiện từ 480px đến 1200px.
 
 ---
 
-## II. LỘ TRÌNH 5 GIAI ĐOẠN CHI TIẾT
+## II. LỘ TRÌNH 4 GIAI ĐOẠN CHI TIẾT
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│ GIAI ĐOẠN 1 (Ngày 01 - 03): SỬA LỖI P0, BẢO MẬT & DỌN DẸP RUNTIME      │ [✅ HOÀN THÀNH 100%]
+│ GIAI ĐOẠN 1 (Ngày 01 - 03): SỬA LỖI DOANH THU, HỌC PHÍ & LỖI 403 RBAC   │ [⏳ ĐANG TRIỂN KHAI]
 ├────────────────────────────────────────────────────────────────────────┤
-│ GIAI ĐOẠN 2 (Ngày 04 - 10): HOÀN THIỆN TOÀN VẸN CSDL & NGHIỆP VỤ      │ [✅ HOÀN THÀNH 100%]
+│ GIAI ĐOẠN 2 (Ngày 04 - 08): ĐỒNG BỘ ĐÀO TẠO - TÀI CHÍNH & CHỨNG CHỈ     │ [📋 CHỜ THI CÔNG]
 ├────────────────────────────────────────────────────────────────────────┤
-│ GIAI ĐOẠN 3 (Ngày 11 - 17): PHÂN TRANG, TỐI ƯU HIỆU NĂNG & UX FORM     │ [✅ HOÀN THÀNH 100%]
+│ GIAI ĐOẠN 3 (Ngày 09 - 14): CHUẨN HÓA DESIGN SYSTEM, DARK MODE & FORMS  │ [📋 CHỜ THI CÔNG]
 ├────────────────────────────────────────────────────────────────────────┤
-│ GIAI ĐOẠN 4 (Ngày 18 - 24): CHUẨN HÓA DESIGN SYSTEM, RESPONSIVE & DARK │ [✅ HOÀN THÀNH 100%]
-├────────────────────────────────────────────────────────────────────────┤
-│ GIAI ĐOẠN 5 (Ngày 25 - 30): BUỔI HỌC, ĐIỂM DANH, KIỂM THỬ & DOCKER GOLIVE│ [✅ HOÀN THÀNH 100%]
+│ GIAI ĐOẠN 4 (Ngày 15 - 18): TỐI ƯU UX, BÁO CÁO EXCEL & TEST SUITE > 85% │ [📋 CHỜ THI CÔNG]
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### GIAI ĐOẠN 1: KHẮC PHỤC LỖI KHẨN CẤP (P0/P1), BẢO MẬT & DỌN DẸP RUNTIME
+### GIAI ĐOẠN 1: KHẮC PHỤC LỖI NGHIỆP VỤ CẤP BÁCH & BẢO MẬT (P0/P1)
 *Thời lượng: 3 ngày (Ngày 01 - Ngày 03)*  
-*Mục tiêu: Đưa hệ thống về trạng thái an toàn tuyệt đối và triệt tiêu các lỗi gây sập trang 500.*
+*Mục tiêu: Đảm bảo số liệu tài chính trên Dashboard chính xác 100%, khóa lỗ hổng ghi đè dữ liệu và triệt tiêu lỗi 403 Forbidden.*
 
-#### Ngày 01: Vá triệt để lỗ hổng xác thực bảo mật P0 tại `core/backends.py`
-- **Vấn đề:** Phương thức `authenticate()` hiện tại đang dùng `user.set_password(password)` và tự động cấp quyền superuser, cho phép đăng nhập bất kỳ tài khoản admin nào với mật khẩu bất kỳ.
-- **Công việc thực hiện:**
-  1. Viết lại `EmailOrUsernameModelBackend` kế thừa chuẩn Django `ModelBackend`.
-  2. Bắt buộc kiểm tra mật khẩu hợp lệ bằng `user.check_password(password)`. Trả về `None` nếu sai thông tin xác thực.
-  3. Gỡ bỏ hoàn toàn logic tự động gán quyền Superuser hoặc tự tạo người dùng mới khi đăng nhập.
-  4. Đặt lại mật khẩu an toàn cho các tài khoản quản trị (`admin`, `hocvu`, `taichinh`).
-- **Nghiệm thu:** Thử đăng nhập sai mật khẩu -> Hệ thống chặn và báo lỗi; chỉ cho phép đăng nhập khi mật khẩu đúng 100%.
-
-#### Ngày 02: Khắc phục lỗi Crash 500 khi tìm kiếm chứng chỉ & Rà soát ORM
-- **Vấn đề:** Trang `/certificates/` bị sập 500 khi người dùng nhập từ khóa tìm kiếm do truy vấn trường `student__student_code` không tồn tại trong model `Student`.
-- **Công việc thực hiện:**
-  1. Sửa hàm `certificate_list` trong [core/handlers/certificates.py](core/handlers/certificates.py), thay thế bằng tìm kiếm theo tên học viên, email hoặc mã chứng chỉ:
+#### Nhiệm vụ 1.1: Sửa logic thống kê doanh thu thực thu trên Dashboard
+- **Tệp xử lý:** `core/handlers/dashboard.py`
+- **Nội dung kỹ thuật:**
+  1. Thay thế câu truy vấn doanh thu theo tháng: Thay vì nhóm trên model `Tuition` (vốn chỉ chứa số tiền lũy kế và ngày đóng gần nhất), chuyển sang truy vấn trực tiếp bảng `PaymentTransaction`:
      ```python
-     Q(certificate_code__icontains=keyword) | Q(student__full_name__icontains=keyword) | Q(student__email__icontains=keyword)
+     paid_sum = PaymentTransaction.objects.filter(
+         payment_date__year=y,
+         payment_date__month=m,
+     ).aggregate(s=Sum("amount"))["s"] or Decimal("0")
      ```
-  2. Rà soát toàn bộ các câu truy vấn `Q(...)` và `filter(...)` trong toàn bộ thư mục `core/handlers/` để đảm bảo 100% khớp đúng trường dữ liệu của model.
-- **Nghiệm thu:** Tìm kiếm từ khóa bất kỳ trên trang `/certificates/` hoạt động mượt mà, phản hồi đúng kết quả mà không phát sinh ngoại lệ `FieldError`.
+  2. Tính toán doanh thu dự kiến (`monthly_expected`) dựa trên học phí các lớp mở trong tháng hoặc công nợ phải thu.
+- **Tiêu chí nghiệm thu:** Học viên nộp tiền đợt 1 vào tháng 1, nộp đợt 2 vào tháng 3 -> Doanh thu tháng 1 và tháng 3 hiển thị chính xác từng khoản nộp tương ứng trên biểu đồ.
 
-#### Ngày 03: Dọn dẹp tệp mồ côi, mã chết & Đồng bộ tài liệu cấu trúc
-- **Vấn đề:** Tồn tại tệp template không sử dụng `core/templates/core/students/form.html`; tệp `PROJECT_STRUCTURE.md` nhắc đến `core/views.py` đã bị xóa.
-- **Công việc thực hiện:**
-  1. Xóa bỏ an toàn tệp `core/templates/core/students/form.html`.
-  2. Cập nhật [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) phản ánh chính xác cấu trúc handler hiện thời, loại bỏ tham chiếu `views.py`.
-  3. Thêm cấu hình hỗ trợ chuyển đổi linh hoạt giữa MySQL và SQLite trong [config/settings.py](config/settings.py) dựa trên biến môi trường `DB_ENGINE`.
-- **Nghiệm thu:** Chạy `python manage.py check` không có cảnh báo; cây thư mục dự án sạch sẽ, đồng nhất với tài liệu.
+#### Nhiệm vụ 1.2: Chuẩn hóa luồng Sửa Học phí & Bảo vệ Lịch sử Thu ngân
+- **Tệp xử lý:** `core/handlers/tuition.py`, `core/templates/core/finance/tuition/edit.html`
+- **Nội dung kỹ thuật:**
+  1. Trong `tuition_edit`: Khóa trường `paid_amount` thành dạng chỉ đọc (Readonly), không cho phép nhân viên gõ tay sửa số tiền đã nộp.
+  2. Bổ sung bảng danh sách các đợt nộp tiền (`tuition.transactions.all()`) ngay trên giao diện sửa phiếu học phí.
+  3. Thêm nút liên kết trực tiếp "Thu học phí bổ sung" (`tuition_payment_add`) để mọi phát sinh tiền đều được ghi nhận qua `PaymentTransaction`.
+- **Tiêu chí nghiệm thu:** Không còn hiện tượng lệch số dư giữa `Tuition.paid_amount` và `Sum(transactions.amount)`; lịch sử giao dịch được bảo toàn vẹn toàn.
 
----
-
-### GIAI ĐOẠN 2: HOÀN THIỆN TÍNH TOÀN VẸN CSDL & NGHIỆP VỤ CỐT LÕI
-*Thời lượng: 7 ngày (Ngày 04 - Ngày 10)*  
-*Mục tiêu: Đảm bảo tính chính xác về dữ liệu tài chính kế toán và hoàn thiện các luồng nghiệp vụ còn thiếu.*
-
-#### Ngày 04 - 05: Thiết kế bảng Lịch sử thanh toán học phí (`PaymentTransaction`)
-- **Vấn đề:** Bảng `Tuition` hiện tại chỉ lưu tổng số tiền đã đóng, khi học viên đóng học phí nhiều đợt sẽ bị ghi đè, làm mất lịch sử các lần thu trước đó.
-- **Công việc thực hiện:**
-  1. Thêm model `PaymentTransaction` trong `core/models.py`:
-     - `tuition` (ForeignKey đến `Tuition`, `on_delete=models.CASCADE`)
-     - `receipt_code` (CharField, mã biên lai duy nhất, ví dụ `BL-202610-0001`)
-     - `amount` (DecimalField, số tiền thu đợt này)
-     - `payment_method` (CharField: Tiền mặt, Chuyển khoản, Thẻ)
-     - `payment_date` (DateField)
-     - `collected_by` (ForeignKey đến `User`, nhân viên thu ngân)
-     - `note` (TextField)
-  2. Tạo migration an toàn (`python manage.py makemigrations core`) và migrate vào MySQL.
-  3. Cập nhật logic: Khi tạo giao dịch thu tiền mới, tự động cập nhật `paid_amount` trên bản ghi `Tuition` cha và tính toán lại công nợ còn lại.
-- **Nghiệm thu:** Xem chi tiết học phí của học viên thấy rõ danh sách tất cả các đợt nộp tiền, ngày nộp, người thu và số tiền từng lần.
-
-#### Ngày 06 - 07: Xây dựng giao diện và luồng Cấp chứng chỉ mới từ Web UI
-- **Vấn đề:** Hiện tại nhân viên học vụ không thể cấp chứng chỉ mới trên giao diện web, phải vào Django Admin.
-- **Công việc thực hiện:**
-  1. Tạo handler `certificate_add` trong `core/handlers/certificates.py` và route `/certificates/add/`.
-  2. Tạo template `core/templates/core/certificates/add.html`.
-  3. Tích hợp logic thông minh: Khi chọn một lớp học, hệ thống tự động lọc và gợi ý các học viên đã có kết quả tổng kết Đạt (`FinalResult.status == 'passed'`) và chưa từng được cấp chứng chỉ cho lớp đó.
-  4. Tự động sinh mã chứng chỉ chuẩn `CERT-XXXXXXXXXXXX` và tự tính xếp loại dựa trên điểm số tổng kết.
-- **Nghiệm thu:** Nhân viên học vụ có thể cấp chứng chỉ mới trực tiếp từ giao diện web trong vòng chưa đầy 1 phút.
-
-#### Ngày 08 - 10: Tích hợp Django Forms & Khắc phục lỗi mất dữ liệu khi submit lỗi
-- **Vấn đề:** Hiện tại toàn bộ biểu mẫu đều đọc `request.POST.get()` thủ công, khi xảy ra lỗi nhập liệu (ví dụ sai ngày, sai số tiền), hệ thống redirect và làm mất sạch thông tin người dùng vừa nhập.
-- **Công việc thực hiện:**
-  1. Tạo tệp `core/forms.py`, xây dựng các form chuẩn:
-     - `StudentForm`, `TeacherForm`, `CourseForm`, `EnglishClassForm`
-     - `TuitionPaymentForm`, `CertificateIssueForm`
-  2. Gắn widget định dạng ngày (`type="date"`), tiền tệ (`min=0`), số điện thoại và email.
-  3. Cập nhật các view trong `core/handlers/`: Nếu `form.is_valid()` thất bại, render lại template kèm dữ liệu đã nhập và hiển thị thông báo lỗi cụ thể ngay dưới từng trường dữ liệu bị sai.
-- **Nghiệm thu:** Thử nhập thiếu hoặc sai một trường trong form -> Trang hiển thị lỗi rõ ràng ngay cạnh trường đó, các thông tin đúng khác vẫn được giữ nguyên vẹn.
+#### Nhiệm vụ 1.3: Sửa lỗi phân quyền nút "Duyệt chuyển lớp" tránh HTTP 403
+- **Tệp xử lý:** `core/templates/core/academics/classes/list.html`, `core/handlers/class_transfers.py`
+- **Nội dung kỹ thuật:**
+  1. Tại `classes/list.html`: Điều chỉnh điều kiện hiển thị nút "Duyệt chuyển lớp" sang `{% if is_admin %}` thay vì `can_manage_academics`.
+  2. Tại `core/handlers/class_transfers.py`: Cập nhật `class_transfer_list` cho phép cán bộ Học vụ truy cập để theo dõi trạng thái yêu cầu (`@academic_required`), nhưng giữ nguyên `@admin_required` cho hai hành động `class_transfer_approve` và `class_transfer_reject`.
+- **Tiêu chí nghiệm thu:** Cán bộ Học vụ không bị ấn nhầm vào nút gây lỗi 403; Admin truy cập và duyệt chuyển lớp bình thường.
 
 ---
 
-### GIAI ĐOẠN 3: TỐI ƯU HIỆU NĂNG, PHÂN TRANG & TRẢI NGHIỆM NGƯỜI DÙNG (UX)
-*Thời lượng: 7 ngày (Ngày 11 - Ngày 17)*  
-*Mục tiêu: Đảm bảo hệ thống vận hành siêu mượt, tải nhanh và trải nghiệm tương tác liền mạch.*
+### GIAI ĐOẠN 2: HOÀN THIỆN LIÊN KẾT LIÊN PHÂN HỆ & ĐỒNG BỘ DỮ LIỆU
+*Thời lượng: 5 ngày (Ngày 04 - Ngày 08)*  
+*Mục tiêu: Đảm bảo dữ liệu luân chuyển tự động, thông suốt giữa Đào tạo, Điểm số, Tài chính và Chứng chỉ.*
 
-#### Ngày 11 - 13: Triển khai Phân trang chuẩn toàn diện (Pagination)
-- **Vấn đề:** Toàn bộ danh sách đều load 100% bản ghi ra giao diện mà không phân trang.
-- **Công việc thực hiện:**
-  1. Xây dựng template partial dùng chung `core/templates/core/partials/pagination.html` (gồm nút Trước, Sau, nhảy đến số trang, hiển thị tổng số kết quả).
-  2. Bổ sung `Paginator` trong Django vào tất cả các handler danh sách:
-     - Danh sách Học viên (`student_list` - 15 học viên/trang)
-     - Danh sách Phiếu học phí (`tuition_list` - 15 phiếu/trang)
-     - Danh sách Khóa học & Lớp học (`course_list`, `class_list` - 12 lớp/trang)
-     - Danh sách Giáo viên (`teacher_list` - 12 giảng viên/trang)
-     - Danh sách Chứng chỉ (`certificate_list` - 15 chứng chỉ/trang)
-     - Danh sách Bảng điểm (`grade_list` - 20 bài thi/trang)
-  3. Giữ nguyên các tham số tìm kiếm và bộ lọc (`q=...`, `status=...`) khi bấm chuyển trang.
-- **Nghiệm thu:** Toàn bộ các trang danh sách đều có thanh phân trang đồng bộ, tải trang nhanh dưới 100ms ngay cả khi có hàng nghìn bản ghi.
+#### Nhiệm vụ 2.1: Tự động hóa liên kết Đào tạo ↔ Tài chính khi Xếp lớp
+- **Tệp xử lý:** `core/handlers/academics.py` (hàm `class_detail`)
+- **Nội dung kỹ thuật:**
+  1. Khi nhân viên học vụ đăng ký học viên vào lớp thành công (`Enrollment.objects.create`), tự động kích hoạt tạo bản ghi `Tuition` tương ứng:
+     ```python
+     Tuition.objects.get_or_create(
+         student=student,
+         english_class=english_class,
+         defaults={
+             "total_fee": english_class.course.tuition,
+             "paid_amount": Decimal("0"),
+             "note": f"Học phí tự động khởi tạo khi ghi danh lớp {english_class.name}",
+         }
+     )
+     ```
+- **Tiêu chí nghiệm thu:** Thêm học viên vào lớp -> Kiểm tra danh sách học phí tại `/tuitions/` lập tức thấy bản ghi học phí kèm số tiền phải thu, không bị sót công nợ.
 
-#### Ngày 14 - 15: Liên kết tương tác động giữa Học viên & Lớp học khi thu phí
-- **Vấn đề:** Form thêm phiếu học phí yêu cầu chọn học viên và lớp học riêng biệt, dễ chọn nhầm học viên chưa vào lớp.
-- **Công việc thực hiện:**
-  1. Bổ sung một endpoint nội bộ (JSON API): `/api/students/<student_id>/classes/` trả về các lớp học mà học viên đó đang theo học.
-  2. Bổ sung JavaScript tại [core/static/core/js/tuition_add.js](core/static/core/js/tuition_add.js): Khi người dùng chọn Học viên, dropdown Lớp học tự động cập nhật chỉ hiển thị các lớp học viên đó đã ghi danh, tự động điền học phí và số tiền còn nợ.
-- **Nghiệm thu:** Nhân viên tài chính chọn học viên -> dropdown lớp học tự động hiển thị chính xác lớp học viên đang học, loại bỏ hoàn toàn khả năng lập sai phiếu học phí.
+#### Nhiệm vụ 2.2: Thiết lập Cổng kiểm duyệt điều kiện Cấp chứng chỉ & Quy trình Phê duyệt 2 bước (Enterprise Workflow)
+- **Tệp xử lý:** `core/handlers/certificates.py` (`certificate_add`, `certificate_issue`), `core/templates/core/certificates/add.html`, `core/templates/core/certificates/list.html`
+- **Nội dung kỹ thuật:**
+  1. **Quy trình 2 bước chuẩn doanh nghiệp (Option 2):**
+     - **Bước 1 (Học vụ):** Chỉ có quyền lập đề xuất chứng chỉ (`blockchain_status="pending"`), không có quyền tự ý ký số Blockchain. Giao diện hiển thị banner quy trình 2 bước, ẩn nút bấm/toggle ký Blockchain.
+     - **Bước 2 (Admin):** Xem danh sách đề xuất, thẩm định điều kiện và bấm nút "Duyệt & Ký số" để trực tiếp đóng dấu băm SHA-256 lên Smart Contract Ganache/Ethereum.
+  2. **Cổng kiểm duyệt điều kiện (Gatekeeper):**
+     - **Điều kiện tài chính:** Chặn cấp nếu `tuition.paid_amount < tuition.total_fee` (còn nợ học phí). Hiển thị số tiền nợ cụ thể.
+     - **Điều kiện học lực:** Điểm tổng kết phải đạt tối thiểu `score >= 5.0` (tránh cấp chứng chỉ cho học viên có kết quả chưa đạt).
+     - Đánh dấu cảnh báo ngay trên danh sách chọn học viên `[⚠️ Nợ học phí]` và `[⚠️ Chưa đạt điểm sàn]`.
+- **Tiêu chí nghiệm thu:** [ĐÃ HOÀN THÀNH 100%] Không thể lập đề xuất/cấp cho học viên nợ phí hoặc điểm < 5.0; Học vụ không thể can thiệp ký số Blockchain; Admin toàn quyền duyệt ký số; toàn bộ 8 bài kiểm tra nghiệp vụ và 28 test cases hệ thống đều PASS.
 
-#### Ngày 16 - 17: Thống nhất và liên thông 2 hệ thống điểm số
-- **Vấn đề:** Dự án đang tồn tại song song model `Grade` (4 kỹ năng cứng) và hệ thống `AssessmentPolicy` (quy chế điểm động) nhưng hai bên không liên thông.
-- **Công việc thực hiện:**
-  1. Xây dựng quy chế mẫu chuẩn 4 kỹ năng (Nghe, Nói, Đọc, Viết - mỗi kỹ năng 25%) bằng `AssessmentPolicy`.
-  2. Cho phép tự động chuyển đổi điểm từ các bản ghi `Grade` cũ sang `AssessmentResult` của đợt thi tương ứng.
-  3. Bổ sung liên kết trên giao diện Sổ điểm: Xem trực tiếp bảng tổng hợp điểm 4 kỹ năng và điểm trung bình tích lũy của từng học viên trong lớp.
-- **Nghiệm thu:** Dữ liệu điểm tập trung nhất quán về một mối, kết quả tổng kết tự động làm căn cứ cho việc cấp chứng chỉ.
+#### Nhiệm vụ 2.3: Xây dựng cơ chế luân chuyển học phí khi Học viên Chuyển lớp
+- **Tệp xử lý:** `core/services/class_transfers.py` (`request_class_transfer`, `approve_class_transfer`)
+- **Nội dung kỹ thuật:**
+  1. Khi phê duyệt chuyển lớp: Tự động tìm bản ghi `Tuition` ở lớp cũ.
+  2. Kết chuyển toàn bộ số tiền đã đóng (`paid_amount`) và các giao dịch `PaymentTransaction` hoặc tạo bản ghi ghi nhận số tiền chuyển giao sang phiếu học phí của lớp mới.
+  3. Nếu chuyển sang lớp có học phí khác nhau, tự động tính khoản tiền chênh lệch (phải thu thêm hoặc bảo lưu hoàn trả).
+- **Tiêu chí nghiệm thu:** Học viên chuyển lớp không bị đòi học phí hai lần; công nợ ở lớp mới phản ánh chính xác số tiền đã đóng từ lớp cũ.
 
----
+#### Nhiệm vụ 2.4: Đồng bộ Điểm số hai chiều & Tích hợp Dashboard toàn diện
+- **Tệp xử lý:** `core/services/grading.py`, `core/handlers/dashboard.py`
+- **Nội dung kỹ thuật:**
+  1. Khi giảng viên nhập điểm qua Sổ điểm quy chế (`assessment_event_gradebook`), tự động cập nhật ngược lại điểm kỹ năng tương ứng trong model `Grade` (nếu có).
+  2. Nâng cấp truy vấn thống kê điểm trên Dashboard: Đọc dữ liệu điểm từ cả hai nguồn `FinalResult` và `Grade`, tránh việc chấm điểm qua quy chế mới nhưng Dashboard báo điểm trung bình bằng 0.
+- **Tiêu chí nghiệm thu:** Chấm điểm trên bất kỳ phân hệ nào thì bảng điểm và biểu đồ thống kê Dashboard đều đồng bộ số liệu.
 
-### GIAI ĐOẠN 4: CHUẨN HÓA DESIGN SYSTEM, RESPONSIVE & DARK MODE
-*Thời lượng: 7 ngày (Ngày 18 - Ngày 24)*  
-*Mục tiêu: Đưa giao diện đạt chuẩn thẩm mỹ cao cấp (WOW user), nhất quán trên mọi kích thước thiết bị.*
-
-#### Ngày 18 - 19: Chuẩn hóa Design System & Đồng bộ Breakpoint Responsive
-- **Vấn đề:** 12 tệp CSS trang có 12 mốc media query tùy tiện gây lệch bố cục trên Tablet (iPad 768px).
-- **Công việc thực hiện:**
-  1. Định nghĩa chuẩn 4 breakpoint cố định trong [core/static/core/css/base.css](core/static/core/css/base.css):
-     - `--bp-mobile: 640px` (Điện thoại)
-     - `--bp-tablet: 768px` (Máy tính bảng dọc)
-     - `--bp-laptop: 1024px` (Máy tính bảng ngang / Laptop nhỏ)
-     - `--bp-desktop: 1280px` (Màn hình Desktop)
-  2. Đồng bộ hóa toàn bộ các media query trong các file `pages/**/*.css` theo 4 mốc trên.
-  3. Bổ sung thanh cuộn ngang `table-responsive` chống tràn cho toàn bộ các bảng dữ liệu trên thiết bị di động.
-- **Nghiệm thu:** Kiểm thử mượt mà trên iPhone, iPad Air/Mini (768px - 834px) và Laptop/PC; không còn hiện tượng vỡ layout hay tràn ngang trang.
-
-#### Ngày 20 - 22: Triển khai Chế độ Giao diện Tối (Dark Mode) toàn diện
-- **Công việc thực hiện:**
-  1. Mở rộng biến CSS Theme trong `base.css`:
-     - Chế độ sáng: `--canvas: #f8fafc`, `--surface: #ffffff`, `--ink: #0f172a`, `--line: #e2e8f0`
-     - Chế độ tối (`[data-theme="dark"]`): `--canvas: #0f172a`, `--surface: #1e293b`, `--ink: #f8fafc`, `--line: #334155`
-  2. Bổ sung nút chuyển đổi Theme Toggle (Mặt trời ☀️ / Mặt trăng 🌙) trên thanh Topbar của giao diện.
-  3. Tự động lưu lựa chọn của người dùng vào `localStorage` và tự động phát hiện tùy chọn hệ thống qua `@media (prefers-color-scheme: dark)`.
-  4. Rà soát và áp dụng Dark Mode cho toàn bộ các thành phần: Table, Modal, Card, Dropdown, Form Input, Toast messages.
-- **Nghiệm thu:** Chuyển đổi qua lại giữa Light Mode và Dark Mode mượt mà không chớp nháy (zero FOUC); độ tương phản màu sắc đạt chuẩn WCAG AA.
-
-#### Ngày 23 - 24: Loại bỏ CSS Inline, Thẻ `!important` & Hoàn thiện Micro-animations
-- **Công việc thực hiện:**
-  1. Rà soát toàn bộ thư mục `core/templates/`, chuyển tất cả các thẻ `<style>` nội tuyến vào đúng tệp CSS của trang.
-  2. Loại bỏ các khai báo `!important` không cần thiết bằng cách chuẩn hóa CSS Selector Specificity.
-  3. Thêm các hiệu ứng vi mô (micro-interactions):
-     - Hiệu ứng hover nổi nhẹ trên các thẻ thống kê Dashboard (`transform: translateY(-2px)` kèm shadow mềm).
-     - Skeleton loader nhẹ khi tải dữ liệu bảng.
-     - Hiệu ứng chuyển cảnh mượt mà (`transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1)`).
-- **Nghiệm thu:** Giao diện đem lại trải nghiệm sang trọng, chuyên nghiệp, mã CSS đóng gói sạch sẽ.
+#### Nhiệm vụ 2.5: Chuyển đổi Biểu mẫu sang Django Forms & Dọn dẹp Mã chết
+- **Tệp xử lý:** `core/handlers/academics.py`, `core/handlers/students.py`
+- **Nội dung kỹ thuật:**
+  1. Áp dụng `CourseForm`, `TeacherForm`, `EnglishClassForm` đã có trong `core/forms.py` vào các hàm `course_add`, `course_edit`, `teacher_add`, `teacher_edit`, `class_add`, `class_edit`.
+  2. Khi người dùng nhập sai, giữ nguyên toàn bộ dữ liệu đã điền và tô đỏ trường bị lỗi kèm thông báo cụ thể.
+  3. Xóa đoạn mã render chết sau lệnh `return` tại `students.py` (dòng 109 - 114).
+- **Tiêu chí nghiệm thu:** Nhập sai định dạng email hoặc học phí âm -> Form báo lỗi ngay dưới ô nhập, các thông tin khác không bị xóa trắng.
 
 ---
 
-### GIAI ĐOẠN 5: BUỔI HỌC, ĐIỂM DANH, KIỂM THỬ TỰ ĐỘNG & ĐÓNG GÓI PRODUCTION
-*Thời lượng: 6 ngày (Ngày 25 - Ngày 30)*  
-*Mục tiêu: Bổ sung phân hệ vận hành thực tế cuối cùng, nâng cao độ phủ test và sẵn sàng vận hành thương mại.*
+### GIAI ĐOẠN 3: NÂNG CẤP UI/UX, CHUẨN HÓA DESIGN SYSTEM & DARK MODE
+*Thời lượng: 6 ngày (Ngày 09 - Ngày 14)*  
+*Mục tiêu: Đưa toàn bộ giao diện đạt độ nhất quán thương mại cao cấp, hỗ trợ Dark Mode hoàn hảo.*
 
-#### Ngày 25 - 26: Xây dựng Phân hệ Buổi học (`ClassSession`) & Điểm danh (`Attendance`)
-- **Vấn đề:** Hiện tại trung tâm chưa có công cụ ghi nhận học viên nghỉ học, đi muộn hoặc học bù.
-- **Công việc thực hiện:**
-  1. Thêm model `ClassSession` (Lớp, Buổi số mấy, Ngày học, Phòng học, Giáo viên đứng lớp, Nội dung bài giảng).
-  2. Thêm model `Attendance` (Buổi học, Học viên, Trạng thái: Có mặt / Vắng có phép / Vắng không phép / Đi muộn, Ghi chú).
-  3. Xây dựng giao diện Điểm danh nhanh cho giáo viên/học vụ (dạng danh sách tích chọn trực quan trên từng buổi học).
-  4. Tự động thống kê tỷ lệ chuyên cần của học viên trong toàn khóa học.
-- **Nghiệm thu:** Giáo viên mở điện thoại hoặc máy tính điểm danh lớp học chỉ với 30 giây; hệ thống tự động cảnh báo học viên vắng quá số buổi quy định.
+#### Nhiệm vụ 3.1: Khắc phục triệt để lỗi Dark Mode trên các trang Form và Phân trang
+- **Tệp xử lý:**
+  - `core/templates/core/partials/pagination.html`
+  - `core/templates/core/certificates/add.html`
+  - `core/templates/core/academics/courses/list.html`
+  - `core/templates/core/academics/attendance/session_list.html`
+  - `core/templates/core/finance/tuition/receipt.html`
+- **Nội dung kỹ thuật:**
+  1. Thay thế 100% các mã màu cố định (`#ffffff`, `#0f172a`, `#e2e8f0`, `#64748b`) bằng biến Design Tokens: `var(--surface)`, `var(--ink)`, `var(--line)`, `var(--canvas)`.
+  2. Bổ sung khối CSS `[data-theme="dark"]` cho thanh phân trang:
+     ```css
+     [data-theme="dark"] .saas-pagination-nav {
+         background: var(--surface-card);
+         border-color: var(--line);
+     }
+     [data-theme="dark"] .page-link {
+         background: var(--surface);
+         border-color: var(--line);
+         color: var(--ink);
+     }
+     ```
+- **Tiêu chí nghiệm thu:** Bật Dark Mode, toàn bộ trang và thanh phân trang chuyển màu tối dịu mắt, độ tương phản văn bản đạt chuẩn WCAG AA, không còn mảng trắng chói.
 
-#### Ngày 27 - 28: Tách tác vụ Blockchain bất đồng bộ & Mở rộng Kiểm thử (Test Suite)
-- **Công việc thực hiện:**
-  1. Bọc việc phát hành chứng chỉ lên Blockchain trong cơ chế xử lý phòng thủ an toàn: ghi nhận trạng thái `PENDING_BLOCKCHAIN` trước, tránh nghẽn luồng HTTP chính khi node Ganache phản hồi chậm.
-  2. Mở rộng bộ kiểm thử trong `core/tests/`:
-     - Viết test kiểm tra xác thực mật khẩu an toàn.
-     - Viết test cho luồng giao dịch thanh toán học phí từng đợt.
-     - Viết test cho chức năng cấp và xác minh chứng chỉ.
-     - Viết test cho phân trang và bộ lọc.
-  3. Đạt mục tiêu độ phủ kiểm thử (Test Coverage) > 85%.
-- **Nghiệm thu:** Chạy `python manage.py test` vượt qua 100% test case (dự kiến > 25 tests pass), thời gian chạy dưới 15 giây.
+#### Nhiệm vụ 3.2: Dọn dẹp thẻ `<style>` nội tuyến & Chuẩn hóa CSS Files
+- **Tệp xử lý:** Toàn bộ thư mục `core/templates/core/`
+- **Nội dung kỹ thuật:**
+  1. Di chuyển mã CSS từ thẻ `<style>` trong `certificates/add.html` sang `core/static/core/css/pages/certificates/add.css`.
+  2. Di chuyển CSS của `pagination.html` vào `core/static/core/css/base.css`.
+  3. Loại bỏ hoàn toàn các khai báo `!important` không cần thiết tại `teachers/add.html` và các trang liên quan.
+- **Tiêu chí nghiệm thu:** Thư mục template sạch sẽ, tách biệt hoàn toàn cấu trúc HTML và mã định dạng CSS.
 
-#### Ngày 29 - 30: Đóng gói Docker Production, Hardening An ninh & Bàn giao
-- **Công việc thực hiện:**
-  1. Hoàn thiện tệp `Dockerfile` và `docker-compose.yml` chạy 3 service: `web` (Django + Gunicorn), `db` (MySQL 8.0) và `node` (Ganache Blockchain).
-  2. Thiết lập cấu hình bảo vệ môi trường Production trong `settings.py`:
-     - Cưỡng bức tạo khóa bí mật `DJANGO_SECRET_KEY` mạnh qua biến môi trường.
-     - Bật các cờ an ninh: `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `X_FRAME_OPTIONS = 'DENY'`.
-  3. Biên soạn tài liệu Hướng dẫn triển khai và Vận hành hệ thống (`DEPLOYMENT_GUIDE.md`).
-- **Nghiệm thu:** Chạy `docker compose up -d` là toàn bộ hệ thống khởi chạy hoàn hảo, tự động migrate database và sẵn sàng tiếp nhận người dùng thật.
+#### Nhiệm vụ 3.3: Thống nhất Hệ thống Biểu tượng (Iconography) về RemixIcon
+- **Tệp xử lý:** Các template phân hệ Điểm danh (`attendance`), Phân quyền (`system/roles`), và Chứng chỉ (`certificates`)
+- **Nội dung kỹ thuật:**
+  1. Thay thế các biểu tượng cảm xúc Emoji (`📊`, `➕`, `🛡️`, `🎓`, `💳`, `👤`) bằng thẻ RemixIcon đồng bộ (`ri-bar-chart-2-line`, `ri-add-line`, `ri-shield-check-line`, `ri-graduation-cap-line`, `ri-bank-card-line`, `ri-user-line`).
+  2. Chuẩn hóa kích thước icon: 16px cho nút bấm, 18px cho menu, 24px cho thẻ thống kê.
+- **Tiêu chí nghiệm thu:** Giao diện có nhận diện đồng bộ, sắc nét, mang phong thái phần mềm doanh nghiệp (Enterprise SaaS).
+
+#### Nhiệm vụ 3.4: Đồng bộ Breakpoint Responsive & Ngữ nghĩa HTML5
+- **Tệp xử lý:** Toàn bộ tệp CSS trang tại `core/static/core/css/pages/`
+- **Nội dung kỹ thuật:**
+  1. Quy chuẩn toàn bộ media queries theo 4 mốc: `--bp-mobile: 640px`, `--bp-tablet: 768px`, `--bp-laptop: 1024px`, `--bp-desktop: 1280px`.
+  2. Xóa bỏ thẻ `<header>` và `<main>` lồng sai chuẩn HTML5 bên trong `courses/add.html`, `courses/edit.html`, `courses/delete.html`.
+- **Tiêu chí nghiệm thu:** Kiểm thử hoàn hảo trên iPad Air (768px - 820px), iPhone và Laptop; mã HTML vượt qua bộ kiểm tra W3C Validator.
 
 ---
 
-## III. MA TRẬN PHÂN LOẠI ƯU TIÊN THEO NGUYÊN TẮC MOSCOW
+### GIAI ĐOẠN 4: TỐI ƯU TRẢI NGHIỆM, BÁO CÁO & KIỂM THỬ MỞ RỘNG
+*Thời lượng: 4 ngày (Ngày 15 - Ngày 18)*  
+*Mục tiêu: Hoàn thiện trải nghiệm người dùng, báo cáo xuất file chỉn chu và nâng cao độ phủ test tự động lên > 85%.*
+
+#### Nhiệm vụ 4.1: Tối ưu hóa hàm Xuất Excel (Báo cáo Học viên & Học phí)
+- **Tệp xử lý:** `core/handlers/students.py` (`student_export_excel`), `core/handlers/tuition.py` (`tuition_export_excel`)
+- **Nội dung kỹ thuật:**
+  1. Khi tính độ rộng tự động cho cột (`ws.column_dimensions[col_letter].width`), bỏ qua các dòng tiêu đề gộp 1 và 2 (`if cell.row > 3`).
+  2. Cố định độ rộng hợp lý cho cột STT (8 ký tự), Mã học viên/phiếu (14 ký tự).
+- **Tiêu chí nghiệm thu:** File Excel tải về mở lên có tỷ lệ cột cân đối, đẹp mắt, có thể in ấn ngay mà không cần chỉnh tay.
+
+#### Nhiệm vụ 4.2: Tối ưu Điều hướng & Trải nghiệm Thông báo
+- **Tệp xử lý:** `core/templates/core/base.html`, `core/handlers/certificates.py`
+- **Nội dung kỹ thuật:**
+  1. Thêm liên kết trực tiếp đến "Duyệt chuyển lớp" (`class_transfer_list`) và "Quy chế đánh giá" (`assessment_policy_list`) vào nhóm Quản trị Hệ thống trên Sidebar khi đăng nhập bằng quyền Admin.
+  2. Cải thiện trang Xác minh Chứng chỉ (`certificate_verify`): Phân biệt rõ thông báo "Chứng chỉ có thật trong CSDL nhưng Blockchain đang tắt" với "Chứng chỉ giả mạo / Không tồn tại".
+- **Tiêu chí nghiệm thu:** Quản trị viên dễ dàng tìm thấy tất cả tính năng quản trị chỉ với 1 click từ Sidebar.
+
+#### Nhiệm vụ 4.3: Mở rộng Bộ kiểm thử tự động (Unit Tests & Integration Tests)
+- **Tệp xử lý:** `core/tests/`
+- **Nội dung kỹ thuật:**
+  1. Thêm `test_tuition_workflow.py`: Kiểm tra thanh toán từng đợt, tính công nợ, chống ghi đè số tiền.
+  2. Thêm `test_certificate_eligibility.py`: Kiểm tra cổng chặn cấp chứng chỉ khi còn nợ học phí hoặc vắng thi.
+  3. Thêm `test_forms_validation.py`: Kiểm tra xác thực email trùng, số điện thoại không hợp lệ trên Django Forms.
+  4. Đạt mục tiêu độ phủ kiểm thử (Test Coverage) > 85%, tổng số test cases đạt trên 40 tests.
+- **Tiêu chí nghiệm thu:** Lệnh `python manage.py test` vượt qua 100% tests trong thời gian dưới 30 giây.
+
+#### Nhiệm vụ 4.4: Kiểm thử Hồi quy toàn diện (Regression Testing) & Bàn giao
+- **Nội dung kỹ thuật:**
+  1. Kiểm thử trọn vẹn luồng học viên từ đầu đến cuối: Thêm học viên -> Đăng ký lớp -> Tự sinh học phí -> Thu tiền từng đợt -> Điểm danh -> Nhập điểm -> Cấp chứng chỉ băm Blockchain.
+  2. Cập nhật tài liệu kỹ thuật và bàn giao mã nguồn hoàn thiện.
+
+---
+
+## III. MA TRẬN PHÂN LOẠI ƯU TIÊN THEO NGUYÊN TẮC MOSCOW (CẬP NHẬT)
 
 | Mức độ | Các hạng mục công việc | Thời hạn hoàn thành |
 |---|---|:---:|
-| **MUST HAVE** *(Bắt buộc phải làm ngay)* | • Vá lỗi xác thực bảo mật P0 tại `core/backends.py`<br>• Sửa lỗi sập 500 khi tìm kiếm chứng chỉ<br>• Bổ sung bảng Lịch sử nộp tiền `PaymentTransaction`<br>• Thêm giao diện Web Cấp chứng chỉ mới<br>• Tích hợp phân trang toàn diện (Pagination) | **Tuần 1 & 2** |
-| **SHOULD HAVE** *(Nên có để hệ thống hoàn thiện)* | • Chuyển đổi biểu mẫu sang Django Forms giữ dữ liệu<br>• Lọc tương tác động AJAX Học viên - Lớp học<br>• Chuẩn hóa Responsive Breakpoints trên iPad/Tablet<br>• Phân hệ Buổi học & Điểm danh chuyên cần (`Attendance`) | **Tuần 3 & 4** |
-| **COULD HAVE** *(Làm tăng tính cao cấp của phần mềm)* | • Hỗ trợ giao diện nền tối (Dark Mode)<br>• Tách hàng đợi tác vụ ngầm cho Blockchain<br>• Xuất báo cáo điểm danh ra Excel | **Tuần 4** |
-| **WON'T HAVE** *(Chưa cần thiết ở giai đoạn này)* | • Chuyển đổi sang Microservices (tiếp tục giữ Monolith)<br>• Tích hợp Trí tuệ nhân tạo (AI chatbot)<br>• Tách ứng dụng Mobile App riêng (Web Responsive đã đáp ứng đủ) | *Xem xét sau Golive* |
+| **MUST HAVE** *(Bắt buộc phải làm ngay)* | • Sửa câu truy vấn doanh thu Dashboard theo `PaymentTransaction`<br>• Khóa sửa tay `paid_amount` trong `tuition_edit`<br>• Sửa lỗi 403 nút "Duyệt chuyển lớp" trên `classes/list.html`<br>• Tự động tạo `Tuition` khi ghi danh học viên vào lớp<br>• Ràng buộc điều kiện học phí, điểm số khi cấp chứng chỉ<br>• Sửa lỗi hiển thị Dark Mode cho thanh phân trang | **Giai đoạn 1 & 2** |
+| **SHOULD HAVE** *(Cần thiết cho tính đồng bộ)* | • Kết chuyển học phí khi duyệt chuyển lớp `ClassTransfer`<br>• Chuyển đổi Khóa học, Giáo viên, Lớp học sang Django Forms<br>• Đồng bộ hai chiều điểm số quy chế và bảng điểm 4 kỹ năng<br>• Dọn dẹp toàn bộ thẻ `<style>` inline vào file CSS riêng<br>• Chuẩn hóa toàn bộ hệ sinh thái Icon sang RemixIcon | **Giai đoạn 2 & 3** |
+| **COULD HAVE** *(Làm tăng tính cao cấp & thẩm mỹ)* | • Sửa lỗi dãn cột tiêu đề khi xuất Excel<br>• Bổ sung link quản trị chuyển lớp và quy chế lên Sidebar Admin<br>• Thêm animation mượt mà khi lọc bảng dữ liệu | **Giai đoạn 4** |
+| **WON'T HAVE** *(Chưa cần thiết lúc này)* | • Chuyển đổi sang kiến trúc Microservices<br>• Viết ứng dụng Mobile App riêng biệt<br>• Tích hợp cổng thanh toán trực tuyến bên ngoài (VNPAY/Momo) | *Xem xét sau khi Golive* |
 
 ---
 
-## IV. BẢNG TIÊU CHÍ NGHIỆM THU TỔNG THỂ (DOD - DEFINITION OF DONE)
+## IV. BẢNG TIÊU CHÍ NGHIỆM THU ĐẠT CHUẨN (DEFINITION OF DONE - DOD)
 
-Một tính năng chỉ được xem là hoàn thành khi đáp ứng trọn vẹn 5 tiêu chí:
-1. **Chức năng:** Hoạt động đúng yêu cầu nghiệp vụ, không sinh lỗi runtime console hoặc 500.
-2. **Giao diện:** Đẹp mắt, tương thích hoàn hảo trên Mobile, Tablet (768px) và Desktop; hỗ trợ cả Light Mode và Dark Mode.
-3. **Dữ liệu:** Lưu trữ chính xác vào MySQL 8.0, tuân thủ ràng buộc khóa ngoại và bảo toàn dữ liệu.
-4. **Bảo mật:** Đã được kiểm tra quyền truy cập theo vai trò (RBAC) và bảo vệ CSRF.
-5. **Kiểm thử:** Có ít nhất một test case tự động kiểm tra luồng chạy chính và vượt qua `python manage.py test`.
+Mỗi nhiệm vụ trong lộ trình nâng cấp chỉ được đánh dấu hoàn thành khi đáp ứng đủ 5 điều kiện:
+1. **Logic & Nghiệp vụ:** Xử lý chính xác dữ liệu đầu vào - đầu ra, không phát sinh lỗi ngoại lệ hoặc sai lệch số học.
+2. **Tính Đồng bộ:** Dữ liệu cập nhật tại một phân hệ phải lập tức phản ánh chính xác tại các phân hệ liên quan (Đào tạo ↔ Tài chính ↔ Điểm số ↔ Dashboard).
+3. **Giao diện & Thẩm mỹ:** Đạt chuẩn hiển thị trên cả Light Mode và Dark Mode; co giãn tốt trên Mobile, Tablet và Desktop; tuân thủ Design System chung.
+4. **Bảo mật & Phân quyền:** Tuân thủ chặt chẽ quyền hạn vai trò (Admin, Học vụ, Tài chính); không để lộ nút bấm dẫn đến lỗi 403 Forbidden.
+5. **Kiểm thử tự động:** Có test case tương ứng và chạy lệnh `python manage.py test` đạt kết quả xanh (Pass 100%).
 
 ---
-*Kế hoạch này được xây dựng dựa trên khảo sát thực tế toàn diện mã nguồn dự án. Sau khi hoàn thành 5 giai đoạn, hệ thống sẽ đạt mức sẵn sàng vận hành thực tế 98/100 điểm, đáp ứng đầy đủ tiêu chuẩn của một phần mềm quản lý giáo dục chuyên nghiệp.*
+
+## V. BẢNG THEO DÕI TIẾN ĐỘ THI CÔNG CHI TIẾT
+
+| Mã NV | Hạng mục công việc | Phân hệ | Mức ưu tiên | Trạng thái |
+|:---:|---|:---:|:---:|:---:|
+| **1.1** | Sửa câu truy vấn doanh thu biểu đồ Dashboard theo `PaymentTransaction` & Tái thiết kế Hero Charts chuẩn SaaS | Dashboard | P0 | ✅ Đã hoàn thành (05/11/2026) |
+| **1.2** | Khóa sửa tay `paid_amount` trong `tuition_edit`, bảo toàn lịch sử giao dịch | Tài chính | P1 | ⏳ Đang làm |
+| **1.3** | Sửa phân quyền nút "Duyệt chuyển lớp" tại `classes/list.html` tránh lỗi 403 | Phân quyền | P1 | ⏳ Đang làm |
+| **2.1** | Tự động khởi tạo phiếu học phí `Tuition` khi ghi danh học viên vào lớp | Đào tạo | P1 | 📋 Chờ làm |
+| **2.2** | Kiểm duyệt điều kiện cấp chứng chỉ (Công nợ = 0, Chuyên cần >= 80%, Điểm >= 5.0) | Chứng chỉ | P1 | 📋 Chờ làm |
+| **2.3** | Xây dựng logic kết chuyển học phí khi học viên chuyển lớp | Đào tạo / Tài chính | P2 | 📋 Chờ làm |
+| **2.4** | Đồng bộ hai chiều điểm số quy chế ↔ bảng điểm 4 kỹ năng cũ | Điểm số | P2 | 📋 Chờ làm |
+| **2.5** | Chuyển đổi biểu mẫu Khóa học, Giáo viên, Lớp học sang Django Forms | Đào tạo | P2 | 📋 Chờ làm |
+| **2.6** | Xóa mã chết dư thừa tại `student_edit` trong `students.py` | Học viên | P3 | 📋 Chờ làm |
+| **3.1** | Sửa lỗi Dark Mode cho thanh phân trang `pagination.html` và các form | UI/UX | P1 | 📋 Chờ làm |
+| **3.2** | Di chuyển toàn bộ CSS inline vào các tệp tĩnh riêng biệt | UI/UX | P2 | 📋 Chờ làm |
+| **3.3** | Thống nhất toàn bộ hệ thống biểu tượng sang RemixIcon (`ri-*`) | UI/UX | P2 | 📋 Chờ làm |
+| **3.4** | Chuẩn hóa Responsive Breakpoints (640, 768, 1024, 1280) & Ngữ nghĩa HTML | UI/UX | P2 | 📋 Chờ làm |
+| **4.1** | Sửa lỗi dãn rộng cột STT khi xuất file Excel báo cáo | Báo cáo | P3 | 📋 Chờ làm |
+| **4.2** | Bổ sung liên kết quản trị chuyển lớp và quy chế lên Sidebar Admin | Điều hướng | P3 | 📋 Chờ làm |
+| **4.3** | Mở rộng bộ kiểm thử tự động Unit Tests (Coverage > 85%, > 40 test cases) | Kiểm thử | P2 | 📋 Chờ làm |
+| **4.4** | Kiểm thử hồi quy toàn diện hệ thống và bàn giao nghiệm thu | Toàn hệ thống | P1 | 📋 Chờ làm |
+
+---
+*Kế hoạch và lộ trình này là căn cứ kỹ thuật chính thức để triển khai nâng cấp hệ thống `APP-Trung-Tam-Tieng-Anh` đạt tiêu chuẩn phần mềm thương mại thực tế.*

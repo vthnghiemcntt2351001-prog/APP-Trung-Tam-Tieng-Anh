@@ -2,8 +2,8 @@ from django.db.models import Q
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 
-from ..models import Certificate, Course
-from ..permissions import admin_required, academic_required, staff_required, admin_context
+from ..models import Certificate, Course, Tuition
+from ..permissions import admin_required, academic_required, staff_required, admin_context, is_admin_user
 from ..blockchain.blockchain_service import (
     issue_database_certificate,
     verify_database_certificate,
@@ -141,11 +141,20 @@ def certificate_add(request):
                     classification = "Đạt chuẩn tốt nghiệp"
                     score = 8.0
 
+                tuition_rec = Tuition.objects.filter(student=student, english_class=selected_class).first()
+                has_debt = False
+                debt_amount = 0
+                if tuition_rec and tuition_rec.paid_amount < tuition_rec.total_fee:
+                    has_debt = True
+                    debt_amount = tuition_rec.total_fee - tuition_rec.paid_amount
+
                 eligible_students.append({
                     "student": student,
                     "score": score,
                     "classification": classification,
                     "enrollment_status": en.get_status_display(),
+                    "has_debt": has_debt,
+                    "debt_amount": debt_amount,
                 })
 
     if request.method == "POST":
@@ -154,19 +163,40 @@ def certificate_add(request):
         score_raw = request.POST.get("score", "8.0").strip()
         classification = request.POST.get("classification", "Giỏi").strip()
         issue_date_raw = request.POST.get("issue_date") or None
-        auto_blockchain = request.POST.get("auto_blockchain") == "1"
+
+        # Quy trình 2 bước: Học vụ chỉ lập đề xuất (Pending), Admin mới có quyền chọn ký số Blockchain
+        is_admin_actor = is_admin_user(request.user)
+        auto_blockchain = (request.POST.get("auto_blockchain") == "1") if is_admin_actor else False
 
         try:
             student = get_object_or_404(Student, pk=student_id)
             english_class = get_object_or_404(EnglishClass.objects.select_related("course"), pk=class_id)
 
             if Certificate.objects.filter(student=student, english_class=english_class).exists():
-                messages.warning(request, f"Học viên '{student.full_name}' đã được cấp chứng chỉ cho lớp này.")
+                messages.warning(request, f"Học viên '{student.full_name}' đã có hồ sơ chứng chỉ cho lớp này.")
                 return redirect("certificate_list")
 
             score = Decimal(score_raw)
             if not score.is_finite() or score < 0 or score > 10:
                 raise ValueError("Điểm số phải từ 0 đến 10.")
+
+            # Ràng buộc điều kiện 1: Điểm tổng kết phải đạt chuẩn tối thiểu 5.0
+            if score < Decimal("5.0"):
+                messages.error(
+                    request,
+                    f"Không đủ điều kiện cấp chứng chỉ: Điểm tốt nghiệp của học viên ({score}) chưa đạt chuẩn đầu ra tối thiểu (từ 5.0 trở lên)."
+                )
+                return redirect(f"/certificates/add/?class_id={class_id}")
+
+            # Ràng buộc điều kiện 2: Học viên phải hoàn tất học phí (nếu có hồ sơ học phí)
+            tuition = Tuition.objects.filter(student=student, english_class=english_class).first()
+            if tuition and tuition.paid_amount < tuition.total_fee:
+                debt = tuition.total_fee - tuition.paid_amount
+                messages.error(
+                    request,
+                    f"Không đủ điều kiện cấp chứng chỉ: Học viên '{student.full_name}' còn nợ học phí {debt:,.0f} đ cho lớp này. Yêu cầu hoàn tất học phí trước khi đề xuất cấp chứng chỉ."
+                )
+                return redirect(f"/certificates/add/?class_id={class_id}")
 
             issue_date = parse_date(issue_date_raw) if issue_date_raw else date.today()
             if not issue_date:
@@ -178,19 +208,23 @@ def certificate_add(request):
                 score=score,
                 classification=classification or "Đạt",
                 issue_date=issue_date,
+                blockchain_status="pending",
             )
 
-            msg = f"Đã cấp chứng chỉ '{cert.certificate_code}' cho học viên '{student.full_name}' thành công!"
+            if is_admin_actor:
+                msg = f"Đã cấp chứng chỉ '{cert.certificate_code}' cho học viên '{student.full_name}' thành công!"
+                if auto_blockchain and is_blockchain_available():
+                    try:
+                        result = issue_database_certificate(cert)
+                        if result.get("status") == "success":
+                            msg += f" (Đã phê duyệt & ghi nhận lên Blockchain tại Block #{result.get('block_number')})"
+                    except Exception as exc:
+                        msg += f" (Lưu ý: Chưa ghi được lên Blockchain: {exc})"
+                messages.success(request, msg)
+            else:
+                msg = f"Đã lập đề xuất cấp chứng chỉ '{cert.certificate_code}' cho học viên '{student.full_name}' thành công! Hồ sơ đang ở trạng thái 'Chờ Admin duyệt phát hành'."
+                messages.success(request, msg)
 
-            if auto_blockchain and is_blockchain_available():
-                try:
-                    result = issue_database_certificate(cert)
-                    if result.get("status") == "success":
-                        msg += f" (Đã ghi nhận lên Blockchain tại Block #{result.get('block_number')})"
-                except Exception as exc:
-                    msg += f" (Lưu ý: Chưa ghi được lên Blockchain: {exc})"
-
-            messages.success(request, msg)
             return redirect("certificate_list")
 
         except (InvalidOperation, ValueError, TypeError) as exc:

@@ -32,7 +32,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
-                <span>Cấp chứng chỉ mới</span>
+                <span>{% if is_admin %}Cấp chứng chỉ mới{% else %}Lập đề xuất cấp chứng chỉ{% endif %}</span>
             </a>
         </div>
     </div>
@@ -115,7 +115,7 @@
                 </svg>
             </div>
             <div class="stat-data">
-                <span class="stat-title">Chờ cấp phát</span>
+                <span class="stat-title">Chờ Admin duyệt (Pending)</span>
                 <span class="stat-num">{{ pending_count|default:"0" }}</span>
             </div>
         </div>
@@ -281,12 +281,12 @@
                                 <span>Ghi thất bại</span>
                             </span>
                             {% else %}
-                            <span class="status-badge pending">
+                            <span class="status-badge pending" title="Hồ sơ đề xuất đang chờ Quản trị viên duyệt và ký số Blockchain">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"/>
                                     <polyline points="12 6 12 12 16 14"/>
                                 </svg>
-                                <span>Chờ cấp (Pending)</span>
+                                <span>Chờ Admin duyệt</span>
                             </span>
                             {% endif %}
                         </td>
@@ -316,17 +316,23 @@
                         <!-- Thao tác -->
                         <td style="text-align: right;">
                             <div class="row-actions-wrap">
-                                {% if is_admin and cert.blockchain_status != "issued" %}
-                                <form method="post" action="{% url 'certificate_issue' cert.id %}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn phát hành chứng chỉ này lên Blockchain?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-issue-chain" title="Phát hành lên Smart Contract">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="m22 2-7 20-4-9-9-4Z"/>
-                                            <path d="M22 2 11 13"/>
-                                        </svg>
-                                        <span>Phát hành</span>
-                                    </button>
-                                </form>
+                                {% if cert.blockchain_status != "issued" %}
+                                    {% if is_admin %}
+                                    <form method="post" action="{% url 'certificate_issue' cert.id %}" style="display: inline;" onsubmit="return confirm('Xác nhận phê duyệt và ký số phát hành chứng chỉ {{ cert.certificate_code }} lên Blockchain Ethereum?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-issue-chain" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); border-color: #6d28d9;" title="Phê duyệt & Phát hành Smart Contract">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                                <path d="m9 12 2 2 4-4"/>
+                                            </svg>
+                                            <span>Duyệt & Ký số</span>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="status-badge pending" style="font-size: 11px; padding: 4px 8px; border-radius: 6px;" title="Học vụ đã gửi đề xuất, đang chờ Quản trị viên phê duyệt">
+                                        <span>Chờ duyệt</span>
+                                    </span>
+                                    {% endif %}
                                 {% endif %}
 
                                 <a href="{% url 'certificate_verify' %}?code={{ cert.certificate_code }}" class="btn-row-verify" title="Kiểm tra đối chiếu với Smart Contract">

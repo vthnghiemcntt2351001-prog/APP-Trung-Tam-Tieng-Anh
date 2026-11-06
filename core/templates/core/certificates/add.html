@@ -220,10 +220,35 @@
                 <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
                 <path d="m9 15 2 2 4-4"/>
             </svg>
-            Cấp chứng chỉ tốt nghiệp mới
+            {% if is_admin %}Cấp chứng chỉ tốt nghiệp mới{% else %}Lập đề xuất cấp chứng chỉ tốt nghiệp{% endif %}
         </h1>
-        <p class="cert-form-desc">Phát hành chứng chỉ hoàn thành khóa học cho học viên và tùy chọn lưu trữ bất biến lên sổ cái Blockchain.</p>
+        <p class="cert-form-desc">
+            {% if is_admin %}
+                Phát hành chứng chỉ hoàn thành khóa học cho học viên và tùy chọn lưu trữ bất biến lên sổ cái Blockchain.
+            {% else %}
+                Học vụ lập danh sách đề xuất cấp chứng chỉ tốt nghiệp (Chờ Quản trị viên kiểm tra điều kiện & ký số phát hành Blockchain).
+            {% endif %}
+        </p>
     </div>
+
+    <!-- Bước 1: Chọn Lớp học để tải danh sách học viên -->
+    {% if not is_admin %}
+    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: #dbeafe; color: #2563eb; display: grid; place-items: center; flex-shrink: 0;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+        </div>
+        <div>
+            <strong style="color: #1e40af; font-size: 14.5px; display: block; margin-bottom: 3px;">Quy trình phê duyệt 2 bước (Enterprise Workflow)</strong>
+            <span style="color: #1e3a8a; font-size: 13px; line-height: 1.45;">
+                Bạn đang thao tác với quyền <strong>Nhân viên Học vụ</strong>. Hệ thống áp dụng quy trình kiểm soát 2 bước: Học vụ lập đề xuất chứng chỉ (trạng thái <em>Chờ duyệt</em>). Quản trị viên (Admin) sẽ thẩm định điều kiện công nợ & học lực, sau đó trực tiếp ký số và phát hành lên Blockchain Ethereum.
+            </span>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Bước 1: Chọn Lớp học để tải danh sách học viên -->
     <div class="cert-card" style="margin-bottom: 20px;">
@@ -284,7 +309,7 @@
                                     <option value="{{ item.student.id }}"
                                             data-score="{{ item.score|default:'8.0' }}"
                                             data-classification="{{ item.classification }}">
-                                        {{ item.student.student_code }} - {{ item.student.full_name }} (Điểm: {{ item.score|default:'N/A' }} | Xếp loại: {{ item.classification }})
+                                        {{ item.student.student_code }} - {{ item.student.full_name }} (Điểm: {{ item.score|default:'N/A' }} | Xếp loại: {{ item.classification }}){% if item.has_debt %} [⚠️ Nợ học phí: {{ item.debt_amount|floatformat:0 }}đ]{% endif %}{% if item.score < 5.0 %} [⚠️ Chưa đạt điểm sàn]{% endif %}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -321,8 +346,9 @@
                             <input type="date" name="issue_date" id="issue_date" class="form-input" required value="{{ today }}">
                         </div>
 
-                        <!-- Tùy chọn Blockchain -->
+                        <!-- Tùy chọn Blockchain (Admin: Ký phát hành ngay; Học vụ: Banner quy trình 2 bước) -->
                         <div class="form-group col-span-2">
+                            {% if is_admin %}
                             <div class="blockchain-toggle-card {% if blockchain_available %}available{% endif %}">
                                 <div class="toggle-left">
                                     <div class="toggle-icon">
@@ -332,12 +358,12 @@
                                         </svg>
                                     </div>
                                     <div class="toggle-text">
-                                        <strong>Tự động phát hành lên Blockchain Ethereum ngay sau khi tạo</strong>
+                                        <strong>Tự động phát hành & ký số Blockchain Ethereum ngay sau khi tạo</strong>
                                         <span>
                                             {% if blockchain_available %}
                                                 Mạng Ganache RPC đang kết nối sẵn sàng. Smart contract sẽ đóng dấu băm chứng chỉ vĩnh viễn.
                                             {% else %}
-                                                Mạng Blockchain hiện đang ngoại tuyến. Nếu chọn, hệ thống sẽ phát hành chứng chỉ cơ sở dữ liệu trước.
+                                                Mạng Blockchain hiện đang ngoại tuyến. Nếu chọn, hệ thống sẽ lưu chứng chỉ trước và phát hành khi node online.
                                             {% endif %}
                                         </span>
                                     </div>
@@ -346,6 +372,25 @@
                                     <input type="checkbox" name="auto_blockchain" value="1" class="switch-input" {% if blockchain_available %}checked{% endif %}>
                                 </label>
                             </div>
+                            {% else %}
+                            <div class="blockchain-toggle-card" style="background: #eff6ff; border-color: #bfdbfe;">
+                                <div class="toggle-left">
+                                    <div class="toggle-icon" style="background: #dbeafe; color: #2563eb;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="16" x2="12" y2="12"/>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                        </svg>
+                                    </div>
+                                    <div class="toggle-text">
+                                        <strong style="color: #1e40af;">Quy trình phê duyệt 2 bước (Enterprise Workflow)</strong>
+                                        <span style="color: #1e3a8a;">
+                                            Bạn đang thao tác với vai trò <strong>Học vụ</strong>. Chứng chỉ sau khi lập đề xuất sẽ lưu ở trạng thái <strong>Chờ Admin duyệt (Pending)</strong> để Quản trị viên kiểm tra và tiến hành ký số phát hành lên Blockchain.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -356,7 +401,7 @@
                                 <path d="M5 12h14"/>
                                 <path d="m12 5 7 7-7 7"/>
                             </svg>
-                            Xác nhận cấp chứng chỉ
+                            {% if is_admin %}Xác nhận cấp chứng chỉ{% else %}Gửi đề xuất cấp chứng chỉ{% endif %}
                         </button>
                     </div>
                 </form>

@@ -5,7 +5,7 @@ from django.db.models import Avg, Sum
 from django.shortcuts import render
 from django.utils import timezone
 
-from ..models import Student, Course, EnglishClass, Teacher, Grade, Tuition
+from ..models import Student, Course, EnglishClass, Teacher, Grade, Tuition, PaymentTransaction
 from ..permissions import admin_context, staff_required
 
 
@@ -57,9 +57,16 @@ def home(request):
         if not active_courses:
             active_courses = course_stats[:6]
 
+        total_course_students = sum(c.student_count for c in active_courses) or 1
+        palette = ["#f43f5e", "#8b5cf6", "#f59e0b", "#06b6d4", "#10b981", "#6366f1"]
+        for idx, c in enumerate(active_courses):
+            c.percentage = round((c.student_count / total_course_students) * 100)
+            c.color = palette[idx % len(palette)]
+
         context["course_labels"] = [c.name for c in active_courses]
         context["course_student_counts"] = [c.student_count for c in active_courses]
         context["course_distribution"] = active_courses
+        context["top_courses"] = active_courses[:4]
 
     if permissions["can_manage_finance"]:
         tuition_statistics = Tuition.objects.aggregate(
@@ -74,8 +81,9 @@ def home(request):
             "total_debt": total_fee - total_paid,
         })
 
-        # Thống kê doanh thu học phí theo 6 tháng gần nhất
         today = timezone.localdate()
+
+        # 1. Thống kê 6 tháng gần nhất (ưu tiên PaymentTransaction thực thu)
         monthly_labels = []
         monthly_paid = []
         monthly_expected = []
@@ -89,21 +97,27 @@ def home(request):
             month_label = f"T{m:02d}/{y}"
             monthly_labels.append(month_label)
 
-            paid_sum = Tuition.objects.filter(
+            paid_sum = PaymentTransaction.objects.filter(
                 payment_date__year=y,
                 payment_date__month=m,
-            ).aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
+            ).aggregate(s=Sum("amount"))["s"] or Decimal("0")
 
-            fee_sum = Tuition.objects.filter(
-                created_at__year=y,
-                created_at__month=m,
-            ).aggregate(s=Sum("total_fee"))["s"] or Decimal("0")
+            if paid_sum == 0:
+                paid_sum = Tuition.objects.filter(
+                    payment_date__year=y,
+                    payment_date__month=m,
+                ).aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
 
             if paid_sum == 0:
                 paid_sum = Tuition.objects.filter(
                     created_at__year=y,
                     created_at__month=m,
                 ).aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
+
+            fee_sum = Tuition.objects.filter(
+                created_at__year=y,
+                created_at__month=m,
+            ).aggregate(s=Sum("total_fee"))["s"] or Decimal("0")
 
             monthly_paid.append(float(paid_sum))
             monthly_expected.append(float(fee_sum or paid_sum))
@@ -112,5 +126,81 @@ def home(request):
         context["monthly_paid"] = monthly_paid
         context["monthly_expected"] = monthly_expected
 
-    return render(request, "core/dashboard/home.html", context)
+        # 2. Thống kê 12 tháng (Cả năm)
+        yearly_labels = []
+        yearly_paid = []
+        yearly_expected = []
+        for i in range(11, -1, -1):
+            m = today.month - i
+            y = today.year
+            while m <= 0:
+                m += 12
+                y -= 1
+            yearly_labels.append(f"T{m:02d}")
 
+            y_paid = PaymentTransaction.objects.filter(
+                payment_date__year=y,
+                payment_date__month=m,
+            ).aggregate(s=Sum("amount"))["s"] or Decimal("0")
+            if y_paid == 0:
+                y_paid = Tuition.objects.filter(
+                    payment_date__year=y,
+                    payment_date__month=m,
+                ).aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
+            if y_paid == 0:
+                y_paid = Tuition.objects.filter(
+                    created_at__year=y,
+                    created_at__month=m,
+                ).aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
+
+            y_fee = Tuition.objects.filter(
+                created_at__year=y,
+                created_at__month=m,
+            ).aggregate(s=Sum("total_fee"))["s"] or Decimal("0")
+
+            yearly_paid.append(float(y_paid))
+            yearly_expected.append(float(y_fee or y_paid))
+
+        context["yearly_labels"] = yearly_labels
+        context["yearly_paid"] = yearly_paid
+        context["yearly_expected"] = yearly_expected
+
+        # 3. Chỉ số tháng gần nhất (Latest Month KPI)
+        current_tx_paid = PaymentTransaction.objects.filter(
+            payment_date__year=today.year,
+            payment_date__month=today.month,
+        ).aggregate(s=Sum("amount"))["s"] or Decimal("0")
+        current_tx_count = PaymentTransaction.objects.filter(
+            payment_date__year=today.year,
+            payment_date__month=today.month,
+        ).count()
+
+        if current_tx_paid > 0:
+            latest_month_paid = current_tx_paid
+            latest_month_tx_count = current_tx_count
+            latest_month_label = f"Tháng {today.month:02d}/{today.year}"
+        else:
+            latest_month_paid = Decimal("0")
+            latest_month_tx_count = 0
+            latest_month_label = f"Tháng {today.month:02d}/{today.year}"
+            for i in range(len(monthly_paid) - 1, -1, -1):
+                if monthly_paid[i] > 0:
+                    latest_month_paid = Decimal(str(int(monthly_paid[i])))
+                    label_parts = monthly_labels[i].replace("T", "").split("/")
+                    m_val = int(label_parts[0])
+                    y_val = int(label_parts[1])
+                    latest_month_tx_count = PaymentTransaction.objects.filter(
+                        payment_date__year=y_val,
+                        payment_date__month=m_val,
+                    ).count()
+                    latest_month_label = f"Tháng {m_val:02d}/{y_val}"
+                    break
+
+        if latest_month_tx_count == 0:
+            latest_month_tx_count = Student.objects.filter(is_active=True).count()
+
+        context["latest_month_paid"] = latest_month_paid
+        context["latest_month_tx_count"] = latest_month_tx_count
+        context["latest_month_label"] = latest_month_label
+
+    return render(request, "core/dashboard/home.html", context)
