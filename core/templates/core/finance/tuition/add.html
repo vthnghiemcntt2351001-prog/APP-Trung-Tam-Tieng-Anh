@@ -1,31 +1,29 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Tạo phiếu học phí | English Center{% endblock %}
-{% block breadcrumb %}Tạo phiếu học phí{% endblock %}
+{% block title %}Tạo phiếu học phí | VISTA English Center{% endblock %}
+{% block breadcrumb %}Tài chính{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="{% static 'core/css/pages/finance/tuition/add.css' %}?v=20261101_v3">
+<link rel="stylesheet" href="{% static 'core/css/pages/finance/tuition/add.css' %}?v=20261107_v4">
 {% endblock %}
 
 {% block page_content %}
-<div class="tuition-form-wrapper">
+<div class="student-form-page">
 
-    <!-- 1. BREADCRUMB & HEADER -->
-    <div class="form-header-area">
-        <nav class="form-breadcrumb" aria-label="Breadcrumb">
-            <a href="{% url 'home' %}">Trang chủ</a>
-            <span class="sep">/</span>
-            <a href="{% url 'tuition_list' %}">Tài chính</a>
-            <span class="sep">/</span>
-            <span>Tạo phiếu học phí</span>
-        </nav>
-        <div class="form-badge-tag">
-            <i class="ri-file-add-line"></i>
-            <span>Lập hồ sơ tài chính</span>
+    <!-- 1. HEADER BAR WITH BACK BUTTON -->
+    <div class="form-page-header">
+        <a href="{% url 'tuition_list' %}" class="btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Quay lại danh sách</span>
+        </a>
+        <div class="header-intro">
+            <h1 class="page-title">Tạo phiếu học phí mới</h1>
+            <p class="page-desc">Khởi tạo nghĩa vụ tài chính theo lớp học và ghi nhận thanh toán đợt đầu (nếu có)</p>
         </div>
-        <h1 class="form-title">Tạo phiếu học phí mới</h1>
-        <p class="form-subtitle">Khởi tạo nghĩa vụ học phí cho học viên theo lớp học và ghi nhận đợt thanh toán đầu tiên (nếu có).</p>
     </div>
 
     <!-- 2. MESSAGES ALERT -->
@@ -40,158 +38,184 @@
         </div>
     {% endif %}
 
-    <!-- 3. MAIN FORM CARD -->
-    <div class="form-card">
-        <form method="post" style="display: flex; flex-direction: column; gap: 24px;">
+    <!-- 3. MAIN FORM CONTAINER CARD -->
+    <div class="form-container-card">
+
+        <!-- Banner Header -->
+        <div class="card-hero-banner" style="background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);">
+            <div class="hero-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                </svg>
+            </div>
+            <div class="hero-text">
+                <h2>Hồ sơ học phí & Thanh toán</h2>
+                <p>Điền các trường thông tin tài chính bắt buộc có dấu (<span class="req-star">*</span>)</p>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <form method="POST" class="student-form">
             {% csrf_token %}
 
             <!-- SECTION 1: HỌC VIÊN & LỚP HỌC -->
             <div class="form-section">
-                <h2 class="form-section-title">
-                    <i class="ri-user-shared-line"></i>
-                    <span>Thông tin đối tượng & Lớp học</span>
-                </h2>
+                <div class="section-badge">1</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thông tin học viên & Lớp học</h3>
 
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="student">
-                            <span>Học viên</span>
-                            <span class="req-star">*</span>
-                        </label>
-                        <select id="student" name="student" required class="select-control">
-                            <option value="">-- Chọn học viên --</option>
-                            {% for student in students %}
-                                <option value="{{ student.id }}">
-                                    {{ student.full_name }} &bull; {{ student.student_code|default:"HV" }} ({{ student.phone|default:student.email }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <p class="form-hint">
-                            <i class="ri-information-line"></i> Chọn học viên để lọc lớp học tương ứng.
-                        </p>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="student">
+                                <span>Học viên</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <select id="student" name="student" required>
+                                    <option value="">-- Chọn học viên --</option>
+                                    {% for student in students %}
+                                        <option value="{{ student.id }}">
+                                            {{ student.full_name }} &bull; {{ student.student_code|default:"HV" }} ({{ student.phone|default:student.email }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <span class="field-hint">
+                                <i class="ri-information-line"></i> Chọn học viên để tự động lọc các lớp học viên đang theo học.
+                            </span>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="english_class">
+                                <span>Lớp học</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <select id="english_class" name="english_class" required>
+                                    <option value="">-- Chọn lớp học --</option>
+                                    {% for class in classes %}
+                                        <option
+                                            value="{{ class.id }}"
+                                            data-fee="{{ class.course.tuition }}"
+                                        >
+                                            {{ class.name }} - {{ class.course.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <span class="field-hint">
+                                <i class="ri-checkbox-circle-line" style="color: #10b981;"></i> Chỉ lập phiếu cho học viên đang theo học.
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="english_class">
-                            <span>Lớp học</span>
-                            <span class="req-star">*</span>
-                        </label>
-                        <select id="english_class" name="english_class" required class="select-control">
-                            <option value="">-- Chọn lớp học --</option>
-                            {% for class in classes %}
-                                <option
-                                    value="{{ class.id }}"
-                                    data-fee="{{ class.course.tuition }}"
-                                >
-                                    {{ class.name }} - {{ class.course.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <p class="form-hint">
-                            <i class="ri-checkbox-circle-line" style="color: #10b981;"></i> Chỉ lập phiếu cho học viên đang theo học.
-                        </p>
+                    <!-- DYNAMIC FEE PREVIEW -->
+                    <div class="fee-preview-box">
+                        <div class="fee-preview-item">
+                            <span class="fee-preview-label">
+                                <i class="ri-price-tag-3-line"></i>
+                                <span>Tổng học phí khóa học</span>
+                            </span>
+                            <strong id="total-fee" class="fee-preview-val">0 đ</strong>
+                        </div>
+                        <div class="fee-preview-item">
+                            <span class="fee-preview-label">
+                                <i class="ri-wallet-3-line"></i>
+                                <span>Số tiền còn lại sau khi nộp</span>
+                            </span>
+                            <strong id="remaining-fee" class="fee-preview-val remaining">0 đ</strong>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- DYNAMIC FEE PREVIEW -->
-            <div class="fee-preview-box">
-                <div class="fee-preview-item">
-                    <span class="fee-preview-label">
-                        <i class="ri-price-tag-3-line"></i>
-                        <span>Tổng học phí khóa học</span>
-                    </span>
-                    <strong id="total-fee" class="fee-preview-val">0 đ</strong>
-                </div>
-                <div class="fee-preview-item">
-                    <span class="fee-preview-label">
-                        <i class="ri-wallet-3-line"></i>
-                        <span>Số tiền còn lại sau khi đóng</span>
-                    </span>
-                    <strong id="remaining-fee" class="fee-preview-val remaining">0 đ</strong>
                 </div>
             </div>
 
             <!-- SECTION 2: THANH TOÁN BAN ĐẦU -->
             <div class="form-section">
-                <h2 class="form-section-title">
-                    <i class="ri-money-dollar-circle-line"></i>
-                    <span>Thông tin thanh toán ban đầu</span>
-                </h2>
+                <div class="section-badge">2</div>
+                <div class="section-content">
+                    <h3 class="section-heading">Thông tin thanh toán ban đầu</h3>
 
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="paid_amount">
-                            <span>Số tiền đóng lần này (VNĐ)</span>
-                            <span class="req-star">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            id="paid_amount"
-                            name="paid_amount"
-                            min="0"
-                            step="1"
-                            value="0"
-                            required
-                            class="input-control"
-                        >
-                        <p class="form-hint">
-                            <i class="ri-lightbulb-line" style="color: #f59e0b;"></i> Nhập 0 nếu tạo phiếu ghi nợ nhưng chưa thu tiền.
-                        </p>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="paid_amount">
+                                <span>Số tiền nộp lần này (VNĐ)</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="number"
+                                    id="paid_amount"
+                                    name="paid_amount"
+                                    min="0"
+                                    step="1"
+                                    value="0"
+                                    required
+                                >
+                            </div>
+                            <span class="field-hint">
+                                <i class="ri-lightbulb-line" style="color: #f59e0b;"></i> Nhập 0 nếu tạo phiếu ghi nợ nhưng chưa thu tiền ngay.
+                            </span>
+                        </div>
+
+                        <div class="input-field-group">
+                            <label for="payment_method">
+                                <span>Phương thức thanh toán</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <select id="payment_method" name="payment_method" required>
+                                    {% for val, label in payment_methods %}
+                                        <option value="{{ val }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="payment_method">
-                            <span>Phương thức thanh toán</span>
-                            <span class="req-star">*</span>
-                        </label>
-                        <select id="payment_method" name="payment_method" required class="select-control">
-                            {% for val, label in payment_methods %}
-                                <option value="{{ val }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label for="payment_date">
+                                <span>Ngày thanh toán</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="date"
+                                    id="payment_date"
+                                    name="payment_date"
+                                    value="{{ today }}"
+                                >
+                            </div>
+                        </div>
 
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="payment_date">
-                            <span>Ngày thanh toán</span>
-                        </label>
-                        <input
-                            type="date"
-                            id="payment_date"
-                            name="payment_date"
-                            value="{{ today }}"
-                            class="input-control"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="note">
-                            <span>Ghi chú thu ngân</span>
-                        </label>
-                        <textarea
-                            id="note"
-                            name="note"
-                            placeholder="Ví dụ: Đóng học phí đợt 1 qua chuyển khoản, ưu đãi học bổng 10%..."
-                            class="textarea-control"
-                        ></textarea>
+                        <div class="input-field-group">
+                            <label for="note">
+                                <span>Ghi chú thu ngân</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <textarea
+                                    id="note"
+                                    name="note"
+                                    rows="3"
+                                    placeholder="Ví dụ: Đóng học phí đợt 1 qua chuyển khoản, ưu đãi học bổng 10%..."
+                                ></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. FORM ACTIONS -->
+            <!-- 4. FORM ACTIONS BAR -->
             <div class="form-actions-bar">
-                <button type="submit" class="btn-form-primary">
-                    <i class="ri-check-line"></i>
+                <a href="{% url 'tuition_list' %}" class="btn-action-cancel">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn-action-submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
                     <span>Lưu phiếu học phí</span>
                 </button>
-
-                <a href="{% url 'tuition_list' %}" class="btn-form-secondary">
-                    <i class="ri-arrow-left-line"></i>
-                    <span>Quay lại</span>
-                </a>
             </div>
         </form>
     </div>
@@ -201,5 +225,5 @@
 
 {% block page_scripts %}
 <script id="studentClassesData" type="application/json">{{ student_classes_json|safe }}</script>
-<script defer src="{% static 'core/js/tuition_add.js' %}?v=20261101_v3"></script>
+<script defer src="{% static 'core/js/tuition_add.js' %}?v=20261107_v4"></script>
 {% endblock %}
