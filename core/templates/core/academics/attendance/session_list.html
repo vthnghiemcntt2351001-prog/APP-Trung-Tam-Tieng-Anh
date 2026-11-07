@@ -18,7 +18,7 @@
                     Lớp {{ english_class.name }}
                 </h1>
                 <p style="color: var(--text-muted); margin: 0.25rem 0 0 0; font-size: 0.95rem;">
-                    Khóa học: <strong>{{ english_class.course.name }}</strong> &bull; Giáo viên: <strong>{{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa phân công" }}</strong>
+                    Khóa học: <strong>{{ english_class.course.name }}</strong> &bull; Giảng viên: <strong>{{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa phân công" }}</strong>
                 </p>
             </div>
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
@@ -67,7 +67,7 @@
                         <th style="padding: 0.85rem 1rem;">Ngày học</th>
                         <th style="padding: 0.85rem 1rem;">Thời gian & Phòng</th>
                         <th style="padding: 0.85rem 1rem;">Chủ đề bài học</th>
-                        <th style="padding: 0.85rem 1rem;">Giáo viên</th>
+                        <th style="padding: 0.85rem 1rem;">Giảng viên</th>
                         <th style="padding: 0.85rem 1rem;">Tình trạng điểm danh</th>
                         <th style="padding: 0.85rem 1.25rem; text-align: right;">Thao tác</th>
                     </tr>

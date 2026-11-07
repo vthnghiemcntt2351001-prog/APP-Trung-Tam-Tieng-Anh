@@ -699,7 +699,7 @@ def teacher_add(request):
                 address=address,
             )
 
-            messages.success(request, "Thêm giáo viên thành công!")
+            messages.success(request, "Thêm giảng viên thành công!")
             return redirect("teacher_list")
 
     return render(
@@ -743,7 +743,7 @@ def teacher_edit(request, teacher_id):
 
             messages.success(
                 request,
-                "Cập nhật giáo viên thành công!"
+                "Cập nhật giảng viên thành công!"
             )
             return redirect("teacher_list")
 

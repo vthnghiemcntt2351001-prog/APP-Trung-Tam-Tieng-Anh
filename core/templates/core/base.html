@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#243b53">
     <title>{% block title %}English Center{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'core/css/base.css' %}?v=20261027_v10">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}?v=20261107_v1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css">
     {% block extra_head %}{% endblock %}
     {% block page_styles %}{% endblock %}
@@ -49,9 +49,9 @@
                     <span class="nav-icon"><i class="ri-user-smile-line"></i></span>
                     <span class="nav-label">Học viên</span>
                 </a>
-                <a class="nav-link {% if 'teacher' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'teacher_list' %}" title="Giáo viên">
+                <a class="nav-link {% if 'teacher' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'teacher_list' %}" title="Giảng viên">
                     <span class="nav-icon"><i class="ri-presentation-line"></i></span>
-                    <span class="nav-label">Giáo viên</span>
+                    <span class="nav-label">Giảng viên</span>
                 </a>
                 <a class="nav-link {% if 'course' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'course_list' %}" title="Khóa học">
                     <span class="nav-icon"><i class="ri-book-read-line"></i></span>
@@ -102,7 +102,7 @@
                     <button id="sidebarToggle" class="sidebar-toggle-btn" type="button" aria-label="Menu điều hướng" title="Thu gọn / Mở rộng Sidebar">
                         <i class="ri-menu-line" style="font-size: 18px;"></i>
                     </button>
-                    <div class="topbar-context"><span class="topbar-kicker">TRUNG TÂM TIẾNG ANH</span><span class="topbar-divider">/</span><span class="topbar-current">{% block breadcrumb %}{% if 'student' in request.resolver_match.url_name %}Học viên{% elif 'teacher' in request.resolver_match.url_name %}Giáo viên{% elif 'course' in request.resolver_match.url_name %}Khóa học{% elif 'class' in request.resolver_match.url_name %}Lớp học{% elif 'tuition' in request.resolver_match.url_name %}Tài chính{% elif 'assessment' in request.resolver_match.url_name or 'grade' in request.resolver_match.url_name %}Điểm số & đánh giá{% elif request.resolver_match.url_name == 'home' %}Tổng quan{% else %}Không gian làm việc{% endif %}{% endblock %}</span></div>
+                    <div class="topbar-context"><span class="topbar-kicker">TRUNG TÂM TIẾNG ANH</span><span class="topbar-divider">/</span><span class="topbar-current">{% block breadcrumb %}{% if 'student' in request.resolver_match.url_name %}Học viên{% elif 'teacher' in request.resolver_match.url_name %}Giảng viên{% elif 'course' in request.resolver_match.url_name %}Khóa học{% elif 'class' in request.resolver_match.url_name %}Lớp học{% elif 'tuition' in request.resolver_match.url_name %}Tài chính{% elif 'assessment' in request.resolver_match.url_name or 'grade' in request.resolver_match.url_name %}Điểm số & đánh giá{% elif request.resolver_match.url_name == 'home' %}Tổng quan{% else %}Không gian làm việc{% endif %}{% endblock %}</span></div>
                 </div>
                 <div class="topbar-right" style="display: flex; align-items: center; gap: 12px;">
                     <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Chuyển chế độ Sáng / Tối" title="Chuyển chế độ Sáng / Tối">

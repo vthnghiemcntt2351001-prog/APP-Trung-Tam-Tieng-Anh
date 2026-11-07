@@ -243,10 +243,10 @@ def role_list(request):
             "badge_class": "badge-role-academic",
             "icon": "🎓",
             "title": "Cán bộ Học vụ (Academic Staff)",
-            "description": "Chịu trách nhiệm quản lý hồ sơ học viên, giáo viên, danh mục khóa học, xếp lớp học, ghi danh, điểm danh chuyên cần, nhập điểm và cấp phát chứng chỉ.",
+            "description": "Chịu trách nhiệm quản lý hồ sơ học viên, giảng viên, danh mục khóa học, xếp lớp học, ghi danh, điểm danh chuyên cần, nhập điểm và cấp phát chứng chỉ.",
             "users": User.objects.filter(groups__name=ROLE_ACADEMIC).distinct().order_by("username"),
             "features": [
-                "Thêm mới, sửa, quản lý hồ sơ học viên và giáo viên",
+                "Thêm mới, sửa, quản lý hồ sơ học viên và giảng viên",
                 "Quản lý danh sách khóa học và lớp học",
                 "Ghi danh học viên và đề xuất chuyển lớp",
                 "Tạo lịch buổi học và thực hiện điểm danh chuyên cần",
@@ -275,7 +275,7 @@ def role_list(request):
     matrix = [
         {"module": "Bảng điều khiển (Dashboard)", "admin": True, "academic": True, "finance": True},
         {"module": "Quản lý Hồ sơ Học viên", "admin": True, "academic": True, "finance": False},
-        {"module": "Quản lý Giáo viên & Khóa học", "admin": True, "academic": True, "finance": False},
+        {"module": "Quản lý Giảng viên & Khóa học", "admin": True, "academic": True, "finance": False},
         {"module": "Quản lý Lớp học & Ghi danh", "admin": True, "academic": True, "finance": False},
         {"module": "Buổi học & Điểm danh chuyên cần", "admin": True, "academic": True, "finance": False},
         {"module": "Kỳ đánh giá & Nhập bảng điểm", "admin": True, "academic": True, "finance": False},

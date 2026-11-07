@@ -60,7 +60,7 @@ class TeacherForm(forms.ModelForm):
         widgets = {
             "full_name": forms.TextInput(attrs={
                 "class": "form-input",
-                "placeholder": "Họ và tên giáo viên",
+                "placeholder": "Họ và tên giảng viên",
                 "required": True,
             }),
             "email": forms.EmailInput(attrs={
@@ -97,7 +97,7 @@ class TeacherForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             query = query.exclude(pk=self.instance.pk)
         if query.exists():
-            raise ValidationError(f"Email '{email}' đã được sử dụng bởi giáo viên khác.")
+            raise ValidationError(f"Email '{email}' đã được sử dụng bởi giảng viên khác.")
         return email
 
 

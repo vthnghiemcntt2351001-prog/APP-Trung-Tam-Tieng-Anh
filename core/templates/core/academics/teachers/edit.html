@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load static %}
-{% block title %}Cập nhật giáo viên | English Center{% endblock %}
-{% block breadcrumb %}Cập nhật giáo viên{% endblock %}
+{% block title %}Cập nhật giảng viên | VISTA English Center{% endblock %}
+{% block breadcrumb %}Cập nhật giảng viên{% endblock %}
 {% block extra_head %}
 <style>
 .app-content .input-wrapper input {
@@ -26,8 +26,8 @@
             <span>Quay lại danh sách</span>
         </a>
         <div class="header-intro">
-            <h1 class="page-title">Cập nhật thông tin giáo viên</h1>
-            <p class="page-desc">Chỉnh sửa thông tin hồ sơ của giáo viên <strong>{{ teacher.full_name }}</strong></p>
+            <h1 class="page-title">Cập nhật thông tin giảng viên</h1>
+            <p class="page-desc">Chỉnh sửa thông tin hồ sơ của giảng viên <strong>{{ teacher.full_name }}</strong></p>
         </div>
     </div>
 
@@ -142,7 +142,7 @@
                                     id="address"
                                     name="address"
                                     rows="3"
-                                    placeholder="Nhập địa chỉ hoặc thông tin bổ sung về giáo viên..."
+                                    placeholder="Nhập địa chỉ hoặc thông tin bổ sung về giảng viên..."
                                 >{{ request.POST.address|default:teacher.address }}</textarea>
                             </div>
                         </div>

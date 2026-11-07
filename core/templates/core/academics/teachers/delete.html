@@ -1,12 +1,12 @@
 {% extends "core/base.html" %}
 {% load static %}
-{% block title %}Xóa giáo viên{% endblock %}
+{% block title %}Xóa giảng viên | VISTA English Center{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="{% static 'core/css/pages/academics/teachers/delete.css' %}?v=20261018e">{% endblock %}
 {% block page_content %}
 <div class="container">
-    <h1>XÁC NHẬN XÓA GIÁO VIÊN</h1>
+    <h1>XÁC NHẬN XÓA GIẢNG VIÊN</h1>
 
-    <p>Bạn có chắc chắn muốn xóa giáo viên này không?</p>
+    <p>Bạn có chắc chắn muốn xóa giảng viên này không?</p>
 
     <div class="info">
         <strong>Họ và tên:</strong> {{ teacher.full_name }}<br>
@@ -16,7 +16,7 @@
         {{ teacher.specialization|default:"Chưa cập nhật" }}
     </div>
 
-    <p>Thao tác này sẽ xóa thông tin giáo viên khỏi hệ thống.</p>
+    <p>Thao tác này sẽ lưu trữ/xóa thông tin giảng viên khỏi danh sách hoạt động.</p>
 
     <form method="POST">
         {% csrf_token %}

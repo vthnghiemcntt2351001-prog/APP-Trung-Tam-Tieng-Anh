@@ -74,14 +74,14 @@
 
             <div style="margin-bottom: 1.25rem;">
                 <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
-                    Giáo viên đứng lớp
+                    Giảng viên đứng lớp
                 </label>
                 <select name="teacher"
                     style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;">
-                    <option value="">-- Mặc định giáo viên phụ trách lớp ({{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa gán" }}) --</option>
+                    <option value="">-- Mặc định giảng viên phụ trách lớp ({{ english_class.teacher.full_name|default:english_class.teacher_name|default:"Chưa gán" }}) --</option>
                     {% for t in teachers %}
                         <option value="{{ t.id }}" {% if t.id == english_class.teacher_id %}selected{% endif %}>
-                            {{ t.full_name }} ({{ t.specialization|default:"Giáo viên" }})
+                            {{ t.full_name }} ({{ t.specialization|default:"Giảng viên" }})
                         </option>
                     {% endfor %}
                 </select>
@@ -99,7 +99,7 @@
                 <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem;">
                     Ghi chú / Yêu cầu chuẩn bị
                 </label>
-                <textarea name="notes" rows="3" placeholder="Nhập ghi chú cho giáo viên hoặc học viên..."
+                <textarea name="notes" rows="3" placeholder="Nhập ghi chú cho giảng viên hoặc học viên..."
                     style="width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary, var(--surface)); color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;"></textarea>
             </div>
 

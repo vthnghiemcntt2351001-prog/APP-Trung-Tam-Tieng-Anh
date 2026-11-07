@@ -28,7 +28,7 @@
                     📅 Ngày: <strong>{{ session.session_date|date:"d/m/Y" }}</strong>
                     {% if session.start_time %}&bull; ⏰ <strong>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</strong>{% endif %}
                     {% if session.room %}&bull; 📍 Phòng: <strong>{{ session.room }}</strong>{% endif %}
-                    &bull; 👨‍🏫 Giáo viên: <strong>{{ session.teacher.full_name|default:english_class.teacher.full_name|default:"Chưa gán" }}</strong>
+                    &bull; 👨‍🏫 Giảng viên: <strong>{{ session.teacher.full_name|default:english_class.teacher.full_name|default:"Chưa gán" }}</strong>
                 </div>
                 {% if session.topic %}
                 <div style="color: var(--text-main); font-size: 0.95rem; margin-top: 0.5rem; font-weight: 500;">

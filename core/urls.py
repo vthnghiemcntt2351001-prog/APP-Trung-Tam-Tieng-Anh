@@ -140,7 +140,7 @@ urlpatterns = [
         name='assessment_event_gradebook',
     ),
 
-    # Quản lý giáo viên
+    # Quản lý giảng viên
     path('teachers/', academics.teacher_list, name='teacher_list'),
     path('teachers/add/', academics.teacher_add, name='teacher_add'),
     path(

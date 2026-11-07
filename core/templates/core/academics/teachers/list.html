@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load static %}
-{% block title %}Quản lý giáo viên | English Center{% endblock %}
-{% block breadcrumb %}Giáo viên{% endblock %}
+{% block title %}Quản lý giảng viên | VISTA English Center{% endblock %}
+{% block breadcrumb %}Giảng viên{% endblock %}
 {% block page_styles %}
 <link rel="stylesheet" href="{% static 'core/css/pages/students/list.css' %}?v=20261027_v4">
 {% endblock %}
@@ -18,7 +18,7 @@
                 </svg>
                 <span>Đội ngũ giảng dạy</span>
             </div>
-            <h1 class="page-title">Quản lý giáo viên</h1>
+            <h1 class="page-title">Quản lý giảng viên</h1>
             <p class="page-desc">Theo dõi danh sách giảng viên, chuyên môn giảng dạy và thông tin liên hệ</p>
         </div>
 
@@ -29,7 +29,7 @@
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                <span>Thêm giáo viên</span>
+                <span>Thêm giảng viên</span>
             </a>
             {% endif %}
         </div>
@@ -61,7 +61,7 @@
 
         <div class="stat-pill">
             <span class="stat-dot"></span>
-            <span>Tổng cộng: <strong>{{ teachers|length }}</strong> giáo viên</span>
+            <span>Tổng cộng: <strong>{{ teachers|length }}</strong> giảng viên</span>
         </div>
     </div>
 
@@ -92,7 +92,7 @@
                                 </div>
                                 <div class="student-info">
                                     <strong class="student-name">{{ teacher.full_name }}</strong>
-                                    <small class="student-meta">{{ teacher.address|default:"Giáo viên trung tâm" }}</small>
+                                    <small class="student-meta">{{ teacher.address|default:"Giảng viên trung tâm" }}</small>
                                 </div>
                             </div>
                         </td>
@@ -131,9 +131,9 @@
                                 {% endif %}
 
                                 {% if user.is_superuser or is_admin %}
-                                <form method="post" action="{% url 'teacher_delete' teacher.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa giáo viên {{ teacher.full_name }}?');" style="margin: 0; display: inline;">
+                                <form method="post" action="{% url 'teacher_delete' teacher.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa giảng viên {{ teacher.full_name }}?');" style="margin: 0; display: inline;">
                                     {% csrf_token %}
-                                    <button class="action-btn delete" type="submit" title="Xóa giáo viên">
+                                    <button class="action-btn delete" type="submit" title="Xóa giảng viên">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <line x1="4" y1="7" x2="20" y2="7" />
                                             <line x1="10" y1="11" x2="10" y2="17" />
@@ -159,10 +159,10 @@
                                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                                     </svg>
                                 </div>
-                                <h3>Không tìm thấy giáo viên nào</h3>
-                                <p>{% if keyword %}Không có kết quả phù hợp với từ khóa "<strong>{{ keyword }}</strong>".{% else %}Hiện tại trung tâm chưa có dữ liệu giáo viên.{% endif %}</p>
+                                <h3>Không tìm thấy giảng viên nào</h3>
+                                <p>{% if keyword %}Không có kết quả phù hợp với từ khóa "<strong>{{ keyword }}</strong>".{% else %}Hiện tại trung tâm chưa có dữ liệu giảng viên.{% endif %}</p>
                                 {% if can_manage_academics %}
-                                <a href="{% url 'teacher_add' %}" class="btn-primary-action" style="margin-top: 14px;">+ Thêm giáo viên mới</a>
+                                <a href="{% url 'teacher_add' %}" class="btn-primary-action" style="margin-top: 14px;">+ Thêm giảng viên mới</a>
                                 {% endif %}
                             </div>
                         </td>

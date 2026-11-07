@@ -367,7 +367,7 @@ class AssessmentComponent(models.Model):
 
 
 # ==============================
-# QUẢN LÝ GIÁO VIÊN
+# QUẢN LÝ GIẢNG VIÊN
 # ==============================
 class Teacher(models.Model):
     full_name = models.CharField(
@@ -405,8 +405,8 @@ class Teacher(models.Model):
         return self.full_name
 
     class Meta:
-        verbose_name = "Giáo viên"
-        verbose_name_plural = "Danh sách giáo viên"
+        verbose_name = "Giảng viên"
+        verbose_name_plural = "Danh sách giảng viên"
 
 
 # ==============================
@@ -434,21 +434,21 @@ class EnglishClass(models.Model):
         verbose_name="Quy chế đánh giá",
     )
 
-    # Giữ lại tên giáo viên cũ để tránh mất dữ liệu
+    # Giữ lại tên giảng viên cũ để tránh mất dữ liệu
     teacher_name = models.CharField(
         max_length=100,
         blank=True,
-        verbose_name="Tên giáo viên cũ"
+        verbose_name="Tên giảng viên cũ"
     )
 
-    # Liên kết lớp học với giáo viên
+    # Liên kết lớp học với giảng viên
     teacher = models.ForeignKey(
         Teacher,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="english_classes",
-        verbose_name="Giáo viên phụ trách"
+        verbose_name="Giảng viên phụ trách"
     )
 
     start_date = models.DateField(
@@ -1299,7 +1299,7 @@ class ClassSession(models.Model):
         null=True,
         blank=True,
         related_name="conducted_sessions",
-        verbose_name="Giáo viên đứng lớp",
+        verbose_name="Giảng viên đứng lớp",
     )
     topic = models.CharField(
         max_length=255,

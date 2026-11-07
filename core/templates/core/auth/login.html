@@ -1,180 +1,291 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Đăng nhập | English Center{% endblock %}
+{% block title %}Đăng nhập | VISTA English Center{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="{% static 'core/css/pages/auth/login.css' %}?v=20261101_compact_v2">
+<link rel="stylesheet" href="{% static 'core/css/pages/auth/login.css' %}?v=20261107_navy_flush_bottom">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block page_content %}
-<!-- AURORA BACKDROP (CENTERED AMBIENT LIGHT FOCAL POINT) -->
-<div class="aurora-backdrop" aria-hidden="true">
-    <div class="aurora-blob-1"></div>
-    <div class="aurora-blob-2"></div>
-</div>
+<div class="botanical-viewport">
 
-<!-- FLOATING THEME TOGGLE BUTTON -->
-<div class="auth-top-bar">
-    <button id="authThemeToggle" type="button" class="btn-theme-pill" title="Chuyển chế độ Sáng / Tối" aria-label="Đổi chế độ giao diện">
-        <svg class="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <svg class="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-    </button>
-</div>
+    <!-- Ambient glowing backdrop orbs in System Navy & Ice Blue -->
+    <div class="ambient-orb ambient-orb-1" aria-hidden="true"></div>
+    <div class="ambient-orb ambient-orb-2" aria-hidden="true"></div>
 
-<!-- COMPACT AUTH CONTAINER -->
-<main class="auth-stage">
-    <div class="auth-compact-card">
+    <!-- Main Card in Corporate Navy #203864 Theme -->
+    <div class="botanical-card">
 
-        <!-- LOGO & HEADING (FOCAL POINT WITH OFFICIAL LOGO) -->
-        <div class="auth-badge-center">
-            <div class="brand-logo-wrapper">
-                <div class="brand-logo-plate">
-                    <img src="{% static 'core/images/logo.png' %}?v=20261101_logo" alt="English Academy" class="brand-logo-img">
-                </div>
-            </div>
-            <p class="brand-subtitle">Hệ thống Quản lý Đào tạo & Học vụ</p>
+        <!-- LAYER 1: Foliage Artwork Backdrop (SVG) in System Blue Palette -->
+        <div class="card-foliage-backdrop" aria-hidden="true">
+            <svg class="foliage-svg" viewBox="0 0 1100 700" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <!-- Corporate Navy & Royal Blue Gradients -->
+                    <linearGradient id="navyCanvas" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#0e172a" />
+                        <stop offset="45%" stop-color="#16274a" />
+                        <stop offset="100%" stop-color="#203864" />
+                    </linearGradient>
+
+                    <linearGradient id="waveSapphire" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#3b82f6" />
+                        <stop offset="60%" stop-color="#2563eb" />
+                        <stop offset="100%" stop-color="#1d4ed8" />
+                    </linearGradient>
+
+                    <linearGradient id="waveCyanGlow" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#7dd3fc" />
+                        <stop offset="45%" stop-color="#38bdf8" />
+                        <stop offset="100%" stop-color="#1e40af" />
+                    </linearGradient>
+
+                    <linearGradient id="waveElectric" x1="0" y1="0" x2="1" y2="0.6">
+                        <stop offset="0%" stop-color="#93c5fd" />
+                        <stop offset="40%" stop-color="#3b82f6" />
+                        <stop offset="80%" stop-color="#1d4ed8" />
+                        <stop offset="100%" stop-color="#0f172a" />
+                    </linearGradient>
+
+                    <linearGradient id="waveDeepIndigo" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#312e81" />
+                        <stop offset="100%" stop-color="#0f172a" />
+                    </linearGradient>
+
+                    <linearGradient id="goldNode" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#fde68a" />
+                        <stop offset="100%" stop-color="#f59e0b" />
+                    </linearGradient>
+                </defs>
+
+                <!-- Base Canvas Fill: Deep Corporate Navy -->
+                <rect width="1100" height="700" fill="url(#navyCanvas)" />
+
+                <!-- Layered Artwork (Right Side) -->
+                <!-- Deep silhouette background wave -->
+                <path d="M880 700 C860 520, 930 400, 1020 320 C1060 280, 1100 260, 1100 260 L1100 700 Z" fill="#0b1329" opacity="0.8" />
+                <path d="M0 450 C80 430, 150 490, 190 560 C230 630, 240 700, 240 700 L0 700 Z" fill="#0f172a" opacity="0.6" />
+
+                <!-- Leaf 1 (Tall, Right Side) -->
+                <g transform="translate(820, 160) rotate(-4)">
+                    <path d="M90 540 C70 400, 40 220, 95 90 C125 18, 160 0, 160 0 C160 0, 175 35, 170 120 C165 240, 145 440, 115 540 Z" fill="url(#waveSapphire)" opacity="0.9" />
+                    <path d="M128 50 C110 90, 95 180, 112 280" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" opacity="0.7" />
+                    <path d="M160 0 C150 150, 130 350, 105 540" stroke="#93c5fd" stroke-width="3" opacity="0.6" />
+                </g>
+
+                <!-- Leaf 2 with Ice-Cyan Gradient (Center Right) -->
+                <g transform="translate(680, 310) rotate(-18)">
+                    <path d="M0 390 C40 290, 120 180, 230 110 C290 70, 350 45, 360 45 C355 58, 330 95, 270 150 C180 230, 90 330, 0 390 Z" fill="url(#waveElectric)" />
+                    <path d="M140 190 L110 230 M180 155 L160 195 M225 125 L215 160 M270 95 L265 130" stroke="#dbeafe" stroke-width="1.8" opacity="0.75" stroke-linecap="round" />
+                    <path d="M0 390 C120 250, 240 140, 360 45" stroke="#ffffff" stroke-width="2.5" opacity="0.85" />
+                </g>
+
+                <!-- Leaf 3 (Lower Right, Cyan Glow) -->
+                <g transform="translate(730, 470) rotate(-10)">
+                    <path d="M0 250 C50 190, 130 120, 220 80 C270 55, 305 40, 305 40 C300 50, 275 80, 220 120 C140 180, 70 240, 0 250 Z" fill="url(#waveCyanGlow)" />
+                    <path d="M0 250 C100 170, 200 100, 305 40" stroke="#e0f2fe" stroke-width="2" opacity="0.85" />
+                </g>
+
+                <!-- Layered Navy Overlay Leaf -->
+                <path d="M1000 700 C980 570, 920 480, 830 420 C810 470, 805 520, 820 580 C790 550, 780 490, 790 440 C750 470, 740 540, 750 610 C720 570, 715 500, 730 450 C680 500, 680 600, 700 700 Z" fill="url(#waveDeepIndigo)" opacity="0.85" />
+
+                <!-- Left Edge Foliage Curves -->
+                <g transform="translate(0, 200)">
+                    <path d="M-20 500 Q40 380 70 240 Q95 120 70 -20" stroke="#1d4ed8" stroke-width="3" fill="none" opacity="0.4" />
+                    <path d="M10 440 C40 430, 85 440, 110 470 C75 490, 35 485, 10 440 Z" fill="url(#waveSapphire)" opacity="0.5" />
+                    <path d="M35 360 C75 340, 120 350, 145 385 C105 405, 60 400, 35 360 Z" fill="url(#waveSapphire)" opacity="0.4" />
+                    <path d="M60 270 C105 250, 150 260, 175 295 C135 315, 85 310, 60 270 Z" fill="url(#waveSapphire)" opacity="0.3" />
+                </g>
+            </svg>
         </div>
 
-        <!-- NOTIFICATION ALERTS -->
-        {% if form.errors %}
-            <div class="auth-alert-compact" role="alert">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                <span>Tài khoản hoặc mật khẩu chưa chính xác. Vui lòng thử lại.</span>
-            </div>
-        {% endif %}
+        <!-- LAYER 2: Organic White Island (The Flowing Container for the Form) -->
+        <div class="organic-white-shape">
 
-        {% if next and user.is_authenticated %}
-            <div class="auth-alert-compact" role="alert">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                <span>Tài khoản hiện tại chưa được cấp quyền truy cập liên kết này.</span>
-            </div>
-        {% endif %}
-
-        <!-- MAIN LOGIN FORM -->
-        <form method="post" action="{% url 'login' %}" id="loginForm" novalidate>
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ next }}">
-
-            <!-- USERNAME -->
-            <div class="form-field">
-                <label for="usernameInput" class="form-field-label">Tài khoản</label>
-                <div class="field-input-box">
-                    <span class="field-icon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
+            <!-- Top Header Bar inside Card -->
+            <header class="botanical-topbar">
+                <!-- Brand / Logo (VISTA Shield Logo + System Blue Typography) -->
+                <a href="{% url 'home' %}" class="brand-link" title="VISTA English Center">
+                    <span class="brand-flower-glyph" aria-hidden="true">
+                        <!-- High-tech Blockchain Shield Glyph in Royal Blue & Gold -->
+                        <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="18" cy="18" r="17" fill="#eff6ff" />
+                            <path d="M18 6 L28 11 V18 C28 24.5 23.5 28.5 18 30 C12.5 28.5 8 24.5 8 18 V11 L18 6 Z" fill="#2563eb" />
+                            <path d="M18 10 L25 13.5 V18 C25 22.5 21.8 25.5 18 26.8 C14.2 25.5 11 22.5 11 18 V13.5 L18 10 Z" fill="#1d4ed8" />
+                            <!-- Golden Core Star / Node -->
+                            <circle cx="18" cy="18" r="4.5" fill="#f59e0b" />
+                            <circle cx="18" cy="18" r="2.5" fill="#ffffff" />
                         </svg>
                     </span>
-                    <input
-                        type="text"
-                        id="usernameInput"
-                        name="username"
-                        class="form-control"
-                        placeholder="Nhập tên đăng nhập"
-                        autocomplete="username"
-                        required
-                        autofocus
-                    >
-                </div>
-            </div>
-
-            <!-- PASSWORD -->
-            <div class="form-field">
-                <label for="passwordInput" class="form-field-label">Mật khẩu</label>
-                <div class="field-input-box">
-                    <span class="field-icon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
+                    <span class="brand-title-text">
+                        <strong class="brand-name">VISTA</strong>
+                        <span class="brand-tag">Academy</span>
                     </span>
-                    <input
-                        type="password"
-                        id="passwordInput"
-                        name="password"
-                        class="form-control has-eye"
-                        placeholder="Nhập mật khẩu"
-                        autocomplete="current-password"
-                        required
-                    >
-                    <button type="button" class="btn-eye-toggle" id="togglePasswordBtn" title="Hiện hoặc ẩn mật khẩu" aria-label="Hiện mật khẩu">
-                        <svg id="eyeOpenIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        <svg id="eyeClosedIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                            <line x1="1" y1="1" x2="23" y2="23"/>
-                        </svg>
-                    </button>
+                </a>
+
+                <!-- Top Right Nav Links (Sign In | Tra cứu Blockchain) -->
+                <nav class="top-nav-links" aria-label="Điều hướng nhanh">
+                    <span class="nav-link active">Đăng nhập</span>
+                    <span class="nav-divider">|</span>
+                    <a href="{% url 'certificate_verify' %}" class="nav-link verify-portal" title="Cổng đối soát chứng chỉ công khai">
+                        <i class="ri-shield-check-line" style="font-size: 14px; color: #2563eb;"></i>
+                        <span>Tra cứu văn bằng</span>
+                    </a>
+                </nav>
+            </header>
+
+            <!-- Form Content Area -->
+            <div class="form-content-wrap">
+
+                <!-- Greeting Typography -->
+                <div class="greeting-block">
+                    <span class="greeting-lead">Xin chào,</span>
+                    <h1 class="greeting-main">chào mừng đến với VISTA</h1>
                 </div>
+
+                <!-- Error Messages Notification -->
+                {% if form.errors %}
+                    <div class="botanical-alert" role="alert">
+                        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span>Tài khoản hoặc mật khẩu chưa chính xác. Vui lòng kiểm tra lại.</span>
+                    </div>
+                {% endif %}
+
+                {% if next and user.is_authenticated %}
+                    <div class="botanical-alert warning" role="alert">
+                        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <span>Tài khoản hiện tại chưa được cấp quyền truy cập chức năng này.</span>
+                    </div>
+                {% endif %}
+
+                <!-- Main Authentication Form -->
+                <form method="post" action="{% url 'login' %}" id="loginForm" class="botanical-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    <!-- Field 1: USERNAME -->
+                    <div class="field-item-group">
+                        <label for="usernameInput" class="field-label-text">
+                            <span>Tên đăng nhập</span>
+                        </label>
+                        <div class="modern-input-card">
+                            <span class="input-left-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </span>
+                            <input
+                                type="text"
+                                id="usernameInput"
+                                name="username"
+                                class="modern-text-input"
+                                placeholder="Nhập tên tài khoản hoặc email"
+                                autocomplete="username"
+                                required
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Field 2: PASSWORD -->
+                    <div class="field-item-group">
+                        <label for="passwordInput" class="field-label-text">
+                            <span>Mật khẩu</span>
+                        </label>
+                        <div class="modern-input-card has-eye">
+                            <span class="input-left-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                            </span>
+                            <input
+                                type="password"
+                                id="passwordInput"
+                                name="password"
+                                class="modern-text-input"
+                                placeholder="Nhập mật khẩu"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button type="button" class="btn-toggle-eye" id="togglePasswordBtn" title="Hiện / Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                <svg id="eyeOpenIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                <svg id="eyeClosedIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                    <line x1="1" y1="1" x2="23" y2="23" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row: Remember me & Forgot Password -->
+                    <div class="field-options-bar">
+                        <label class="remember-option">
+                            <input type="checkbox" name="remember" class="remember-checkbox">
+                            <span class="remember-text">Ghi nhớ đăng nhập</span>
+                        </label>
+                        <button type="button" class="link-forgot-pass" onclick="openForgotModal()">Quên mật khẩu?</button>
+                    </div>
+
+                    <!-- Action: System Brand Blue Gradient Button -->
+                    <div class="action-submit-row">
+                        <button type="submit" class="btn-botanical-submit" id="btnSubmit">
+                            <span class="btn-text">ĐĂNG NHẬP</span>
+                            <span class="btn-spinner" style="display: none;" aria-hidden="true"></span>
+                        </button>
+                    </div>
+
+                </form>
+
             </div>
 
-            <!-- OPTIONS (REMEMBER ME & FORGOT PASSWORD) -->
-            <div class="form-options-split">
-                <label class="remember-check">
-                    <input type="checkbox" name="remember" id="rememberMe">
-                    <span>Ghi nhớ đăng nhập</span>
-                </label>
-                <button type="button" class="btn-forgot-link" onclick="openForgotModal()">Quên mật khẩu?</button>
-            </div>
-
-            <!-- SUBMIT BUTTON (PROMINENT ACCENT) -->
-            <button type="submit" class="btn-primary-highlight" id="btnSubmit">
-                <span class="btn-label">Đăng nhập</span>
-                <svg class="btn-icon-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                    <polyline points="12 5 19 12 12 19"/>
-                </svg>
-                <span class="btn-spinner" style="display: none;" aria-hidden="true"></span>
-            </button>
-        </form>
-
-        <div class="auth-card-footer">
-            <span>English Center · Nền tảng quản lý trung tâm</span>
         </div>
+
     </div>
-</main>
 
-<!-- CLEAN MODAL: QUÊN MẬT KHẨU -->
-<div class="forgot-modal-backdrop" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="forgot-modal-card">
-        <div class="modal-header">
-            <h3 class="modal-title" id="modalTitle">Khôi phục mật khẩu</h3>
-            <p class="modal-desc">Vui lòng liên hệ trực tiếp Bộ phận Học vụ tại trung tâm hoặc hotline để được cấp lại mật khẩu an toàn.</p>
+</div>
+
+<!-- CLEAN MODAL: KHÔI PHỤC MẬT KHẨU (System Navy Theme) -->
+<div class="botanical-modal-backdrop" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="botanical-modal-card">
+        <div class="modal-top">
+            <div class="modal-icon-shield">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+            </div>
+            <h3 class="modal-title" id="modalTitle">Hỗ trợ khôi phục mật khẩu</h3>
+            <p class="modal-desc">
+                Nhằm bảo mật thông tin điểm số và chứng chỉ học viên, vui lòng liên hệ trực tiếp Bộ phận Học vụ tại cơ sở hoặc đường dây nóng để được cấp lại mật khẩu an toàn.
+            </p>
         </div>
 
-        <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 14px 16px; margin: 16px 0; font-size: 13.5px; line-height: 1.5;">
-            <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 4px;">Hotline hỗ trợ học vụ:</div>
-            <div style="color: #3b82f6; font-size: 16px; font-weight: 700;">1900 6868 <span style="font-size: 12px; font-weight: 400; color: var(--text-muted);">(8:00 - 21:00)</span></div>
+        <div class="modal-support-box">
+            <div class="support-title">Đường dây nóng hỗ trợ học vụ:</div>
+            <div class="support-phone">1900 6868 <span class="support-time">(8:00 - 21:00 hàng ngày)</span></div>
+            <div class="support-email">hotro@vista-english.edu.vn</div>
         </div>
 
         <div class="modal-actions">
-            <button type="button" class="btn-secondary" onclick="closeForgotModal()" style="width: 100%;">Đóng</button>
+            <button type="button" class="btn-modal-close" onclick="closeForgotModal()">Đã hiểu, quay lại</button>
         </div>
     </div>
 </div>
 
+<!-- SCRIPTS: Password Toggle & Submit Animation -->
 <script>
     // 1. Password Visibility Toggle
     var toggleBtn = document.getElementById('togglePasswordBtn');
@@ -201,7 +312,7 @@
         });
     }
 
-    // 2. Submit Button Loading & Anti Double Submit
+    // 2. Submit Button Loading State
     var form = document.getElementById('loginForm');
     var btnSubmit = document.getElementById('btnSubmit');
 
@@ -212,12 +323,10 @@
             if (!u.value.trim() || !p.value) {
                 return;
             }
-            var label = btnSubmit.querySelector('.btn-label');
-            var arrow = btnSubmit.querySelector('.btn-icon-arrow');
+            var text = btnSubmit.querySelector('.btn-text');
             var spinner = btnSubmit.querySelector('.btn-spinner');
 
-            if (label) label.textContent = 'Đang đăng nhập...';
-            if (arrow) arrow.style.display = 'none';
+            if (text) text.textContent = 'ĐANG XÁC THỰC...';
             if (spinner) spinner.style.display = 'inline-block';
             btnSubmit.disabled = true;
         });
@@ -234,37 +343,6 @@
     if (forgotModal) {
         forgotModal.addEventListener('click', function(e) {
             if (e.target === forgotModal) closeForgotModal();
-        });
-    }
-
-    // 4. Dark/Light Theme Toggle Sync
-    var themeBtn = document.getElementById('authThemeToggle');
-    var sunIcon = themeBtn ? themeBtn.querySelector('.theme-icon-sun') : null;
-    var moonIcon = themeBtn ? themeBtn.querySelector('.theme-icon-moon') : null;
-
-    function renderThemeIcons(theme) {
-        if (!sunIcon || !moonIcon) return;
-        if (theme === 'dark') {
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'block';
-        } else {
-            sunIcon.style.display = 'block';
-            moonIcon.style.display = 'none';
-        }
-    }
-
-    var activeTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('ec_theme') || 'dark';
-    renderThemeIcons(activeTheme);
-
-    if (themeBtn) {
-        themeBtn.addEventListener('click', function() {
-            var curr = document.documentElement.getAttribute('data-theme') || 'dark';
-            var next = curr === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            try {
-                localStorage.setItem('ec_theme', next);
-            } catch (err) {}
-            renderThemeIcons(next);
         });
     }
 </script>
